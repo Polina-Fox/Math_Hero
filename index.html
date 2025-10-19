@@ -21,17 +21,26 @@
             border-radius: 10px;
             overflow: hidden;
         }
+        .loading {
+            color: white;
+            font-size: 24px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div id="game-container"></div>
+    <div id="game-container">
+        <div class="loading">Загрузка игры...</div>
+    </div>
     
-    <script src="js/config.js"></script>
+    <!-- Сначала загружаем все сцены -->
     <script src="js/mainMenu.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/gameScene.js"></script>
     <script src="js/bossScene.js"></script>
     <script src="js/victory.js"></script>
     <script src="js/miniGames.js"></script>
+    <!-- Затем конфигурацию -->
+    <script src="js/config.js"></script>
 </body>
 </html>

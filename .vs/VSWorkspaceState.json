@@ -2,11 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\assets",
-    "\\assets\\audio",
-    "\\assets\\images",
     "\\js",
     "\\styles"
   ],
-  "SelectedNode": "\\js",
+  "SelectedNode": "\\js\\settings.js",
   "PreviewInSolutionExplorer": false
 }
