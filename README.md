@@ -7,7 +7,7 @@
 
 **Обучающая аркада для детей 6-10 лет, разработанная в рамках курсовой работы**
 
-[![Demo](https://img.shields.io/badge/🎮-Играть_онлайн-8A2BE2)](https://polina-fox.github.io/Math_Hero/)
+[![Demo](https://img.shields.io/badge/🎮-Играть_онлайн-8A2BE2)](https://polina-fox.github.io/Math_Hero/index.html)
 [![Report](https://img.shields.io/badge/📄-Курсовая_работа-blue)](Курсовая.pdf)
 [![Scenario](https://img.shields.io/badge/🎯-Сценарий_игры-green)](Сценарий.pdf)
 
