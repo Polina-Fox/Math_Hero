@@ -8,24 +8,17 @@ const gameSettings = {
     lives: 3
 };
 
-// Функция для запуска игры после загрузки всех классов
-function initializeGame() {
-    console.log('Initializing game...');
+// Функция инициализации игры
+function initGame() {
+    console.log('Initializing Math Hero game...');
 
-    // Проверяем, что все основные классы загружены
-    if (typeof MainMenu === 'undefined') {
-        console.error('MainMenu class not found');
-        return;
-    }
-
-    // Конфигурация Phaser
     const config = {
         type: Phaser.AUTO,
         width: 800,
         height: 600,
         parent: 'game-container',
-        backgroundColor: '#4488aa',
-        scene: [MainMenu, Settings, GameScene, BossScene, Victory],
+        backgroundColor: '#2c3e50',
+        scene: [MainMenu, Settings, GameScene, BossScene, Victory, RescueMiniGame],
         physics: {
             default: 'arcade',
             arcade: {
@@ -39,29 +32,27 @@ function initializeGame() {
         },
         callbacks: {
             postBoot: function (game) {
-                console.log('Phaser game booted successfully');
-                // Убираем сообщение о загрузке
-                const loadingElement = document.querySelector('.loading');
-                if (loadingElement) {
-                    loadingElement.style.display = 'none';
-                }
+                console.log('Game successfully booted!');
+                // Скрываем сообщение о загрузке
+                const loading = document.querySelector('.loading');
+                if (loading) loading.style.display = 'none';
             }
         }
     };
 
-    // Создание экземпляра игры
     try {
         const game = new Phaser.Game(config);
-        console.log('Game instance created');
+        console.log('Phaser game instance created');
     } catch (error) {
-        console.error('Error creating game:', error);
-        document.querySelector('.loading').textContent = 'Ошибка загрузки игры: ' + error.message;
+        console.error('Failed to create game:', error);
+        const loading = document.querySelector('.loading');
+        if (loading) loading.textContent = 'Ошибка: ' + error.message;
     }
 }
 
-// Запускаем игру когда страница полностью загружена
+// Запуск когда DOM готов
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeGame);
+    document.addEventListener('DOMContentLoaded', initGame);
 } else {
-    initializeGame();
+    initGame();
 }

@@ -1,46 +1,48 @@
-<!DOCTYPE html>
+п»ї<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Математический герой</title>
+    <title>РњР°С‚РµРјР°С‚РёС‡РµСЃРєРёР№ РіРµСЂРѕР№</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #000;
+            background: #1a1a2e;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
         #game-container {
-            border: 2px solid #333;
-            border-radius: 10px;
+            border: 3px solid #34495e;
+            border-radius: 15px;
             overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
         .loading {
-            color: white;
-            font-size: 24px;
+            color: #ecf0f1;
+            font-size: 20px;
             text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <div class="loading">Загрузка игры...</div>
+        <div class="loading">рџЋ® Р—Р°РіСЂСѓР·РєР° РњР°С‚РµРјР°С‚РёС‡РµСЃРєРѕРіРѕ Р“РµСЂРѕСЏ...</div>
     </div>
     
-    <!-- Сначала загружаем все сцены -->
+    <!-- РЎРЅР°С‡Р°Р»Р° РІСЃРµ СЃС†РµРЅС‹ -->
     <script src="js/mainMenu.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/gameScene.js"></script>
     <script src="js/bossScene.js"></script>
     <script src="js/victory.js"></script>
     <script src="js/miniGames.js"></script>
-    <!-- Затем конфигурацию -->
+    <!-- Р—Р°С‚РµРј РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ -->
     <script src="js/config.js"></script>
 </body>
 </html>
