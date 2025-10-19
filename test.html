@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест загрузки файлов</title>
+</head>
+<body>
+    <h1>Проверка загрузки файлов</h1>
+    <div id="status"></div>
+
+    <script>
+        const files = [
+            'js/config.js',
+            'js/mainMenu.js',
+            'js/settings.js',
+            'js/gameScene.js',
+            'js/bossScene.js',
+            'js/victory.js',
+            'js/miniGames.js'
+        ];
+
+        const statusDiv = document.getElementById('status');
+
+        files.forEach(file => {
+            fetch(file)
+                .then(response => {
+                    if (response.ok) {
+                        statusDiv.innerHTML += `<p style="color: green;">✅ ${file} - Загружен</p>`;
+                    } else {
+                        statusDiv.innerHTML += `<p style="color: red;">❌ ${file} - Ошибка: ${response.status}</p>`;
+                    }
+                })
+                .catch(error => {
+                    statusDiv.innerHTML += `<p style="color: red;">❌ ${file} - Ошибка: ${error}</p>`;
+                });
+        });
+    </script>
+</body>
+</html>
