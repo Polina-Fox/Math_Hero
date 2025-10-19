@@ -3,51 +3,88 @@
         super({ key: 'Settings' });
     }
 
+    preload() {
+        // Загрузка фона для настроек
+        this.load.image('settings-bg', 'assets/images/background0.png');
+        this.createColorTexture('fallback-bg', 0x34495e);
+    }
+
+    createColorTexture(key, color) {
+        const graphics = this.add.graphics();
+        graphics.fillStyle(color);
+        graphics.fillRect(0, 0, 800, 600);
+        graphics.generateTexture(key, 800, 600);
+        graphics.destroy();
+    }
+
     create() {
         console.log('Settings scene created');
 
-        // Простой фон
-        this.add.rectangle(400, 300, 800, 600, 0x34495e);
+        // Фон
+        try {
+            this.add.image(400, 300, 'settings-bg').setDisplaySize(800, 600);
+        } catch (error) {
+            this.add.image(400, 300, 'fallback-bg');
+        }
 
         // Заголовок
-        this.add.text(400, 100, 'ВЫБЕРИ РЕЖИМ ИГРЫ', {
+        this.add.text(400, 80, 'ВЫБЕРИ РЕЖИМ ИГРЫ', {
             fontSize: '36px',
             fill: '#f1c40f',
             fontWeight: 'bold',
             stroke: '#000',
-            strokeThickness: 4
+            strokeThickness: 4,
+            fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
 
         // Информация
-        this.add.text(400, 150, 'Выбери математические операции для игры:', {
+        this.add.text(400, 130, 'Выбери математические операции для игры:', {
             fontSize: '20px',
-            fill: '#ecf0f1'
+            fill: '#ecf0f1',
+            fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
 
         // Чекбоксы для выбора операций
-        this.createCheckbox(400, 200, 'Сложение', 'addition', 0x27ae60);
-        this.createCheckbox(400, 250, 'Вычитание', 'subtraction', 0xe74c3c);
-        this.createCheckbox(400, 300, 'Умножение', 'multiplication', 0x3498db);
+        this.createCheckbox(400, 180, 'Сложение', 'addition', 0x27ae60);
+        this.createCheckbox(400, 230, 'Вычитание', 'subtraction', 0xe74c3c);
+        this.createCheckbox(400, 280, 'Умножение', 'multiplication', 0x3498db);
+
+        // Сообщение о выборе
+        this.add.text(400, 320, 'Рекомендуется выбрать все операции', {
+            fontSize: '16px',
+            fill: '#bdc3c7',
+            fontStyle: 'italic',
+            fontFamily: 'Arial, sans-serif'
+        }).setOrigin(0.5);
+
+        this.add.text(400, 345, 'для лучшего обучения!', {
+            fontSize: '16px',
+            fill: '#bdc3c7',
+            fontStyle: 'italic',
+            fontFamily: 'Arial, sans-serif'
+        }).setOrigin(0.5);
 
         // Кнопка начала игры
-        const startButton = this.add.rectangle(400, 380, 350, 70, 0x27ae60)
+        const startButton = this.add.rectangle(400, 400, 350, 70, 0x27ae60)
             .setInteractive({ useHandCursor: true })
             .setStrokeStyle(4, 0x2ecc71);
 
-        const startText = this.add.text(400, 380, 'НАЧАТЬ ИГРУ', {
+        const startText = this.add.text(400, 400, 'НАЧАТЬ ИГРУ', {
             fontSize: '28px',
             fill: '#ffffff',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
 
         // Кнопка назад
-        const backButton = this.add.rectangle(400, 470, 200, 50, 0x95a5a6)
+        const backButton = this.add.rectangle(400, 490, 200, 50, 0x95a5a6)
             .setInteractive({ useHandCursor: true });
 
-        const backText = this.add.text(400, 470, 'НАЗАД', {
+        const backText = this.add.text(400, 490, 'НАЗАД', {
             fontSize: '20px',
             fill: '#ffffff',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
 
         // Сообщение об ошибке
@@ -58,9 +95,10 @@
             if (!gameSettings.addition && !gameSettings.subtraction && !gameSettings.multiplication) {
                 // Показываем ошибку
                 if (errorText) errorText.destroy();
-                errorText = this.add.text(400, 430, 'Выбери хотя бы одну операцию!', {
+                errorText = this.add.text(400, 450, 'Выбери хотя бы одну операцию!', {
                     fontSize: '18px',
-                    fill: '#e74c3c'
+                    fill: '#e74c3c',
+                    fontFamily: 'Arial, sans-serif'
                 }).setOrigin(0.5);
                 return;
             }
@@ -99,7 +137,8 @@
         const checkmark = this.add.text(x - 120, y, '✓', {
             fontSize: '20px',
             fill: '#ffffff',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5).setVisible(gameSettings[setting]);
 
         const checkboxText = this.add.text(x - 80, y, text, {
