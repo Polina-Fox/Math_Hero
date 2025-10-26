@@ -3,35 +3,14 @@
         super({ key: 'MainMenu' });
         this.instructionElements = [];
         this.settingsElements = [];
+        this.bgMusic = null;
     }
 
     preload() {
         console.log('Loading main menu assets...');
 
-        // Загрузка фона
-        this.load.image('menu-bg', 'assets/images/background0.png');
-
-        // Создаем простые текстуры для кнопок (на случай если фон не загрузится)
-        this.createColorTexture('button-normal', 0x3498db);
-        this.createColorTexture('button-hover', 0x2980b9);
-        this.createColorTexture('fallback-bg', 0x2c3e50);
-    }
-
-    createColorTexture(key, color) {
-        const graphics = this.add.graphics();
-        graphics.fillStyle(color);
-
-        if (key === 'fallback-bg') {
-            graphics.fillRect(0, 0, 800, 600);
-        } else {
-            graphics.fillRoundedRect(0, 0, 300, 60, 15);
-        }
-
-        graphics.generateTexture(key,
-            key === 'fallback-bg' ? 800 : 300,
-            key === 'fallback-bg' ? 600 : 60
-        );
-        graphics.destroy();
+        // Фон уже должен быть загружен в прелоадере
+        // Музыка тоже загружена в прелоадере
     }
 
     create() {
@@ -44,6 +23,9 @@
             console.log('Background image not found, using fallback');
             this.add.image(400, 300, 'fallback-bg');
         }
+
+        // Запускаем фоновую музыку
+        this.playBackgroundMusic();
 
         // Заголовок игры
         const title = this.add.text(400, 120, 'МАТЕМАТИЧЕСКИЙ ГЕРОЙ', {
@@ -67,13 +49,68 @@
         this.createMenuButton(400, 330, 'КАК ИГРАТЬ', () => this.showInstructions());
         this.createMenuButton(400, 410, 'НАСТРОЙКИ', () => this.showSettings());
 
-        // Футер с информацией (исправлено на дипломную работу)
+        // Кнопка управления музыкой
+        this.createMusicToggle();
+
+        // Футер с информацией
         this.add.text(400, 570, 'Разработано в рамках дипломной работы', {
             fontSize: '14px',
             fill: '#bdc3c7',
             fontStyle: 'italic',
             fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
+    }
+
+    playBackgroundMusic() {
+        try {
+            if (!this.bgMusic) {
+                this.bgMusic = this.sound.add('bgMusic', {
+                    loop: true,
+                    volume: 0.3
+                });
+            }
+
+            if (!this.bgMusic.isPlaying) {
+                this.bgMusic.play();
+                console.log('Background music started');
+            }
+        } catch (error) {
+            console.log('Could not play background music:', error);
+        }
+    }
+
+    stopBackgroundMusic() {
+        if (this.bgMusic && this.bgMusic.isPlaying) {
+            this.bgMusic.stop();
+        }
+    }
+
+    createMusicToggle() {
+        const musicButton = this.add.rectangle(750, 50, 40, 40, 0x3498db)
+            .setInteractive({ useHandCursor: true })
+            .setStrokeStyle(2, 0xffffff);
+
+        const musicIcon = this.add.text(750, 50, '♪', {
+            fontSize: '20px',
+            fill: '#ffffff',
+            fontFamily: 'Arial, sans-serif'
+        }).setOrigin(0.5);
+
+        let musicOn = true;
+
+        musicButton.on('pointerdown', () => {
+            musicOn = !musicOn;
+
+            if (musicOn) {
+                this.playBackgroundMusic();
+                musicButton.setFillStyle(0x3498db);
+                musicIcon.setStyle({ fill: '#ffffff' });
+            } else {
+                this.stopBackgroundMusic();
+                musicButton.setFillStyle(0xe74c3c);
+                musicIcon.setStyle({ fill: '#ffffff' });
+            }
+        });
     }
 
     createMenuButton(x, y, text, target) {
@@ -156,7 +193,7 @@
         const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85);
         this.instructionElements.push(overlay);
 
-        // Панель инструкций (увеличиваем размер)
+        // Панель инструкций
         const panel = this.add.rectangle(400, 300, 700, 500, 0x2c3e50);
         panel.setStrokeStyle(4, 0xf1c40f);
         this.instructionElements.push(panel);
@@ -172,7 +209,7 @@
         }).setOrigin(0.5);
         this.instructionElements.push(title);
 
-        // Текст инструкций (улучшенный и полный с прокруткой)
+        // Текст инструкций
         const instructions = [
             '🎯 ЦЕЛЬ ИГРЫ:',
             'Помоги герою победить злых слизней!',
@@ -191,12 +228,7 @@
             '⭐ СИСТЕМА УРОВНЕЙ:',
             '• 4 уровня с увеличением сложности',
             '• Финальный босс-уровень',
-            '• Мини-игры при проигрыше',
-            '',
-            '💫 ОСОБЕННОСТИ:',
-            '• Постепенное усложнение примеров',
-            '• Система очков и жизней',
-            '• Яркая графика и анимации'
+            '• Мини-игры при проигрыше'
         ];
 
         instructions.forEach((line, index) => {
@@ -206,8 +238,7 @@
                 fontFamily: 'Arial, sans-serif',
                 align: 'center',
                 backgroundColor: line.includes('🎯') || line.includes('🎮') ||
-                    line.includes('📚') || line.includes('⭐') ||
-                    line.includes('💫') ? '#00000044' : 'transparent',
+                    line.includes('📚') || line.includes('⭐') ? '#00000044' : 'transparent',
                 padding: { left: 5, right: 5, top: 2, bottom: 2 }
             }).setOrigin(0.5);
             this.instructionElements.push(text);
@@ -241,7 +272,7 @@
         const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85);
         this.settingsElements.push(overlay);
 
-        // Панель настроек (увеличиваем размер)
+        // Панель настроек
         const panel = this.add.rectangle(400, 300, 600, 400, 0x2c3e50);
         panel.setStrokeStyle(4, 0xf1c40f);
         this.settingsElements.push(panel);
@@ -324,5 +355,10 @@
             }
         });
         this.settingsElements = [];
+    }
+
+    // Останавливаем музыку при переходе в другую сцену
+    shutdown() {
+        this.stopBackgroundMusic();
     }
 }

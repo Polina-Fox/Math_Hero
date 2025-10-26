@@ -3,20 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\mainMenu.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:js\\mainMenu.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\config.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:js\\config.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\index.html||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:index.html||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\settings.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:js\\settings.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\gameScene.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:js\\gameScene.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\mainMenu.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:js\\mainMenu.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\index.html||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:index.html||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\test.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -35,10 +39,6 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:js\\bossScene.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\config.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:js\\config.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\styles\\style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:styles\\style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     }
@@ -50,36 +50,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "index.html",
               "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\index.html",
               "RelativeDocumentMoniker": "index.html",
               "ToolTip": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\index.html",
               "RelativeToolTip": "index.html",
-              "ViewState": "AgIAACEAAAAAAAAAAAAgwC8AAAAHAAAAAAAAAA==",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAcwEgAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2025-10-19T15:02:57.562Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "mainMenu.js",
-              "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\mainMenu.js",
-              "RelativeDocumentMoniker": "js\\mainMenu.js",
-              "ToolTip": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\mainMenu.js",
-              "RelativeToolTip": "js\\mainMenu.js",
-              "ViewState": "AgIAADoBAAAAAAAAAAAmwEcBAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-10-19T15:04:19.911Z",
+              "WhenOpened": "2025-10-19T15:02:57.562Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "settings.js",
               "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\settings.js",
               "RelativeDocumentMoniker": "js\\settings.js",
@@ -93,6 +81,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "config.js",
+              "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\config.js",
+              "RelativeDocumentMoniker": "js\\config.js",
+              "ToolTip": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\config.js",
+              "RelativeToolTip": "js\\config.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAKMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-10-19T15:03:47.075Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "mainMenu.js",
+              "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\mainMenu.js",
+              "RelativeDocumentMoniker": "js\\mainMenu.js",
+              "ToolTip": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\mainMenu.js",
+              "RelativeToolTip": "js\\mainMenu.js",
+              "ViewState": "AgIAAF4BAAAAAAAAAAAmwGsBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-10-19T15:04:19.911Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "gameScene.js",
               "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\gameScene.js",
               "RelativeDocumentMoniker": "js\\gameScene.js",
@@ -100,12 +114,11 @@
               "RelativeToolTip": "js\\gameScene.js",
               "ViewState": "AgIAAGgBAAAAAAAAAAAmwIEBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-10-19T15:04:56.105Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T15:04:56.105Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "test.html",
               "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\test.html",
               "RelativeDocumentMoniker": "test.html",
@@ -117,7 +130,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "miniGames.js",
               "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\miniGames.js",
               "RelativeDocumentMoniker": "js\\miniGames.js",
@@ -129,7 +142,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "victory.js",
               "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\victory.js",
               "RelativeDocumentMoniker": "js\\victory.js",
@@ -141,7 +154,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "bossScene.js",
               "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\bossScene.js",
               "RelativeDocumentMoniker": "js\\bossScene.js",
@@ -150,18 +163,6 @@
               "ViewState": "AgIAAAkBAAAAAAAAAAAqwBABAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-10-19T15:05:26.188Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "config.js",
-              "DocumentMoniker": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\config.js",
-              "RelativeDocumentMoniker": "js\\config.js",
-              "ToolTip": "C:\\Users\\TROLL2\\Documents\\GitHub\\Math_Hero\\js\\config.js",
-              "RelativeToolTip": "js\\config.js",
-              "ViewState": "AgIAACwAAAAAAAAAAAAqwDkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-10-19T15:03:47.075Z"
             },
             {
               "$type": "Document",
@@ -177,11 +178,11 @@
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             }
           ]
         }
