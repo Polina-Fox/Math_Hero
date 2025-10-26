@@ -8,15 +8,13 @@
 
     preload() {
         console.log('Loading main menu assets...');
-
-        // Фон уже должен быть загружен в прелоадере
-        // Музыка тоже загружена в прелоадере
+        // Фон и музыка уже загружены в прелоадере
     }
 
     create() {
         console.log('Creating main menu...');
 
-        // Фон - пробуем загрузить картинку, если нет - используем цветной фон
+        // Фон
         try {
             this.add.image(400, 300, 'menu-bg').setDisplaySize(800, 600);
         } catch (error) {
@@ -114,11 +112,9 @@
     }
 
     createMenuButton(x, y, text, target) {
-        // Основная кнопка
         const button = this.add.image(x, y, 'button-normal')
             .setInteractive({ useHandCursor: true });
 
-        // Текст кнопки
         const buttonText = this.add.text(x, y, text, {
             fontSize: '24px',
             fill: '#ffffff',
@@ -132,7 +128,6 @@
             }
         }).setOrigin(0.5);
 
-        // Анимации при наведении
         button.on('pointerover', () => {
             button.setTexture('button-hover');
             buttonText.setScale(1.05);
@@ -160,7 +155,6 @@
         button.on('pointerdown', () => {
             console.log('Button clicked:', text);
 
-            // Анимация нажатия
             this.tweens.add({
                 targets: [button, buttonText],
                 scaleX: 0.95,
@@ -170,7 +164,6 @@
                 yoyo: true
             });
 
-            // Переход после анимации
             this.time.delayedCall(100, () => {
                 if (typeof target === 'string') {
                     this.scene.start(target);
@@ -183,22 +176,19 @@
         return { button, text: buttonText };
     }
 
+    // ... остальные методы showInstructions, showSettings, clearInstructionElements, clearSettingsElements остаются без изменений ...
     showInstructions() {
         console.log('Showing instructions');
 
-        // Очищаем предыдущие элементы если есть
         this.clearInstructionElements();
 
-        // Затемнение фона
         const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85);
         this.instructionElements.push(overlay);
 
-        // Панель инструкций
         const panel = this.add.rectangle(400, 300, 700, 500, 0x2c3e50);
         panel.setStrokeStyle(4, 0xf1c40f);
         this.instructionElements.push(panel);
 
-        // Заголовок
         const title = this.add.text(400, 130, 'КАК ИГРАТЬ', {
             fontSize: '36px',
             fill: '#f1c40f',
@@ -209,7 +199,6 @@
         }).setOrigin(0.5);
         this.instructionElements.push(title);
 
-        // Текст инструкций
         const instructions = [
             '🎯 ЦЕЛЬ ИГРЫ:',
             'Помоги герою победить злых слизней!',
@@ -244,7 +233,6 @@
             this.instructionElements.push(text);
         });
 
-        // Кнопка закрытия
         const closeButton = this.add.rectangle(400, 520, 200, 50, 0xe74c3c)
             .setInteractive({ useHandCursor: true });
         this.instructionElements.push(closeButton);
@@ -265,19 +253,15 @@
     showSettings() {
         console.log('Showing settings');
 
-        // Очищаем предыдущие элементы если есть
         this.clearSettingsElements();
 
-        // Затемнение фона
         const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85);
         this.settingsElements.push(overlay);
 
-        // Панель настроек
         const panel = this.add.rectangle(400, 300, 600, 400, 0x2c3e50);
         panel.setStrokeStyle(4, 0xf1c40f);
         this.settingsElements.push(panel);
 
-        // Заголовок
         const title = this.add.text(400, 160, 'НАСТРОЙКИ', {
             fontSize: '36px',
             fill: '#f1c40f',
@@ -288,7 +272,6 @@
         }).setOrigin(0.5);
         this.settingsElements.push(title);
 
-        // Информация о настройках
         const info1 = this.add.text(400, 210, 'Выбери математические операции', {
             fontSize: '20px',
             fill: '#ecf0f1',
@@ -321,7 +304,6 @@
         }).setOrigin(0.5);
         this.settingsElements.push(info4);
 
-        // Кнопка закрытия
         const closeButton = this.add.rectangle(400, 380, 200, 50, 0xe74c3c)
             .setInteractive({ useHandCursor: true });
         this.settingsElements.push(closeButton);
@@ -357,7 +339,6 @@
         this.settingsElements = [];
     }
 
-    // Останавливаем музыку при переходе в другую сцену
     shutdown() {
         this.stopBackgroundMusic();
     }

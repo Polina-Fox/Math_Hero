@@ -119,6 +119,16 @@ class Preloader extends Phaser.Scene {
 function initGame() {
     console.log('Initializing Math Hero game...');
 
+    // Проверяем, что все классы загружены
+    if (typeof MainMenu === 'undefined') {
+        console.error('MainMenu class not found');
+        return;
+    }
+    if (typeof Settings === 'undefined') {
+        console.error('Settings class not found');
+        return;
+    }
+
     const config = {
         type: Phaser.AUTO,
         width: 800,
@@ -156,9 +166,7 @@ function initGame() {
     }
 }
 
-// Запуск когда DOM готов
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initGame);
-} else {
-    initGame();
-}
+// Запуск с задержкой чтобы все файлы успели загрузиться
+window.addEventListener('load', function () {
+    setTimeout(initGame, 100);
+});
