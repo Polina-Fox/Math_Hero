@@ -8,10 +8,24 @@
     const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85);
     this.instructionElements.push(overlay);
 
-    // Панель инструкций (увеличиваем высоту для кнопки)
-    const panel = this.add.rectangle(400, 300, 700, 520, 0x2c3e50);
+    // Панель инструкций (возвращаем нормальную высоту)
+    const panel = this.add.rectangle(400, 300, 700, 500, 0x2c3e50);
     panel.setStrokeStyle(4, 0xf1c40f);
     this.instructionElements.push(panel);
+
+    // Крестик закрытия в левом верхнем углу панели
+    const closeButton = this.add.rectangle(150, 100, 40, 40, 0xe74c3c)
+        .setInteractive({ useHandCursor: true })
+        .setStrokeStyle(2, 0xffffff);
+    this.instructionElements.push(closeButton);
+
+    const closeIcon = this.add.text(150, 100, '×', {
+        fontSize: '32px',
+        fill: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 'bold'
+    }).setOrigin(0.5);
+    this.instructionElements.push(closeIcon);
 
     // Заголовок
     const title = this.add.text(400, 130, 'КАК ИГРАТЬ', {
@@ -59,20 +73,13 @@
         this.instructionElements.push(text);
     });
 
-    // Кнопка закрытия (опускаем на 5 строчек ниже)
-    const closeButton = this.add.rectangle(400, 470, 200, 50, 0xe74c3c)
-        .setInteractive({ useHandCursor: true });
-    this.instructionElements.push(closeButton);
-
-    const closeText = this.add.text(400, 470, 'ПОНЯТНО', {
-        fontSize: '20px',
-        fill: '#ffffff',
-        fontWeight: 'bold',
-        fontFamily: 'Arial, sans-serif'
-    }).setOrigin(0.5);
-    this.instructionElements.push(closeText);
-
+    // Обработчик клика на крестик
     closeButton.on('pointerdown', () => {
+        this.clearInstructionElements();
+    });
+
+    // Также закрываем по клику на overlay (за пределами панели)
+    overlay.on('pointerdown', () => {
         this.clearInstructionElements();
     });
 }
