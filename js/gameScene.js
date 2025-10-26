@@ -46,29 +46,35 @@
         // Фон
         this.add.image(400, 300, 'game-bg');
 
-        // Отображение уровня и счета
+        // Отображение уровня и счета (улучшенная видимость)
         this.levelText = this.add.text(20, 20, `Уровень: ${gameSettings.currentLevel}`, {
-            fontSize: '20px',
-            fill: '#fff',
+            fontSize: '22px',
+            fill: '#ffffff',
             fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#00000066',
-            padding: { left: 10, right: 10, top: 5, bottom: 5 }
+            backgroundColor: '#000000aa',
+            padding: { left: 15, right: 15, top: 8, bottom: 8 },
+            stroke: '#000',
+            strokeThickness: 3
         });
 
-        this.scoreText = this.add.text(20, 50, `Счёт: ${gameSettings.score}`, {
-            fontSize: '20px',
-            fill: '#fff',
+        this.scoreText = this.add.text(20, 60, `Счёт: ${gameSettings.score}`, {
+            fontSize: '22px',
+            fill: '#ffffff',
             fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#00000066',
-            padding: { left: 10, right: 10, top: 5, bottom: 5 }
+            backgroundColor: '#000000aa',
+            padding: { left: 15, right: 15, top: 8, bottom: 8 },
+            stroke: '#000',
+            strokeThickness: 3
         });
 
-        this.livesText = this.add.text(20, 80, `Жизни: ${gameSettings.lives}`, {
-            fontSize: '20px',
-            fill: '#fff',
+        this.livesText = this.add.text(20, 100, `Жизни: ${gameSettings.lives}`, {
+            fontSize: '22px',
+            fill: '#ffffff',
             fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#00000066',
-            padding: { left: 10, right: 10, top: 5, bottom: 5 }
+            backgroundColor: '#000000aa',
+            padding: { left: 15, right: 15, top: 8, bottom: 8 },
+            stroke: '#000',
+            strokeThickness: 3
         });
 
         // Герой
@@ -127,13 +133,15 @@
                 break;
         }
 
-        // Отображение вопроса
+        // Отображение вопроса (улучшенная видимость)
         this.problemText = this.add.text(400, 500, this.currentProblem.question, {
-            fontSize: '32px',
-            fill: '#fff',
+            fontSize: '36px',
+            fill: '#ffffff',
             fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#000000aa',
-            padding: { x: 20, y: 10 }
+            backgroundColor: '#000000cc',
+            padding: { x: 25, y: 15 },
+            stroke: '#000',
+            strokeThickness: 4
         }).setOrigin(0.5);
 
         // Генерация вариантов ответов
@@ -163,7 +171,9 @@
                 fontSize: '24px',
                 fill: '#ffffff',
                 fontFamily: 'Arial, sans-serif',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                stroke: '#000',
+                strokeThickness: 2
             }).setOrigin(0.5);
 
             button.on('pointerdown', () => {
@@ -174,6 +184,7 @@
         });
     }
 
+    // ... остальные методы остаются без изменений ...
     checkAnswer(selectedAnswer, button, buttonText) {
         // Блокируем все кнопки после ответа
         this.answerButtons.forEach(btn => {
@@ -319,11 +330,13 @@
         }
 
         this.heroMessage = this.add.text(100, 200, message, {
-            fontSize: '18px',
-            fill: '#fff',
+            fontSize: '20px',
+            fill: '#ffffff',
             fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#000000aa',
-            padding: { x: 10, y: 5 }
+            backgroundColor: '#000000cc',
+            padding: { x: 15, y: 8 },
+            stroke: '#000',
+            strokeThickness: 3
         }).setOrigin(0.5);
 
         this.time.delayedCall(2000, () => {
