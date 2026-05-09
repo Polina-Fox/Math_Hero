@@ -9,6 +9,8 @@
         this.warningShown = false;
         this.hasShield = false;
         this.easyStartActive = false;
+        this.levelFinished = false;   // новый флаг для предотвращения двойного срабатывания
+        this.baseSlimeSpeed = 50;     // для расчета динамической скорости
     }
 
     preload() {
@@ -43,7 +45,11 @@
     }
 
     create() {
-        console.log('Starting level', gameSettings.currentLevel);
+        console.log('=== STARTING LEVEL', gameSettings.currentLevel, '===');
+
+        // Сброс критических флагов при каждом запуске сцены
+        this.levelFinished = false;
+        this.warningShown = false;
 
         // Фон
         this.add.image(400, 300, 'game-bg');
@@ -109,6 +115,12 @@
         // Генерация математической задачи
         this.generateMathProblem();
 
+        // Рассчитываем параметры сложности для текущего уровня
+        this.slimeSpeed = this.baseSlimeSpeed + (gameSettings.currentLevel - 1) * 15; // 50, 65, 80, 95...
+        this.spawnDelay = Math.max(800, 2000 - (gameSettings.currentLevel - 1) * 300); // 2000, 1700, 1400, 1100...
+
+        console.log('Level params: speed=' + this.slimeSpeed + ', spawnDelay=' + this.spawnDelay + ', slimesToSpawn=' + this.getSlimeCountForLevel());
+
         // Запуск появления слизней
         this.startSlimeSpawning();
 
@@ -134,25 +146,44 @@
         if (gameSettings.subtraction) problemTypes.push('subtraction');
         if (gameSettings.multiplication) problemTypes.push('multiplication');
 
+        // Если ни один тип не выбран – включаем сложение по умолчанию
+        if (problemTypes.length === 0) problemTypes.push('addition');
+
         const type = problemTypes[Math.floor(Math.random() * problemTypes.length)];
         let a, b, answer;
+        const lvl = gameSettings.currentLevel;
 
         switch (type) {
             case 'addition':
-                a = Phaser.Math.Between(1, 10 + gameSettings.currentLevel * 2);
-                b = Phaser.Math.Between(1, 10 + gameSettings.currentLevel * 2);
+                if (lvl <= 2) {
+                    a = Phaser.Math.Between(1, 8);
+                    b = Phaser.Math.Between(1, 8);
+                } else {
+                    a = Phaser.Math.Between(1, 10 + lvl * 2);
+                    b = Phaser.Math.Between(1, 10 + lvl * 2);
+                }
                 answer = a + b;
                 this.currentProblem = { question: `${a} + ${b} = ?`, answer: answer };
                 break;
             case 'subtraction':
-                a = Phaser.Math.Between(5, 15 + gameSettings.currentLevel * 2);
-                b = Phaser.Math.Between(1, a);
+                if (lvl <= 2) {
+                    a = Phaser.Math.Between(3, 10);
+                    b = Phaser.Math.Between(1, a);
+                } else {
+                    a = Phaser.Math.Between(5, 12 + lvl * 2);
+                    b = Phaser.Math.Between(1, a);
+                }
                 answer = a - b;
                 this.currentProblem = { question: `${a} - ${b} = ?`, answer: answer };
                 break;
             case 'multiplication':
-                a = Phaser.Math.Between(2, 6 + gameSettings.currentLevel);
-                b = Phaser.Math.Between(2, 6 + gameSettings.currentLevel);
+                if (lvl <= 2) {
+                    a = Phaser.Math.Between(1, 5);
+                    b = Phaser.Math.Between(1, 5);
+                } else {
+                    a = Phaser.Math.Between(2, 5 + lvl);
+                    b = Phaser.Math.Between(2, 5 + lvl);
+                }
                 answer = a * b;
                 this.currentProblem = { question: `${a} × ${b} = ?`, answer: answer };
                 break;
@@ -231,16 +262,6 @@
                 this.slimes.shift();
                 gameSettings.score += 10;
                 this.scoreText.setText(`Счёт: ${gameSettings.score}`);
-
-                // Анимация уничтожения
-                this.tweens.add({
-                    targets: slime,
-                    scaleX: 0,
-                    scaleY: 0,
-                    alpha: 0,
-                    duration: 300,
-                    ease: 'Power2'
-                });
             }
 
             // Обновление задачи
@@ -270,17 +291,22 @@
     }
 
     startSlimeSpawning() {
+        // Защита: если мини-игра сделала запуск очень лёгким, но минимум 1 враг
         let slimeCount = this.getSlimeCountForLevel();
         if (this.easyStartActive) {
-            slimeCount = Math.max(1, slimeCount - 2); // минимум 1 слизень
+            slimeCount = Math.max(1, slimeCount - 2);
+            console.log('Easy start: reduced slime count to', slimeCount);
         }
         this.slimesToSpawn = slimeCount;
         this.slimesSpawned = 0;
 
-        this.time.addEvent({
-            delay: 2000,
+        // Очистка предыдущего таймера, если есть
+        if (this.spawnTimer) this.spawnTimer.remove();
+
+        this.spawnTimer = this.time.addEvent({
+            delay: this.spawnDelay,
             callback: () => {
-                if (this.slimesSpawned < this.slimesToSpawn) {
+                if (!this.levelFinished && this.slimesSpawned < this.slimesToSpawn) {
                     this.spawnSlime();
                     this.slimesSpawned++;
                 }
@@ -311,11 +337,11 @@
 
     getSlimeCountForLevel() {
         switch (gameSettings.currentLevel) {
-            case 1: return 3;
-            case 2: return 4;
-            case 3: return 5;
-            case 4: return 6;
-            default: return 7;
+            case 1: return 4;
+            case 2: return 5;
+            case 3: return 7;
+            case 4: return 9;
+            default: return 10;
         }
     }
 
@@ -325,6 +351,8 @@
     }
 
     heroHit(hero, slime) {
+        if (this.levelFinished) return; // не обрабатываем столкновения после победы
+
         if (this.hasShield) {
             this.hasShield = false;
             slime.destroy();
@@ -356,6 +384,8 @@
     }
 
     gameOver() {
+        if (this.levelFinished) return;
+        this.levelFinished = true; // предотвращаем дальнейшую логику
         this.showHeroMessage('Меня победили... 💀');
 
         this.time.delayedCall(2000, () => {
@@ -389,7 +419,10 @@
     }
 
     update() {
-        // Проверка победы на уровне
+        // Если уровень уже завершён, выходим из update
+        if (this.levelFinished) return;
+
+        // Проверка победы на уровне: все слизни заспавнены и уничтожены
         if (this.slimes.length === 0 && this.slimesSpawned >= this.slimesToSpawn) {
             this.levelComplete();
         }
@@ -401,24 +434,31 @@
             this.warningShown = true;
         }
 
-        // Удаление слизней вышедших за левую границу
-        this.slimes.forEach((slime, index) => {
-            if (slime.x < -50) {
-                slime.destroy();
-                this.slimes.splice(index, 1);
+        // Удаление слизней, вышедших за левую границу (чтобы не занимали память)
+        for (let i = this.slimes.length - 1; i >= 0; i--) {
+            if (this.slimes[i].x < -50) {
+                this.slimes[i].destroy();
+                this.slimes.splice(i, 1);
             }
-        });
+        }
     }
 
     levelComplete() {
+        if (this.levelFinished) return;
+        this.levelFinished = true;
+
+        console.log('Level ' + gameSettings.currentLevel + ' complete!');
+
         gameSettings.currentLevel++;
         this.showHeroMessage('Уровень пройден! 🎉');
 
         if (gameSettings.currentLevel > 4) {
+            console.log('Transition to BossScene');
             this.time.delayedCall(2000, () => {
                 this.scene.start('BossScene');
             });
         } else {
+            console.log('Next level will be ' + gameSettings.currentLevel);
             this.time.delayedCall(2000, () => {
                 this.scene.restart();
             });
