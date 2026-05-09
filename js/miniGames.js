@@ -2,7 +2,7 @@
     constructor() {
         super({ key: 'RescueMiniGame' });
         this.currentNumber = 1;
-        this.timeLeft = 10;
+        this.timeLeft = 15;   // было 10, теперь 15
         this.numbers = [];
     }
 
@@ -32,44 +32,32 @@
     create() {
         console.log('Rescue mini-game started');
 
-        // Фон
         this.add.image(400, 300, 'rescue-bg');
 
-        // Заголовок
         this.add.text(400, 80, 'СПАСИ ДРУГА!', {
-            fontSize: '36px',
-            fill: '#f1c40f',
-            fontFamily: 'Arial, sans-serif',
-            stroke: '#000',
-            strokeThickness: 4
+            fontSize: '36px', fill: '#f1c40f', fontFamily: 'Arial, sans-serif',
+            stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
 
-        // Инструкция
         this.add.text(400, 130, 'Нажимай на числа по порядку от 1 до 9', {
-            fontSize: '20px',
-            fill: '#ecf0f1',
-            fontFamily: 'Arial, sans-serif'
+            fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
 
-        this.add.text(400, 160, 'У тебя есть 10 секунд! ⏰', {
-            fontSize: '18px',
-            fill: '#e74c3c',
-            fontFamily: 'Arial, sans-serif',
-            fontWeight: 'bold'
+        this.add.text(400, 160, 'У тебя есть 15 секунд! ⏰', {
+            fontSize: '18px', fill: '#e74c3c', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
         }).setOrigin(0.5);
 
-        // Запуск мини-игры
-        this.startMiniGame();
+        // Даём 3 секунды на чтение перед началом
+        this.time.delayedCall(3000, () => {
+            this.startMiniGame();
+        });
     }
 
     startMiniGame() {
-        // Создание чисел от 1 до 9
         const positions = [];
         for (let i = 1; i <= 9; i++) {
             let x, y;
             let attempts = 0;
-
-            // Генерация позиции без наложения
             do {
                 x = Phaser.Math.Between(100, 700);
                 y = Phaser.Math.Between(200, 500);
@@ -83,10 +71,7 @@
                 .setData('value', i);
 
             const numberText = this.add.text(x, y, i.toString(), {
-                fontSize: '20px',
-                fill: '#ffffff',
-                fontFamily: 'Arial, sans-serif',
-                fontWeight: 'bold'
+                fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
             }).setOrigin(0.5);
 
             number.on('pointerdown', () => {
@@ -96,16 +81,11 @@
             this.numbers.push({ bubble: number, text: numberText, value: i });
         }
 
-        // Таймер
         this.timerText = this.add.text(400, 550, `Время: ${this.timeLeft} сек`, {
-            fontSize: '24px',
-            fill: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#00000066',
-            padding: { x: 10, y: 5 }
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
+            backgroundColor: '#00000066', padding: { x: 10, y: 5 }
         }).setOrigin(0.5);
 
-        // Запуск таймера
         this.timer = this.time.addEvent({
             delay: 1000,
             callback: this.updateTimer,
@@ -116,29 +96,21 @@
 
     isOverlapping(x, y, positions) {
         for (const pos of positions) {
-            const distance = Phaser.Math.Distance.Between(x, y, pos.x, pos.y);
-            if (distance < 80) { // Минимальное расстояние между пузырями
-                return true;
-            }
+            if (Phaser.Math.Distance.Between(x, y, pos.x, pos.y) < 80) return true;
         }
         return false;
     }
 
     handleNumberClick(bubble, text, value) {
         if (value === this.currentNumber) {
-            // Правильное число
             bubble.setTexture('number-correct');
             text.setStyle({ fill: '#ffffff' });
             bubble.disableInteractive();
             this.currentNumber++;
 
-            // Анимация успеха
             this.tweens.add({
                 targets: [bubble, text],
-                scaleX: 1.3,
-                scaleY: 1.3,
-                duration: 200,
-                yoyo: true
+                scaleX: 1.3, scaleY: 1.3, duration: 200, yoyo: true
             });
 
             if (this.currentNumber > 9) {
@@ -164,16 +136,11 @@
         this.timer.remove();
 
         this.add.text(400, 50, 'УСПЕХ! Друг спасён! 🎉', {
-            fontSize: '28px',
-            fill: '#27ae60',
-            fontFamily: 'Arial, sans-serif',
-            fontWeight: 'bold'
+            fontSize: '28px', fill: '#27ae60', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
         }).setOrigin(0.5);
 
         this.add.text(400, 90, 'Герой возвращается в бой! ⚔️', {
-            fontSize: '18px',
-            fill: '#ecf0f1',
-            fontFamily: 'Arial, sans-serif'
+            fontSize: '18px', fill: '#ecf0f1', fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
 
         this.time.delayedCall(2000, () => {
@@ -184,27 +151,18 @@
 
     miniGameFail() {
         this.timer.remove();
-        // Устанавливаем флаг лёгкого старта
         gameSettings.easyStart = true;
 
         this.add.text(400, 50, 'ВРЕМЯ ВЫШЛО! ⏰', {
-            fontSize: '28px',
-            fill: '#e74c3c',
-            fontFamily: 'Arial, sans-serif',
-            fontWeight: 'bold'
+            fontSize: '28px', fill: '#e74c3c', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
         }).setOrigin(0.5);
 
         this.add.text(400, 90, 'Но герой сам выбрался! 💪', {
-            fontSize: '18px',
-            fill: '#ecf0f1',
-            fontFamily: 'Arial, sans-serif'
+            fontSize: '18px', fill: '#ecf0f1', fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
 
         this.add.text(400, 120, 'Следующие 2 слизня уже побеждены! 🎯', {
-            fontSize: '16px',
-            fill: '#f1c40f',
-            fontFamily: 'Arial, sans-serif',
-            fontStyle: 'italic'
+            fontSize: '16px', fill: '#f1c40f', fontFamily: 'Arial, sans-serif', fontStyle: 'italic'
         }).setOrigin(0.5);
 
         this.time.delayedCall(3000, () => {
@@ -213,6 +171,7 @@
         });
     }
 }
+
 
 class MagicPauseMiniGame extends Phaser.Scene {
     constructor() {
@@ -253,22 +212,16 @@ class MagicPauseMiniGame extends Phaser.Scene {
             fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
-        // Разбираем lastQuestion (например "5 + 3 = ?")
         const lastQ = gameSettings.lastQuestion || '2 + 2 = ?';
         const parts = lastQ.split(' ');
-        // parts = ['5', '+', '3', '=', '?'] – заменим `?` на ответ
         this.expectedOrder = [...parts.slice(0, 4), gameSettings.lastAnswer.toString()];
-        // Теперь ['5', '+', '3', '=', '8']
 
-        // Создаём облачка с элементами, плюс несколько отвлекающих
         const allElements = [...this.expectedOrder];
-        // Добавим пару отвлекающих чисел/символов
         const distractors = ['7', '12', '-', '×', '4', '15'];
         Phaser.Utils.Array.Shuffle(distractors);
         allElements.push(distractors[0], distractors[1]);
         Phaser.Utils.Array.Shuffle(allElements);
 
-        // Размещаем облачка на экране (без наложений)
         const positions = [];
         allElements.forEach((element) => {
             let x, y, attempts = 0;
@@ -291,7 +244,6 @@ class MagicPauseMiniGame extends Phaser.Scene {
             fontSize: '20px', fill: '#ffffff', backgroundColor: '#00000066', padding: 10
         }).setOrigin(0.5);
 
-        // Обработчики
         this.clouds.forEach(item => {
             item.cloud.on('pointerdown', () => this.onCloudClick(item));
         });
@@ -306,21 +258,18 @@ class MagicPauseMiniGame extends Phaser.Scene {
 
     onCloudClick(item) {
         if (item.value === this.expectedOrder[this.currentIndex]) {
-            // Правильный выбор
             item.cloud.setTexture('cloud-correct');
             item.text.setStyle({ fill: '#ffffff' });
             item.cloud.disableInteractive();
             this.currentIndex++;
 
             if (this.currentIndex === this.expectedOrder.length) {
-                // Успех – даём щит
                 gameSettings.shield = true;
                 this.showMessageAndReturn('Магический щит получен! 🛡️', 0x00b894);
             } else {
                 this.statusText.setText(`Дальше: ${this.expectedOrder[this.currentIndex]}`);
             }
         } else {
-            // Ошибка – сбрасываем прогресс и даём шанс
             this.currentIndex = 0;
             this.clouds.forEach(c => {
                 c.cloud.setTexture('cloud-wrong');
@@ -334,11 +283,11 @@ class MagicPauseMiniGame extends Phaser.Scene {
     showMessageAndReturn(message, color) {
         this.statusText.setText(message).setStyle({ fill: '#ffffff' });
         this.time.delayedCall(2000, () => {
-            // Возвращаемся в GameScene независимо от результата
             this.scene.start('GameScene');
         });
     }
 }
+
 
 class SecretTrainingMiniGame extends Phaser.Scene {
     constructor() {
@@ -379,24 +328,15 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             fontSize: '16px', fill: '#bdc3c7', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
-        // Игрок
         this.player = this.physics.add.sprite(400, 500, 'player').setCollideWorldBounds(true);
-
-        // Стены (простой лабиринт)
         this.createWalls();
-
-        // Монетки с числами
         this.createCoins();
-
-        // Сбор
         this.physics.add.overlap(this.player, this.numbersGroup, this.collectCoin, null, this);
 
-        // Текст суммы
         this.sumText = this.add.text(400, 160, `Собрано: 0 / ${this.targetSum}`, {
             fontSize: '22px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold'
         }).setOrigin(0.5);
 
-        // Клавиши
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wasd = {
             up: this.input.keyboard.addKey('W'),
@@ -405,15 +345,14 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             right: this.input.keyboard.addKey('D')
         };
 
-        this.time.delayedCall(30000, () => this.finish(false)); // таймаут 30 сек
+        this.time.delayedCall(30000, () => this.finish(false));
     }
 
     createWalls() {
         this.walls = this.physics.add.staticGroup();
-        // Несколько горизонтальных и вертикальных стенок
         const wallData = [
-            [200, 50, 400, 20], [200, 550, 400, 20], // верх/низ
-            [50, 200, 20, 300], [750, 200, 20, 300], // лево/право
+            [200, 50, 400, 20], [200, 550, 400, 20],
+            [50, 200, 20, 300], [750, 200, 20, 300],
             [400, 250, 20, 200], [300, 350, 200, 20]
         ];
         wallData.forEach(([x, y, w, h]) => {
@@ -449,7 +388,6 @@ class SecretTrainingMiniGame extends Phaser.Scene {
         if (this.collectedSum === this.targetSum) {
             this.finish(true);
         } else if (this.collectedSum > this.targetSum) {
-            // Перебор – проигрыш
             this.finish(false);
         }
     }
