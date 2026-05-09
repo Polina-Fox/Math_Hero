@@ -5,7 +5,13 @@ const gameSettings = {
     multiplication: false,
     currentLevel: 1,
     score: 0,
-    lives: 3
+    lives: 3,
+    // новые поля
+    lastQuestion: null,      // строка вида "5 + 3 = ?"
+    lastAnswer: null,        // число
+    shield: false,           // активен ли щит
+    bonusLife: false,        // дополнительная жизнь на следующем уровне
+    easyStart: false         // облегчённый старт (убрать 2 слизней)
 };
 
 // Класс прелоадера
@@ -103,7 +109,7 @@ function initGame() {
         height: 600,
         parent: 'game-container',
         backgroundColor: '#2c3e50',
-        scene: [Preloader, MainMenu, Settings, GameScene, BossScene, Victory, RescueMiniGame],
+        scene: [Preloader, MainMenu, Settings, GameScene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
         physics: {
             default: 'arcade',
             arcade: {

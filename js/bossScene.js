@@ -130,6 +130,10 @@
             answer: answer
         };
 
+        // Сохраняем последний пример
+        gameSettings.lastQuestion = this.currentBossProblem.question;
+        gameSettings.lastAnswer = this.currentBossProblem.answer;
+
         this.showBossProblem();
     }
 

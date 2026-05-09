@@ -184,6 +184,8 @@
 
     miniGameFail() {
         this.timer.remove();
+        // Устанавливаем флаг лёгкого старта
+        gameSettings.easyStart = true;
 
         this.add.text(400, 50, 'ВРЕМЯ ВЫШЛО! ⏰', {
             fontSize: '28px',
@@ -215,48 +217,267 @@
 class MagicPauseMiniGame extends Phaser.Scene {
     constructor() {
         super({ key: 'MagicPauseMiniGame' });
+        this.clouds = [];
+        this.expectedOrder = [];
+        this.currentIndex = 0;
+    }
+
+    preload() {
+        this.createColorTexture('pause-bg', 0x6c5ce7);
+        this.createColorTexture('cloud', 0xdfe6e9);
+        this.createColorTexture('cloud-correct', 0x00b894);
+        this.createColorTexture('cloud-wrong', 0xd63031);
+    }
+
+    createColorTexture(key, color) {
+        const graphics = this.add.graphics();
+        graphics.fillStyle(color);
+        if (key === 'pause-bg') {
+            graphics.fillRect(0, 0, 800, 600);
+        } else if (key.startsWith('cloud')) {
+            graphics.fillRoundedRect(0, 0, 100, 60, 15);
+        }
+        graphics.generateTexture(key, key === 'pause-bg' ? 800 : 100, key === 'pause-bg' ? 600 : 60);
+        graphics.destroy();
     }
 
     create() {
-        this.add.rectangle(400, 300, 800, 600, 0x2c3e50);
+        this.add.image(400, 300, 'pause-bg');
 
-        this.add.text(400, 250, 'МАГИЧЕСКАЯ ПАУЗА', {
-            fontSize: '32px',
-            fill: '#f1c40f',
-            fontFamily: 'Arial, sans-serif'
+        this.add.text(400, 80, 'МАГИЧЕСКАЯ ПАУЗА', {
+            fontSize: '36px', fill: '#f1c40f', fontFamily: 'Arial',
+            stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
 
-        this.add.text(400, 300, 'Эта мини-игра находится в разработке 🛠️', {
-            fontSize: '20px',
-            fill: '#ecf0f1',
-            fontFamily: 'Arial, sans-serif'
+        this.add.text(400, 130, 'Собери последний пример по порядку!', {
+            fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
-        this.add.text(400, 340, 'Скоро здесь появятся волшебные математические духи! ✨', {
-            fontSize: '16px',
-            fill: '#bdc3c7',
-            fontFamily: 'Arial, sans-serif',
-            fontStyle: 'italic'
-        }).setOrigin(0.5);
+        // Разбираем lastQuestion (например "5 + 3 = ?")
+        const lastQ = gameSettings.lastQuestion || '2 + 2 = ?';
+        const parts = lastQ.split(' ');
+        // parts = ['5', '+', '3', '=', '?'] – заменим `?` на ответ
+        this.expectedOrder = [...parts.slice(0, 4), gameSettings.lastAnswer.toString()];
+        // Теперь ['5', '+', '3', '=', '8']
 
-        // Кнопка возврата
-        const backButton = this.add.rectangle(400, 420, 200, 50, 0x3498db)
-            .setInteractive({ useHandCursor: true });
+        // Создаём облачка с элементами, плюс несколько отвлекающих
+        const allElements = [...this.expectedOrder];
+        // Добавим пару отвлекающих чисел/символов
+        const distractors = ['7', '12', '-', '×', '4', '15'];
+        Phaser.Utils.Array.Shuffle(distractors);
+        allElements.push(distractors[0], distractors[1]);
+        Phaser.Utils.Array.Shuffle(allElements);
 
-        const backText = this.add.text(400, 420, 'ВЕРНУТЬСЯ', {
-            fontSize: '20px',
-            fill: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
-            fontWeight: 'bold'
-        }).setOrigin(0.5);
+        // Размещаем облачка на экране (без наложений)
+        const positions = [];
+        allElements.forEach((element) => {
+            let x, y, attempts = 0;
+            do {
+                x = Phaser.Math.Between(150, 650);
+                y = Phaser.Math.Between(200, 500);
+                attempts++;
+            } while (this.isOverlapping(x, y, positions) && attempts < 50);
+            positions.push({ x, y });
 
-        backButton.on('pointerdown', () => {
-            this.scene.start('GameScene');
+            const cloud = this.add.image(x, y, 'cloud')
+                .setInteractive({ useHandCursor: true });
+            const text = this.add.text(x, y, element, {
+                fontSize: '24px', fill: '#2d3436', fontFamily: 'Arial', fontWeight: 'bold'
+            }).setOrigin(0.5);
+            this.clouds.push({ cloud, text, value: element });
         });
 
-        // Автоматический возврат через 5 секунд
-        this.time.delayedCall(5000, () => {
+        this.statusText = this.add.text(400, 550, 'Нажми на первый элемент цепочки', {
+            fontSize: '20px', fill: '#ffffff', backgroundColor: '#00000066', padding: 10
+        }).setOrigin(0.5);
+
+        // Обработчики
+        this.clouds.forEach(item => {
+            item.cloud.on('pointerdown', () => this.onCloudClick(item));
+        });
+    }
+
+    isOverlapping(x, y, positions) {
+        for (const pos of positions) {
+            if (Phaser.Math.Distance.Between(x, y, pos.x, pos.y) < 80) return true;
+        }
+        return false;
+    }
+
+    onCloudClick(item) {
+        if (item.value === this.expectedOrder[this.currentIndex]) {
+            // Правильный выбор
+            item.cloud.setTexture('cloud-correct');
+            item.text.setStyle({ fill: '#ffffff' });
+            item.cloud.disableInteractive();
+            this.currentIndex++;
+
+            if (this.currentIndex === this.expectedOrder.length) {
+                // Успех – даём щит
+                gameSettings.shield = true;
+                this.showMessageAndReturn('Магический щит получен! 🛡️', 0x00b894);
+            } else {
+                this.statusText.setText(`Дальше: ${this.expectedOrder[this.currentIndex]}`);
+            }
+        } else {
+            // Ошибка – сбрасываем прогресс и даём шанс
+            this.currentIndex = 0;
+            this.clouds.forEach(c => {
+                c.cloud.setTexture('cloud-wrong');
+                c.text.setStyle({ fill: '#ffffff' });
+                c.cloud.disableInteractive();
+            });
+            this.showMessageAndReturn('Духи дают тебе ещё один шанс! ✨', 0xd63031);
+        }
+    }
+
+    showMessageAndReturn(message, color) {
+        this.statusText.setText(message).setStyle({ fill: '#ffffff' });
+        this.time.delayedCall(2000, () => {
+            // Возвращаемся в GameScene независимо от результата
             this.scene.start('GameScene');
         });
+    }
+}
+
+class SecretTrainingMiniGame extends Phaser.Scene {
+    constructor() {
+        super({ key: 'SecretTrainingMiniGame' });
+        this.player = null;
+        this.numbers = [];
+        this.collectedSum = 0;
+        this.targetSum = gameSettings.lastAnswer || 8;
+    }
+
+    preload() {
+        this.createColorTexture('training-bg', 0x2d3436);
+        this.createColorTexture('player', 0xfdcb6e);
+        this.createColorTexture('coin', 0xf1c40f);
+    }
+
+    createColorTexture(key, color) {
+        const graphics = this.add.graphics();
+        graphics.fillStyle(color);
+        if (key === 'training-bg') graphics.fillRect(0, 0, 800, 600);
+        else if (key === 'player') graphics.fillCircle(16, 16, 16);
+        else if (key === 'coin') graphics.fillCircle(12, 12, 12);
+        graphics.generateTexture(key, key === 'training-bg' ? 800 : (key === 'player' ? 32 : 24),
+            key === 'training-bg' ? 600 : (key === 'player' ? 32 : 24));
+        graphics.destroy();
+    }
+
+    create() {
+        this.add.image(400, 300, 'training-bg');
+
+        this.add.text(400, 50, 'СЕКРЕТНАЯ ТРЕНИРОВКА', {
+            fontSize: '32px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 4
+        }).setOrigin(0.5);
+        this.add.text(400, 90, `Собери числа, чтобы получить ${this.targetSum}`, {
+            fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
+        }).setOrigin(0.5);
+        this.add.text(400, 120, 'Управляй слизнем стрелками / WASD', {
+            fontSize: '16px', fill: '#bdc3c7', fontFamily: 'Arial'
+        }).setOrigin(0.5);
+
+        // Игрок
+        this.player = this.physics.add.sprite(400, 500, 'player').setCollideWorldBounds(true);
+
+        // Стены (простой лабиринт)
+        this.createWalls();
+
+        // Монетки с числами
+        this.createCoins();
+
+        // Сбор
+        this.physics.add.overlap(this.player, this.numbersGroup, this.collectCoin, null, this);
+
+        // Текст суммы
+        this.sumText = this.add.text(400, 160, `Собрано: 0 / ${this.targetSum}`, {
+            fontSize: '22px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold'
+        }).setOrigin(0.5);
+
+        // Клавиши
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.wasd = {
+            up: this.input.keyboard.addKey('W'),
+            down: this.input.keyboard.addKey('S'),
+            left: this.input.keyboard.addKey('A'),
+            right: this.input.keyboard.addKey('D')
+        };
+
+        this.time.delayedCall(30000, () => this.finish(false)); // таймаут 30 сек
+    }
+
+    createWalls() {
+        this.walls = this.physics.add.staticGroup();
+        // Несколько горизонтальных и вертикальных стенок
+        const wallData = [
+            [200, 50, 400, 20], [200, 550, 400, 20], // верх/низ
+            [50, 200, 20, 300], [750, 200, 20, 300], // лево/право
+            [400, 250, 20, 200], [300, 350, 200, 20]
+        ];
+        wallData.forEach(([x, y, w, h]) => {
+            const graphics = this.add.graphics();
+            graphics.fillStyle(0x636e72);
+            graphics.fillRect(0, 0, w, h);
+            graphics.generateTexture('wall_' + x + y, w, h);
+            graphics.destroy();
+            this.walls.create(x + w / 2, y + h / 2, 'wall_' + x + y).setImmovable(true).refreshBody();
+        });
+        this.physics.add.collider(this.player, this.walls);
+    }
+
+    createCoins() {
+        this.numbersGroup = this.physics.add.group();
+        const possibleNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        const count = Phaser.Math.Between(4, 8);
+        for (let i = 0; i < count; i++) {
+            const x = Phaser.Math.Between(100, 700);
+            const y = Phaser.Math.Between(200, 500);
+            const coin = this.numbersGroup.create(x, y, 'coin').setScale(1.5);
+            coin.value = Phaser.Math.RND.pick(possibleNumbers);
+            this.add.text(x, y - 15, coin.value.toString(), {
+                fontSize: '14px', fill: '#000', fontFamily: 'Arial', fontWeight: 'bold'
+            }).setOrigin(0.5);
+        }
+    }
+
+    collectCoin(player, coin) {
+        this.collectedSum += coin.value;
+        this.sumText.setText(`Собрано: ${this.collectedSum} / ${this.targetSum}`);
+        coin.destroy();
+        if (this.collectedSum === this.targetSum) {
+            this.finish(true);
+        } else if (this.collectedSum > this.targetSum) {
+            // Перебор – проигрыш
+            this.finish(false);
+        }
+    }
+
+    finish(success) {
+        if (success) {
+            gameSettings.bonusLife = true;
+            this.showMessageAndReturn('+1 жизнь на следующем уровне! ❤️', 0x00b894);
+        } else {
+            this.showMessageAndReturn('Слизни передумали и отпустили тебя! 😄', 0xd63031);
+        }
+    }
+
+    showMessageAndReturn(msg, color) {
+        this.add.rectangle(400, 300, 600, 200, 0x000000, 0.8).setDepth(10);
+        this.add.text(400, 300, msg, { fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center' })
+            .setOrigin(0.5).setDepth(11);
+        this.time.delayedCall(2000, () => {
+            this.scene.start('GameScene');
+        });
+    }
+
+    update() {
+        const speed = 200;
+        this.player.setVelocity(0);
+        if (this.cursors.left.isDown || this.wasd.left.isDown) this.player.setVelocityX(-speed);
+        else if (this.cursors.right.isDown || this.wasd.right.isDown) this.player.setVelocityX(speed);
+        if (this.cursors.up.isDown || this.wasd.up.isDown) this.player.setVelocityY(-speed);
+        else if (this.cursors.down.isDown || this.wasd.down.isDown) this.player.setVelocityY(speed);
     }
 }

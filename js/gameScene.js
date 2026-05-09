@@ -7,6 +7,8 @@
         this.slimeSpeed = 50;
         this.heroMessage = null;
         this.warningShown = false;
+        this.hasShield = false;
+        this.easyStartActive = false;
     }
 
     preload() {
@@ -77,6 +79,29 @@
             strokeThickness: 3
         });
 
+        // Применяем бонусы, если есть
+        if (gameSettings.shield) {
+            this.hasShield = true;
+            gameSettings.shield = false;
+            this.showHeroMessage('Волшебный щит активирован! 🛡️');
+        } else {
+            this.hasShield = false;
+        }
+
+        if (gameSettings.bonusLife) {
+            gameSettings.lives += 1;
+            gameSettings.bonusLife = false;
+            this.livesText.setText(`Жизни: ${gameSettings.lives}`);
+            this.showHeroMessage('+1 жизнь от секретной тренировки! ❤️');
+        }
+
+        if (gameSettings.easyStart) {
+            this.easyStartActive = true;
+            gameSettings.easyStart = false;
+        } else {
+            this.easyStartActive = false;
+        }
+
         // Герой
         this.hero = this.physics.add.sprite(100, 300, 'hero-character');
         this.hero.setCollideWorldBounds(true);
@@ -133,6 +158,10 @@
                 break;
         }
 
+        // Сохраняем последний пример для мини-игр
+        gameSettings.lastQuestion = this.currentProblem.question;
+        gameSettings.lastAnswer = this.currentProblem.answer;
+
         // Отображение вопроса (улучшенная видимость)
         this.problemText = this.add.text(400, 500, this.currentProblem.question, {
             fontSize: '36px',
@@ -184,7 +213,6 @@
         });
     }
 
-    // ... остальные методы остаются без изменений ...
     checkAnswer(selectedAnswer, button, buttonText) {
         // Блокируем все кнопки после ответа
         this.answerButtons.forEach(btn => {
@@ -242,7 +270,10 @@
     }
 
     startSlimeSpawning() {
-        const slimeCount = this.getSlimeCountForLevel();
+        let slimeCount = this.getSlimeCountForLevel();
+        if (this.easyStartActive) {
+            slimeCount = Math.max(1, slimeCount - 2); // минимум 1 слизень
+        }
         this.slimesToSpawn = slimeCount;
         this.slimesSpawned = 0;
 
@@ -294,6 +325,14 @@
     }
 
     heroHit(hero, slime) {
+        if (this.hasShield) {
+            this.hasShield = false;
+            slime.destroy();
+            this.slimes = this.slimes.filter(s => s !== slime);
+            this.showHeroMessage('Щит отразил атаку! ✨');
+            return;
+        }
+
         slime.destroy();
         this.slimes = this.slimes.filter(s => s !== slime);
 
@@ -320,7 +359,9 @@
         this.showHeroMessage('Меня победили... 💀');
 
         this.time.delayedCall(2000, () => {
-            this.scene.start('RescueMiniGame');
+            const miniGames = ['RescueMiniGame', 'MagicPauseMiniGame', 'SecretTrainingMiniGame'];
+            const chosen = Phaser.Math.RND.pick(miniGames);
+            this.scene.start(chosen);
         });
     }
 
