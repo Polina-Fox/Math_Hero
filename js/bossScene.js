@@ -7,7 +7,6 @@
     }
 
     preload() {
-        this.createColorTexture('boss-bg', 0x8e44ad);
         this.createColorTexture('boss-enemy', 0xe74c3c);
         this.createColorTexture('boss-button', 0x9b59b6);
         this.createColorTexture('boss-correct', 0x27ae60);
@@ -17,23 +16,19 @@
     createColorTexture(key, color) {
         const graphics = this.add.graphics();
         graphics.fillStyle(color);
-        if (key === 'boss-bg') {
-            graphics.fillRect(0, 0, 800, 600);
-        } else if (key === 'boss-enemy') {
+        if (key === 'boss-enemy') {
             graphics.fillCircle(50, 50, 50);
         } else {
             graphics.fillRoundedRect(0, 0, 120, 50, 10);
         }
-        graphics.generateTexture(key,
-            key === 'boss-bg' ? 800 : 120,
-            key === 'boss-bg' ? 600 : 50
-        );
+        graphics.generateTexture(key, key === 'boss-enemy' ? 120 : 120, 50);
         graphics.destroy();
     }
 
     create() {
         console.log('Boss level started');
-        this.add.image(400, 300, 'boss-bg');
+        // Фон пустыни
+        this.add.image(400, 300, 'bg-desert').setDisplaySize(800, 600);
 
         this.add.text(400, 80, 'БОСС-УРОВЕНЬ!', {
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
@@ -57,7 +52,9 @@
 
     generateBossProblem() {
         if (this.problemText) this.problemText.destroy();
-        if (this.answerButtons) this.answerButtons.forEach(b => { if (b.button) b.button.destroy(); if (b.text) b.text.destroy(); });
+        if (this.answerButtons) {
+            this.answerButtons.forEach(b => { if (b.button) b.button.destroy(); if (b.text) b.text.destroy(); });
+        }
         this.answerButtons = [];
 
         let a, b, answer, question;
@@ -126,7 +123,7 @@
                 this.tweens.add({
                     targets: this.boss, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
                     onComplete: () => {
-                        this.time.delayedCall(1500, () => this.scene.start('Victory'));
+                        this.time.delayedCall(1500, () => this.scene.start('OutroCutscene')); // или 'Victory'
                     }
                 });
             } else {

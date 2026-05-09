@@ -14,7 +14,6 @@
     }
 
     preload() {
-        this.createColorTexture('game-bg', 0x1a5276);
         this.createColorTexture('hero-character', 0xe74c3c);
         this.createColorTexture('slime-enemy', 0x2ecc71);
         this.createColorTexture('answer-button', 0x3498db);
@@ -25,70 +24,57 @@
     createColorTexture(key, color) {
         const graphics = this.add.graphics();
         graphics.fillStyle(color);
-
-        if (key === 'game-bg') {
-            graphics.fillRect(0, 0, 800, 600);
-        } else if (key === 'hero-character') {
+        if (key === 'hero-character') {
             graphics.fillRect(0, 0, 60, 80);
         } else if (key === 'slime-enemy') {
             graphics.fillCircle(32, 32, 32);
         } else {
             graphics.fillRoundedRect(0, 0, 120, 50, 10);
         }
-
         graphics.generateTexture(key,
-            key === 'game-bg' ? 800 : (key === 'hero-character' ? 60 : 120),
-            key === 'game-bg' ? 600 : (key === 'hero-character' ? 80 : 50)
+            key === 'hero-character' ? 60 : 120,
+            key === 'hero-character' ? 80 : 50
         );
         graphics.destroy();
     }
 
     create() {
-        // Жёсткая фиксация номера уровня (игнорируем любые "123")
+        // Проверка уровня
         const validLevels = [1, 2, 3, 4];
         if (!validLevels.includes(gameSettings.currentLevel)) {
-            console.warn('⚠️ Некорректный currentLevel =', gameSettings.currentLevel, '→ ставим 1');
+            console.warn('Некорректный currentLevel =', gameSettings.currentLevel, '→ сброс на 1');
             gameSettings.currentLevel = 1;
         }
 
         console.log('=== Запущен уровень', gameSettings.currentLevel, '===');
 
-        // Сброс флагов
+        // Выбор фона
+        let bgKey = 'bg-grass';
+        if (gameSettings.currentLevel >= 3 && gameSettings.currentLevel <= 4) {
+            bgKey = 'bg-forest';
+        } else if (gameSettings.currentLevel >= 5 && gameSettings.currentLevel <= 6) {
+            bgKey = 'bg-fall';
+        }
+        this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
+
         this.levelFinished = false;
         this.warningShown = false;
 
-        // Фон
-        this.add.image(400, 300, 'game-bg');
-
         // UI
         this.levelText = this.add.text(20, 20, `Уровень: ${gameSettings.currentLevel}`, {
-            fontSize: '22px',
-            fill: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#000000aa',
-            padding: { left: 15, right: 15, top: 8, bottom: 8 },
-            stroke: '#000',
-            strokeThickness: 3
+            fontSize: '22px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
+            backgroundColor: '#000000aa', padding: { left: 15, right: 15, top: 8, bottom: 8 },
+            stroke: '#000', strokeThickness: 3
         });
-
         this.scoreText = this.add.text(20, 60, `Счёт: ${gameSettings.score}`, {
-            fontSize: '22px',
-            fill: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#000000aa',
-            padding: { left: 15, right: 15, top: 8, bottom: 8 },
-            stroke: '#000',
-            strokeThickness: 3
+            fontSize: '22px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
+            backgroundColor: '#000000aa', padding: { left: 15, right: 15, top: 8, bottom: 8 },
+            stroke: '#000', strokeThickness: 3
         });
-
         this.livesText = this.add.text(20, 100, `Жизни: ${gameSettings.lives}`, {
-            fontSize: '22px',
-            fill: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#000000aa',
-            padding: { left: 15, right: 15, top: 8, bottom: 8 },
-            stroke: '#000',
-            strokeThickness: 3
+            fontSize: '22px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
+            backgroundColor: '#000000aa', padding: { left: 15, right: 15, top: 8, bottom: 8 },
+            stroke: '#000', strokeThickness: 3
         });
 
         // Бонусы
@@ -99,14 +85,12 @@
         } else {
             this.hasShield = false;
         }
-
         if (gameSettings.bonusLife) {
             gameSettings.lives += 1;
             gameSettings.bonusLife = false;
             this.livesText.setText(`Жизни: ${gameSettings.lives}`);
             this.showHeroMessage('+1 жизнь от секретной тренировки! ❤️');
         }
-
         if (gameSettings.easyStart) {
             this.easyStartActive = true;
             gameSettings.easyStart = false;
@@ -119,11 +103,11 @@
         this.hero.setCollideWorldBounds(true);
         this.hero.body.setSize(60, 80);
 
-        // Параметры сложности
-        this.slimeSpeed = this.baseSlimeSpeed + (gameSettings.currentLevel - 1) * 15;
-        this.spawnDelay = Math.max(800, 2000 - (gameSettings.currentLevel - 1) * 300);
+        // Сложность
+        this.slimeSpeed = this.baseSlimeSpeed + (gameSettings.currentLevel - 1) * 10;
+        this.spawnDelay = Math.max(1100, 2000 - (gameSettings.currentLevel - 1) * 250);
 
-        // Генерация задачи и слизней
+        // Генерация примера и слизней
         this.generateMathProblem();
         this.startSlimeSpawning();
 
@@ -132,7 +116,6 @@
     }
 
     generateMathProblem() {
-        // Очистка
         this.answerButtons.forEach(b => { if (b.button) b.button.destroy(); if (b.text) b.text.destroy(); });
         this.answerButtons = [];
         if (this.problemText) this.problemText.destroy();
@@ -293,7 +276,6 @@
         if (this.levelFinished) return;
         this.levelFinished = true;
 
-        // Двойная страховка: не даём currentLevel выйти за пределы
         if (gameSettings.currentLevel < 1 || gameSettings.currentLevel > 4) {
             console.warn('currentLevel вне диапазона, сброс до 1');
             gameSettings.currentLevel = 1;
@@ -310,7 +292,7 @@
             if (gameSettings.currentLevel > 4) {
                 this.scene.start('BossScene');
             } else {
-                this.scene.start('GameScene');  // полный перезапуск сцены
+                this.scene.start('GameScene');
             }
         });
     }
@@ -339,4 +321,4 @@
             }
         }
     }
-} 
+}
