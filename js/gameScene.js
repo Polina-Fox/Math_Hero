@@ -28,6 +28,22 @@
     }
 
     create() {
+        // === Полный сброс старых объектов ===
+        if (this.spawnTimer) {
+            this.spawnTimer.remove();
+            this.spawnTimer = null;
+        }
+        this.time.removeAllEvents();
+        this.slimes.forEach(s => {
+            if (s._parts) s._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+            if (s && s.destroy) s.destroy();
+        });
+        this.slimes = [];
+        this.answerButtons = [];
+        this.levelFinished = false;
+        this.warningShown = false;
+        // =================================
+
         const validLevels = [1, 2, 3, 4];
         if (!validLevels.includes(gameSettings.currentLevel)) {
             console.warn('Некорректный currentLevel =', gameSettings.currentLevel, '→ сброс на 1');
@@ -43,9 +59,6 @@
             bgKey = 'bg-fall';
         }
         this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
-
-        this.levelFinished = false;
-        this.warningShown = false;
 
         this.levelText = this.add.text(20, 20, `Уровень: ${gameSettings.currentLevel}`, {
             fontSize: '22px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
@@ -166,11 +179,9 @@
             btn.setTexture('answer-correct');
             txt.setStyle({ fill: '#ffffff' });
 
-            // Радость героя
             this.hero.setTexture('hero_cheer0');
             this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
 
-            // Уничтожаем первого живого слизня
             if (this.slimes.length > 0) {
                 const slimeIndex = this.slimes.findIndex(s => s.active);
                 if (slimeIndex !== -1) {
@@ -188,7 +199,6 @@
             btn.setTexture('answer-wrong');
             txt.setStyle({ fill: '#ffffff' });
 
-            // Ошибка
             this.hero.setTexture('hero_hurt');
             this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
 
@@ -258,7 +268,7 @@
     }
 
     heroHit(hero, slime) {
-        if (this.levelFinished) return;
+        if (this.levelFinished || !slime.active) return;
         if (this.hasShield) {
             this.hasShield = false;
             if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
@@ -273,7 +283,6 @@
         gameSettings.lives--;
         this.livesText.setText(`Жизни: ${gameSettings.lives}`);
 
-        // Анимация урона
         this.hero.setTexture('hero_hit');
         this.tweens.add({
             targets: hero, alpha: 0.5, duration: 200, yoyo: true, repeat: 2,
@@ -291,8 +300,23 @@
     gameOver() {
         if (this.levelFinished) return;
         this.levelFinished = true;
+
+        // Очищаем всех слизней и их части
+        this.slimes.forEach(s => {
+            if (s._parts) s._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+            if (s && s.destroy) s.destroy();
+        });
+        this.slimes = [];
+        this.slimesToSpawn = 0;
+        this.slimesSpawned = 0;
+
         this.physics.pause();
         this.time.removeAllEvents();
+        if (this.spawnTimer) {
+            this.spawnTimer.remove();
+            this.spawnTimer = null;
+        }
+
         this.hero.setTexture('hero_fallDown');
         this.showHeroMessage('Меня победили... 💀');
         this.time.delayedCall(2000, () => {
@@ -309,9 +333,22 @@
             gameSettings.currentLevel = 1;
         }
 
+        // Очищаем слизней
+        this.slimes.forEach(s => {
+            if (s._parts) s._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+            if (s && s.destroy) s.destroy();
+        });
+        this.slimes = [];
+        this.slimesToSpawn = 0;
+        this.slimesSpawned = 0;
+
         this.hero.setTexture('hero_cheer1');
         this.physics.pause();
         this.time.removeAllEvents();
+        if (this.spawnTimer) {
+            this.spawnTimer.remove();
+            this.spawnTimer = null;
+        }
 
         gameSettings.currentLevel++;
         this.showHeroMessage('Уровень пройден! 🎉');
