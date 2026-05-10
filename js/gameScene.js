@@ -14,9 +14,9 @@
     }
 
     preload() {
-        // Создаём текстуру для героя (пока что прямоугольник)
+        // Создаём текстуру для героя (прямоугольник)
         this.createColorTexture('hero-character', 0xe74c3c);
-        // Кнопки ответов остаются
+        // Кнопки ответов
         this.createColorTexture('answer-button', 0x3498db);
         this.createColorTexture('answer-correct', 0x27ae60);
         this.createColorTexture('answer-wrong', 0xe74c3c);
@@ -96,7 +96,7 @@
             this.easyStartActive = false;
         }
 
-        // Герой
+        // Герой (позиция 330)
         this.hero = this.physics.add.sprite(100, 330, 'hero-character');
         this.hero.setCollideWorldBounds(true);
         this.hero.body.setSize(60, 80);
@@ -217,26 +217,27 @@
     }
 
     spawnSlime() {
-        const colors = ['blue', 'green', 'red', 'dark', 'yellow', 'white'];
+        // Работаем только с цветами, для которых точно есть глаза (blue, green, red)
+        const colors = ['blue', 'green', 'red'];
         const color = Phaser.Math.RND.pick(colors);
         const bodyVariant = Phaser.Math.RND.pick(['A', 'B', 'C', 'D', 'E', 'F']);
-        const mouthVariant = Phaser.Math.RND.pick(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']);
-        const useAngryEye = Math.random() < 0.3 && ['blue', 'green', 'red'].includes(color);
+        const mouthVariant = Phaser.Math.RND.pick(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
+        const useAngryEye = Math.random() < 0.3;
         const eyeKey = useAngryEye ? `eye_angry_${color}` : `eye_${color}`;
 
-        // Основное тело с физикой
+        // Основное тело
         const bodyKey = `body_${color}${bodyVariant}`;
         const slime = this.physics.add.sprite(850, 0, bodyKey);
         slime.body.setSize(slime.width * 0.7, slime.height * 0.7);
         slime.setScale(0.75);
 
-      
+        // Глаза и рот как дети тела
         const eye = this.add.image(0, -10, eyeKey).setScale(0.7);
         const mouth = this.add.image(0, 15, `mouth${mouthVariant}`).setScale(0.7);
         slime.addChild(eye);
         slime.addChild(mouth);
 
-        // По желанию антенны (с вероятностью 50%)
+        // Антенна (50% шанс)
         if (Math.random() < 0.5) {
             const antennaKey = `detail_${color}_antenna_small`;
             const antenna = this.add.image(0, -40, antennaKey).setScale(0.6);
