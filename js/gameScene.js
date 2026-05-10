@@ -98,13 +98,13 @@
             this.easyStartActive = false;
         }
 
-        // Герой
-        this.hero = this.physics.add.sprite(100, 300, 'hero-character');
+        // Герой (опущен на 20 пикселей)
+        this.hero = this.physics.add.sprite(100, 320, 'hero-character');
         this.hero.setCollideWorldBounds(true);
         this.hero.body.setSize(60, 80);
 
-        // Сложность
-        this.slimeSpeed = this.baseSlimeSpeed + (gameSettings.currentLevel - 1) * 10;
+        // Сложность (медленнее рост скорости)
+        this.slimeSpeed = this.baseSlimeSpeed + (gameSettings.currentLevel - 1) * 6;
         this.spawnDelay = Math.max(1100, 2000 - (gameSettings.currentLevel - 1) * 250);
 
         // Генерация примера и слизней
@@ -154,7 +154,8 @@
         gameSettings.lastQuestion = this.currentProblem.question;
         gameSettings.lastAnswer = this.currentProblem.answer;
 
-        this.problemText = this.add.text(400, 500, this.currentProblem.question, {
+        // Плашка с примером поднята (480 вместо 500)
+        this.problemText = this.add.text(400, 480, this.currentProblem.question, {
             fontSize: '36px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
             backgroundColor: '#000000cc', padding: { x: 25, y: 15 },
             stroke: '#000', strokeThickness: 4
@@ -221,7 +222,7 @@
     }
 
     spawnSlime() {
-        const heroY = this.hero ? this.hero.y : 300;
+        const heroY = this.hero ? this.hero.y : 320;
         const y = Phaser.Math.Clamp(heroY + Phaser.Math.Between(-30, 30), 40, 560);
         const slime = this.physics.add.sprite(850, y, 'slime-enemy').setScale(0.8);
         slime.body.setCircle(32);
