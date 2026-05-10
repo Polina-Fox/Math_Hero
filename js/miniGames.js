@@ -2,8 +2,9 @@
     constructor() {
         super({ key: 'RescueMiniGame' });
         this.currentNumber = 1;
-        this.timeLeft = 15;   // было 10, теперь 15
+        this.timeLeft = 15;
         this.numbers = [];
+        this.gameEnded = false; // защита от повторного завершения
     }
 
     preload() {
@@ -15,13 +16,11 @@
     createColorTexture(key, color) {
         const graphics = this.add.graphics();
         graphics.fillStyle(color);
-
         if (key === 'rescue-bg') {
             graphics.fillRect(0, 0, 800, 600);
         } else {
             graphics.fillCircle(25, 25, 25);
         }
-
         graphics.generateTexture(key,
             key === 'rescue-bg' ? 800 : 50,
             key === 'rescue-bg' ? 600 : 50
@@ -31,6 +30,10 @@
 
     create() {
         console.log('Rescue mini-game started');
+        this.gameEnded = false;
+        this.currentNumber = 1;
+        this.timeLeft = 15;
+        this.numbers = [];
 
         this.add.image(400, 300, 'rescue-bg');
 
@@ -49,7 +52,9 @@
 
         // Даём 3 секунды на чтение перед началом
         this.time.delayedCall(3000, () => {
-            this.startMiniGame();
+            if (!this.gameEnded) {
+                this.startMiniGame();
+            }
         });
     }
 
@@ -102,7 +107,10 @@
     }
 
     handleNumberClick(bubble, text, value) {
+        if (this.gameEnded) return;
+
         if (value === this.currentNumber) {
+            // Правильное число
             bubble.setTexture('number-correct');
             text.setStyle({ fill: '#ffffff' });
             bubble.disableInteractive();
@@ -116,10 +124,19 @@
             if (this.currentNumber > 9) {
                 this.miniGameSuccess();
             }
+        } else {
+            // Неправильное число — просто мигаем красным, но не наказываем
+            bubble.setTexture('number-correct'); // временно подсветим
+            text.setStyle({ fill: '#ffffff' });
+            this.tweens.add({
+                targets: [bubble, text],
+                scaleX: 1.1, scaleY: 1.1, duration: 200, yoyo: true
+            });
         }
     }
 
     updateTimer() {
+        if (this.gameEnded) return;
         this.timeLeft--;
         this.timerText.setText(`Время: ${this.timeLeft} сек`);
 
@@ -133,7 +150,9 @@
     }
 
     miniGameSuccess() {
-        this.timer.remove();
+        if (this.gameEnded) return;
+        this.gameEnded = true;
+        if (this.timer) this.timer.remove();
 
         this.add.text(400, 50, 'УСПЕХ! Друг спасён! 🎉', {
             fontSize: '28px', fill: '#27ae60', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
@@ -150,7 +169,9 @@
     }
 
     miniGameFail() {
-        this.timer.remove();
+        if (this.gameEnded) return;
+        this.gameEnded = true;
+        if (this.timer) this.timer.remove();
         gameSettings.easyStart = true;
 
         this.add.text(400, 50, 'ВРЕМЯ ВЫШЛО! ⏰', {
@@ -179,6 +200,8 @@ class MagicPauseMiniGame extends Phaser.Scene {
         this.clouds = [];
         this.expectedOrder = [];
         this.currentIndex = 0;
+        this.canClick = true;
+        this.gameEnded = false;
     }
 
     preload() {
@@ -201,6 +224,11 @@ class MagicPauseMiniGame extends Phaser.Scene {
     }
 
     create() {
+        this.gameEnded = false;
+        this.canClick = true;
+        this.currentIndex = 0;
+        this.clouds = [];
+
         this.add.image(400, 300, 'pause-bg');
 
         this.add.text(400, 80, 'МАГИЧЕСКАЯ ПАУЗА', {
@@ -212,8 +240,13 @@ class MagicPauseMiniGame extends Phaser.Scene {
             fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
-        const lastQ = gameSettings.lastQuestion || '2 + 2 = ?';
-        const parts = lastQ.split(' ');
+        // Безопасно получаем последний вопрос
+        const lastQ = gameSettings.lastQuestion;
+        if (!lastQ || typeof lastQ !== 'string') {
+            gameSettings.lastQuestion = '2 + 2 = ?';
+            gameSettings.lastAnswer = 4;
+        }
+        const parts = gameSettings.lastQuestion.split(' ');
         this.expectedOrder = [...parts.slice(0, 4), gameSettings.lastAnswer.toString()];
 
         const allElements = [...this.expectedOrder];
@@ -222,8 +255,24 @@ class MagicPauseMiniGame extends Phaser.Scene {
         allElements.push(distractors[0], distractors[1]);
         Phaser.Utils.Array.Shuffle(allElements);
 
+        this.createClouds(allElements);
+
+        this.statusText = this.add.text(400, 550, 'Нажми на первый элемент цепочки', {
+            fontSize: '20px', fill: '#ffffff', backgroundColor: '#00000066', padding: 10
+        }).setOrigin(0.5);
+    }
+
+    createClouds(elements) {
+        this.clouds.forEach(c => {
+            if (c.cloud) c.cloud.destroy();
+            if (c.text) c.text.destroy();
+        });
+        this.clouds = [];
+        this.currentIndex = 0;
+        this.canClick = true;
+
         const positions = [];
-        allElements.forEach((element) => {
+        elements.forEach((element) => {
             let x, y, attempts = 0;
             do {
                 x = Phaser.Math.Between(150, 650);
@@ -237,15 +286,9 @@ class MagicPauseMiniGame extends Phaser.Scene {
             const text = this.add.text(x, y, element, {
                 fontSize: '24px', fill: '#2d3436', fontFamily: 'Arial', fontWeight: 'bold'
             }).setOrigin(0.5);
+
+            cloud.on('pointerdown', () => this.onCloudClick(cloud, text, element));
             this.clouds.push({ cloud, text, value: element });
-        });
-
-        this.statusText = this.add.text(400, 550, 'Нажми на первый элемент цепочки', {
-            fontSize: '20px', fill: '#ffffff', backgroundColor: '#00000066', padding: 10
-        }).setOrigin(0.5);
-
-        this.clouds.forEach(item => {
-            item.cloud.on('pointerdown', () => this.onCloudClick(item));
         });
     }
 
@@ -256,35 +299,51 @@ class MagicPauseMiniGame extends Phaser.Scene {
         return false;
     }
 
-    onCloudClick(item) {
-        if (item.value === this.expectedOrder[this.currentIndex]) {
-            item.cloud.setTexture('cloud-correct');
-            item.text.setStyle({ fill: '#ffffff' });
-            item.cloud.disableInteractive();
+    onCloudClick(cloud, text, value) {
+        if (!this.canClick || this.gameEnded) return;
+
+        if (value === this.expectedOrder[this.currentIndex]) {
+            cloud.setTexture('cloud-correct');
+            text.setStyle({ fill: '#ffffff' });
+            cloud.disableInteractive();
             this.currentIndex++;
 
             if (this.currentIndex === this.expectedOrder.length) {
+                this.gameEnded = true;
+                this.canClick = false;
                 gameSettings.shield = true;
-                this.showMessageAndReturn('Магический щит получен! 🛡️', 0x00b894);
+                this.statusText.setText('Магический щит получен! 🛡️');
+                this.time.delayedCall(2000, () => {
+                    this.scene.start('GameScene');
+                });
             } else {
                 this.statusText.setText(`Дальше: ${this.expectedOrder[this.currentIndex]}`);
             }
         } else {
-            this.currentIndex = 0;
+            this.canClick = false;
+            cloud.setTexture('cloud-wrong');
+            text.setStyle({ fill: '#ffffff' });
+
             this.clouds.forEach(c => {
-                c.cloud.setTexture('cloud-wrong');
-                c.text.setStyle({ fill: '#ffffff' });
+                if (c.value === this.expectedOrder[this.currentIndex]) {
+                    c.cloud.setTexture('cloud-correct');
+                }
                 c.cloud.disableInteractive();
             });
-            this.showMessageAndReturn('Духи дают тебе ещё один шанс! ✨', 0xd63031);
-        }
-    }
 
-    showMessageAndReturn(message, color) {
-        this.statusText.setText(message).setStyle({ fill: '#ffffff' });
-        this.time.delayedCall(2000, () => {
-            this.scene.start('GameScene');
-        });
+            this.statusText.setText('Ошибка! Запоминай порядок...');
+            this.time.delayedCall(1500, () => {
+                if (!this.gameEnded) {
+                    const elements = [...this.expectedOrder];
+                    const distractors = ['7', '12', '-', '×', '4', '15'];
+                    Phaser.Utils.Array.Shuffle(distractors);
+                    elements.push(distractors[0], distractors[1]);
+                    Phaser.Utils.Array.Shuffle(elements);
+                    this.createClouds(elements);
+                    this.statusText.setText('Попробуй ещё раз!');
+                }
+            });
+        }
     }
 }
 
@@ -293,9 +352,9 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     constructor() {
         super({ key: 'SecretTrainingMiniGame' });
         this.player = null;
-        this.numbers = [];
         this.collectedSum = 0;
         this.targetSum = gameSettings.lastAnswer || 8;
+        this.gameEnded = false;
     }
 
     preload() {
@@ -316,12 +375,16 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     }
 
     create() {
+        this.gameEnded = false;
+        this.collectedSum = 0;
+        this.targetSum = gameSettings.lastAnswer || 8;
+
         this.add.image(400, 300, 'training-bg');
 
         this.add.text(400, 50, 'СЕКРЕТНАЯ ТРЕНИРОВКА', {
             fontSize: '32px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
-        this.add.text(400, 90, `Собери числа, чтобы получить ${this.targetSum}`, {
+        this.add.text(400, 90, `Собери числа, чтобы получить ровно ${this.targetSum}`, {
             fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
         }).setOrigin(0.5);
         this.add.text(400, 120, 'Управляй слизнем стрелками / WASD', {
@@ -345,7 +408,10 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             right: this.input.keyboard.addKey('D')
         };
 
-        this.time.delayedCall(30000, () => this.finish(false));
+        // Таймаут 30 секунд — если не успел, считаем провалом
+        this.time.delayedCall(30000, () => {
+            if (!this.gameEnded) this.finish(false);
+        });
     }
 
     createWalls() {
@@ -382,9 +448,11 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     }
 
     collectCoin(player, coin) {
+        if (this.gameEnded) return;
         this.collectedSum += coin.value;
         this.sumText.setText(`Собрано: ${this.collectedSum} / ${this.targetSum}`);
         coin.destroy();
+
         if (this.collectedSum === this.targetSum) {
             this.finish(true);
         } else if (this.collectedSum > this.targetSum) {
@@ -393,6 +461,11 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     }
 
     finish(success) {
+        if (this.gameEnded) return;
+        this.gameEnded = true;
+        this.physics.pause();
+        this.time.removeAllEvents();
+
         if (success) {
             gameSettings.bonusLife = true;
             this.showMessageAndReturn('+1 жизнь на следующем уровне! ❤️', 0x00b894);
@@ -411,6 +484,7 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     }
 
     update() {
+        if (this.gameEnded) return;
         const speed = 200;
         this.player.setVelocity(0);
         if (this.cursors.left.isDown || this.wasd.left.isDown) this.player.setVelocityX(-speed);
