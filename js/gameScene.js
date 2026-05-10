@@ -11,11 +11,10 @@
         this.easyStartActive = false;
         this.levelFinished = false;
         this.baseSlimeSpeed = 50;
-        this.slimeParts = []; // массив для хранения частей (глаза, рты, антенны)
     }
 
     preload() {
-        this.createColorTexture('hero-character', 0xe74c3c);
+        // Только кнопки – герой загружен в Preloader
         this.createColorTexture('answer-button', 0x3498db);
         this.createColorTexture('answer-correct', 0x27ae60);
         this.createColorTexture('answer-wrong', 0xe74c3c);
@@ -24,15 +23,8 @@
     createColorTexture(key, color) {
         const graphics = this.add.graphics();
         graphics.fillStyle(color);
-        if (key === 'hero-character') {
-            graphics.fillRect(0, 0, 60, 80);
-        } else {
-            graphics.fillRoundedRect(0, 0, 120, 50, 10);
-        }
-        graphics.generateTexture(key,
-            key === 'hero-character' ? 60 : 120,
-            key === 'hero-character' ? 80 : 50
-        );
+        graphics.fillRoundedRect(0, 0, 120, 50, 10);
+        graphics.generateTexture(key, 120, 50);
         graphics.destroy();
     }
 
@@ -92,9 +84,10 @@
             this.easyStartActive = false;
         }
 
-        this.hero = this.physics.add.sprite(100, 330, 'hero-character');
+        // === ГЕРОЙ ===
+        this.hero = this.physics.add.sprite(100, 330, 'hero_idle');
         this.hero.setCollideWorldBounds(true);
-        this.hero.body.setSize(60, 80);
+        this.hero.body.setSize(this.hero.width * 0.6, this.hero.height * 0.8);
 
         this.slimeSpeed = this.baseSlimeSpeed + (gameSettings.currentLevel - 1) * 6;
         this.spawnDelay = Math.max(1100, 2000 - (gameSettings.currentLevel - 1) * 250);
@@ -174,14 +167,13 @@
         if (selected === this.currentProblem.answer) {
             btn.setTexture('answer-correct');
             txt.setStyle({ fill: '#ffffff' });
+            // Радость
+            this.hero.setTexture('hero_cheer0');
+            this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
+
             if (this.slimes.length > 0) {
                 const slime = this.slimes.shift();
-                // Удаляем связанные части
-                if (slime._parts) {
-                    slime._parts.forEach(part => {
-                        if (part && part.destroy) part.destroy();
-                    });
-                }
+                if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
                 slime.destroy();
                 gameSettings.score += 10;
                 this.scoreText.setText(`Счёт: ${gameSettings.score}`);
@@ -190,6 +182,10 @@
         } else {
             btn.setTexture('answer-wrong');
             txt.setStyle({ fill: '#ffffff' });
+            // Ошибка
+            this.hero.setTexture('hero_hurt');
+            this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
+
             this.answerButtons.forEach(b => {
                 if (parseInt(b.text.text) === this.currentProblem.answer) b.button.setTexture('answer-correct');
             });
@@ -229,15 +225,12 @@
         slime.body.setSize(slime.width * 0.7, slime.height * 0.7);
         slime.setScale(0.75);
 
-        // Вместо addChild создаём спрайты и будем двигать в update
         const eye = this.add.image(slime.x, slime.y - 10, eyeKey).setScale(0.7);
         const mouth = this.add.image(slime.x, slime.y + 15, `mouth${mouthVariant}`).setScale(0.7);
         let antenna = null;
         if (Math.random() < 0.5) {
             antenna = this.add.image(slime.x, slime.y - 40, `detail_${color}_antenna_small`).setScale(0.6);
         }
-
-        // Сохраняем ссылки на части в пользовательском свойстве
         slime._parts = [eye, mouth, antenna].filter(p => p);
 
         slime.y = Phaser.Math.Clamp(this.hero.y + Phaser.Math.Between(-30, 30), 40, 560);
@@ -272,9 +265,20 @@
         this.slimes = this.slimes.filter(s => s !== slime);
         gameSettings.lives--;
         this.livesText.setText(`Жизни: ${gameSettings.lives}`);
-        this.tweens.add({ targets: hero, alpha: 0.5, duration: 200, yoyo: true, repeat: 2 });
-        if (gameSettings.lives <= 0) this.gameOver();
-        else this.showHeroMessage('Ай! Больно! 😫');
+
+        // Урон
+        this.hero.setTexture('hero_hit');
+        this.tweens.add({
+            targets: hero, alpha: 0.5, duration: 200, yoyo: true, repeat: 2,
+            onComplete: () => this.hero.setTexture('hero_idle')
+        });
+
+        if (gameSettings.lives <= 0) {
+            this.hero.setTexture('hero_fallDown');
+            this.gameOver();
+        } else {
+            this.showHeroMessage('Ай! Больно! 😫');
+        }
     }
 
     gameOver() {
@@ -282,6 +286,7 @@
         this.levelFinished = true;
         this.physics.pause();
         this.time.removeAllEvents();
+        this.hero.setTexture('hero_fallDown');
         this.showHeroMessage('Меня победили... 💀');
         this.time.delayedCall(2000, () => {
             const miniGames = ['RescueMiniGame', 'MagicPauseMiniGame', 'SecretTrainingMiniGame'];
@@ -294,17 +299,15 @@
         this.levelFinished = true;
 
         if (gameSettings.currentLevel < 1 || gameSettings.currentLevel > 4) {
-            console.warn('currentLevel вне диапазона, сброс до 1');
             gameSettings.currentLevel = 1;
         }
 
-        console.log('Уровень ' + gameSettings.currentLevel + ' завершён!');
+        this.hero.setTexture('hero_cheer1');
         this.physics.pause();
         this.time.removeAllEvents();
 
         gameSettings.currentLevel++;
         this.showHeroMessage('Уровень пройден! 🎉');
-
         this.time.delayedCall(2000, () => {
             if (gameSettings.currentLevel > 4) {
                 this.scene.start('BossScene');
@@ -326,22 +329,11 @@
 
     update() {
         if (this.levelFinished) return;
-        // Обновляем позиции частей вместе с телами слизней
         this.slimes.forEach(slime => {
             if (slime._parts && slime.active) {
-                // двигаем части за телом
-                if (slime._parts[0]) { // eye
-                    slime._parts[0].x = slime.x;
-                    slime._parts[0].y = slime.y - 10;
-                }
-                if (slime._parts[1]) { // mouth
-                    slime._parts[1].x = slime.x;
-                    slime._parts[1].y = slime.y + 15;
-                }
-                if (slime._parts[2]) { // antenna
-                    slime._parts[2].x = slime.x;
-                    slime._parts[2].y = slime.y - 40;
-                }
+                if (slime._parts[0]) { slime._parts[0].x = slime.x; slime._parts[0].y = slime.y - 10; }
+                if (slime._parts[1]) { slime._parts[1].x = slime.x; slime._parts[1].y = slime.y + 15; }
+                if (slime._parts[2]) { slime._parts[2].x = slime.x; slime._parts[2].y = slime.y - 40; }
             }
         });
 

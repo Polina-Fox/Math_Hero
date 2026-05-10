@@ -1,3 +1,4 @@
+// Глобальные настройки игры
 const gameSettings = {
     addition: true,
     subtraction: false,
@@ -45,9 +46,11 @@ class Preloader extends Phaser.Scene {
             percentText.destroy();
         });
 
+        // Основные ресурсы
         this.load.image('menu-bg', 'assets/images/background0.png');
         this.load.audio('bgMusic', 'assets/audio/bg_music.mp3');
 
+        // Фоны
         this.load.image('bg-grass', 'assets/images/backgroundColorGrass.png');
         this.load.image('bg-forest', 'assets/images/backgroundColorForest.png');
         this.load.image('bg-fall', 'assets/images/backgroundColorFall.png');
@@ -55,7 +58,7 @@ class Preloader extends Phaser.Scene {
 
         this.createButtonTextures();
 
-        // Только проверенные части (blue, green, red)
+        // ===== Части мобов (blue, green, red) =====
         const colors = ['blue', 'green', 'red'];
         colors.forEach(c => {
             ['A', 'B', 'C', 'D', 'E', 'F'].forEach(v => this.load.image(`body_${c}${v}`, `assets/images/mobs/body_${c}${v}.png`));
@@ -64,6 +67,23 @@ class Preloader extends Phaser.Scene {
             this.load.image(`detail_${c}_antenna_small`, `assets/images/mobs/detail_${c}_antenna_small.png`);
         });
         ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].forEach(m => this.load.image(`mouth${m}`, `assets/images/mobs/mouth${m}.png`));
+
+        // ===== Спрайты героя (Adventurer) =====
+        const heroPath = 'assets/images/Poses HD/character_maleAdventurer';
+        const heroFrames = [
+            'idle', 'fall', 'fallDown', 'hurt', 'hit',
+            'cheer0', 'cheer1',
+            'walk0', 'walk1', 'walk2', 'walk3', 'walk4', 'walk5', 'walk6', 'walk7',
+            'run0', 'run1', 'run2',
+            'attack0', 'attack1', 'attack2', 'attackKick', 'kick',
+            'jump', 'slide', 'duck', 'climb0', 'climb1',
+            'back', 'behindBack', 'down', 'drag', 'hang', 'hold',
+            'interact', 'rope', 'shove', 'shoveBack', 'show', 'side',
+            'switch0', 'switch1', 'talk', 'think', 'wide'
+        ];
+        heroFrames.forEach(frame => {
+            this.load.image(`hero_${frame}`, `${heroPath}_${frame}.png`);
+        });
     }
 
     createButtonTextures() {
