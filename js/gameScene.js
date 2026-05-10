@@ -28,7 +28,6 @@
     }
 
     create() {
-        // === Полный сброс старых объектов ===
         if (this.spawnTimer) {
             this.spawnTimer.remove();
             this.spawnTimer = null;
@@ -42,7 +41,6 @@
         this.answerButtons = [];
         this.levelFinished = false;
         this.warningShown = false;
-        // =================================
 
         const validLevels = [1, 2, 3, 4];
         if (!validLevels.includes(gameSettings.currentLevel)) {
@@ -301,7 +299,6 @@
         if (this.levelFinished) return;
         this.levelFinished = true;
 
-        // Очищаем всех слизней и их части
         this.slimes.forEach(s => {
             if (s._parts) s._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
             if (s && s.destroy) s.destroy();
@@ -333,7 +330,6 @@
             gameSettings.currentLevel = 1;
         }
 
-        // Очищаем слизней
         this.slimes.forEach(s => {
             if (s._parts) s._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
             if (s && s.destroy) s.destroy();
@@ -363,18 +359,23 @@
 
     showHeroMessage(msg) {
         if (this.heroMessage) this.heroMessage.destroy();
-        this.heroMessage = this.add.text(100, 200, msg, {
+        this.heroMessage = this.add.text(this.hero.x + 40, this.hero.y - 50, msg, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
             backgroundColor: '#000000cc', padding: { x: 15, y: 8 },
-            stroke: '#000', strokeThickness: 3
+            stroke: '#000', strokeThickness: 3,
+            wordWrap: { width: 250 }
         }).setOrigin(0.5);
-        this.time.delayedCall(2000, () => { if (this.heroMessage) this.heroMessage.destroy(); });
+        this.time.delayedCall(2000, () => {
+            if (this.heroMessage) {
+                this.heroMessage.destroy();
+                this.heroMessage = null;
+            }
+        });
     }
 
     update() {
         if (this.levelFinished) return;
 
-        // Обновляем позиции частей слизней
         this.slimes.forEach(slime => {
             if (slime._parts && slime.active) {
                 if (slime._parts[0]) { slime._parts[0].x = slime.x; slime._parts[0].y = slime.y - 10; }
@@ -390,7 +391,6 @@
             this.warningShown = true;
         }
 
-        // Удаление вышедших за экран (безопасное, с конца массива)
         for (let i = this.slimes.length - 1; i >= 0; i--) {
             const slime = this.slimes[i];
             if (!slime.active || slime.x < -50) {

@@ -1,4 +1,6 @@
-﻿class RescueMiniGame extends Phaser.Scene {
+﻿// miniGames.js - полный код
+
+class RescueMiniGame extends Phaser.Scene {
     constructor() {
         super({ key: 'RescueMiniGame' });
         this.currentNumber = 1;
@@ -37,16 +39,16 @@
 
         this.add.image(400, 300, 'rescue-bg');
 
-        this.add.text(400, 80, 'СПАСИ ДРУГА!', {
+        this.add.text(400, 50, 'СПАСИ ДРУГА!', {
             fontSize: '36px', fill: '#f1c40f', fontFamily: 'Arial, sans-serif',
             stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
 
-        this.add.text(400, 130, 'Нажимай на числа по порядку от 1 до 9', {
+        this.add.text(400, 100, 'Нажимай на числа по порядку от 1 до 9', {
             fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
 
-        this.add.text(400, 160, 'У тебя есть 15 секунд! ⏰', {
+        this.add.text(400, 140, 'У тебя есть 15 секунд! ⏰', {
             fontSize: '18px', fill: '#e74c3c', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
         }).setOrigin(0.5);
 
@@ -64,28 +66,28 @@
             let attempts = 0;
             do {
                 x = Phaser.Math.Between(100, 700);
-                y = Phaser.Math.Between(200, 500);
+                y = Phaser.Math.Between(200, 480);
                 attempts++;
             } while (this.isOverlapping(x, y, positions) && attempts < 50);
 
             positions.push({ x, y });
 
-            const number = this.add.image(x, y, 'number-bubble')
+            const bubble = this.add.image(x, y, 'number-bubble')
                 .setInteractive({ useHandCursor: true })
                 .setData('value', i);
 
             const numberText = this.add.text(x, y, i.toString(), {
-                fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
-            }).setOrigin(0.5);
+                fontSize: '22px', fill: '#ffffff', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
+            }).setOrigin(0.5, 0.5);
 
-            number.on('pointerdown', () => {
-                this.handleNumberClick(number, numberText, i);
+            bubble.on('pointerdown', () => {
+                this.handleNumberClick(bubble, numberText, i);
             });
 
-            this.numbers.push({ bubble: number, text: numberText, value: i });
+            this.numbers.push({ bubble: bubble, text: numberText, value: i });
         }
 
-        this.timerText = this.add.text(400, 550, `Время: ${this.timeLeft} сек`, {
+        this.timerText = this.add.text(400, 560, `Время: ${this.timeLeft} сек`, {
             fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
             backgroundColor: '#00000066', padding: { x: 10, y: 5 }
         }).setOrigin(0.5);
@@ -100,7 +102,7 @@
 
     isOverlapping(x, y, positions) {
         for (const pos of positions) {
-            if (Phaser.Math.Distance.Between(x, y, pos.x, pos.y) < 80) return true;
+            if (Phaser.Math.Distance.Between(x, y, pos.x, pos.y) < 70) return true;
         }
         return false;
     }
@@ -144,13 +146,13 @@
         this.gameEnded = true;
         if (this.timer) this.timer.remove();
 
-        this.add.text(400, 50, 'УСПЕХ! Друг спасён! 🎉', {
+        this.add.rectangle(400, 300, 500, 150, 0x000000, 0.7).setDepth(5);
+        this.add.text(400, 280, 'УСПЕХ! Друг спасён! 🎉', {
             fontSize: '28px', fill: '#27ae60', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
-        }).setOrigin(0.5);
-
-        this.add.text(400, 90, 'Герой возвращается в бой! ⚔️', {
+        }).setOrigin(0.5).setDepth(6);
+        this.add.text(400, 330, 'Герой возвращается в бой! ⚔️', {
             fontSize: '18px', fill: '#ecf0f1', fontFamily: 'Arial, sans-serif'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setDepth(6);
 
         this.time.delayedCall(2000, () => {
             gameSettings.lives = 3;
@@ -164,17 +166,16 @@
         if (this.timer) this.timer.remove();
         gameSettings.easyStart = true;
 
-        this.add.text(400, 50, 'ВРЕМЯ ВЫШЛО! ⏰', {
+        this.add.rectangle(400, 300, 500, 180, 0x000000, 0.7).setDepth(5);
+        this.add.text(400, 270, 'ВРЕМЯ ВЫШЛО! ⏰', {
             fontSize: '28px', fill: '#e74c3c', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
-        }).setOrigin(0.5);
-
-        this.add.text(400, 90, 'Но герой сам выбрался! 💪', {
+        }).setOrigin(0.5).setDepth(6);
+        this.add.text(400, 310, 'Но герой сам выбрался! 💪', {
             fontSize: '18px', fill: '#ecf0f1', fontFamily: 'Arial, sans-serif'
-        }).setOrigin(0.5);
-
-        this.add.text(400, 120, 'Следующие 2 слизня уже побеждены! 🎯', {
+        }).setOrigin(0.5).setDepth(6);
+        this.add.text(400, 340, 'Следующие 2 слизня уже побеждены! 🎯', {
             fontSize: '16px', fill: '#f1c40f', fontFamily: 'Arial, sans-serif', fontStyle: 'italic'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setDepth(6);
 
         this.time.delayedCall(3000, () => {
             gameSettings.lives = 3;
@@ -222,12 +223,12 @@ class MagicPauseMiniGame extends Phaser.Scene {
 
         this.add.image(400, 300, 'pause-bg');
 
-        this.add.text(400, 80, 'МАГИЧЕСКАЯ ПАУЗА', {
+        this.add.text(400, 60, 'МАГИЧЕСКАЯ ПАУЗА', {
             fontSize: '36px', fill: '#f1c40f', fontFamily: 'Arial',
             stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
 
-        this.add.text(400, 130, 'Собери последний пример по порядку!', {
+        this.add.text(400, 110, 'Собери последний пример по порядку!', {
             fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
@@ -270,8 +271,8 @@ class MagicPauseMiniGame extends Phaser.Scene {
 
         this.createClouds(allElements);
 
-        this.statusText = this.add.text(400, 550, 'Нажми на первый элемент цепочки', {
-            fontSize: '20px', fill: '#ffffff', backgroundColor: '#00000066', padding: 10
+        this.statusText = this.add.text(400, 560, 'Нажми на первый элемент цепочки', {
+            fontSize: '20px', fill: '#ffffff', backgroundColor: '#00000066', padding: { x: 10, y: 8 }
         }).setOrigin(0.5);
     }
 
@@ -289,7 +290,7 @@ class MagicPauseMiniGame extends Phaser.Scene {
             let x, y, attempts = 0;
             do {
                 x = Phaser.Math.Between(150, 650);
-                y = Phaser.Math.Between(200, 500);
+                y = Phaser.Math.Between(180, 480);
                 attempts++;
             } while (this.isOverlapping(x, y, positions) && attempts < 50);
             positions.push({ x, y });
@@ -298,7 +299,7 @@ class MagicPauseMiniGame extends Phaser.Scene {
                 .setInteractive({ useHandCursor: true });
             const text = this.add.text(x, y, element, {
                 fontSize: '24px', fill: '#2d3436', fontFamily: 'Arial', fontWeight: 'bold'
-            }).setOrigin(0.5);
+            }).setOrigin(0.5, 0.5);
 
             cloud.on('pointerdown', () => this.onCloudClick(cloud, text, element));
             this.clouds.push({ cloud, text, value: element });
@@ -399,23 +400,27 @@ class SecretTrainingMiniGame extends Phaser.Scene {
 
         this.add.image(400, 300, 'training-bg');
 
-        this.add.text(400, 50, 'СЕКРЕТНАЯ ТРЕНИРОВКА', {
-            fontSize: '32px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 4
-        }).setOrigin(0.5);
-        this.add.text(400, 90, `Собери числа, чтобы получить ровно ${this.targetSum}`, {
-            fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
-        }).setOrigin(0.5);
-        this.add.text(400, 120, 'Управляй слизнем стрелками / WASD', {
-            fontSize: '16px', fill: '#bdc3c7', fontFamily: 'Arial'
+        this.add.text(400, 35, 'СЕКРЕТНАЯ ТРЕНИРОВКА', {
+            fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5);
 
-        this.player = this.physics.add.sprite(400, 500, 'player').setCollideWorldBounds(true);
+        this.add.text(400, 70, `Собери числа, чтобы получить ровно ${this.targetSum}`, {
+            fontSize: '18px', fill: '#ecf0f1', fontFamily: 'Arial'
+        }).setOrigin(0.5);
+
+        this.add.text(400, 95, 'Управляй слизнем стрелками / WASD', {
+            fontSize: '14px', fill: '#bdc3c7', fontFamily: 'Arial'
+        }).setOrigin(0.5);
+
+        this.player = this.physics.add.sprite(400, 480, 'player').setCollideWorldBounds(true);
+
         this.createWalls();
         this.createCoins();
         this.physics.add.overlap(this.player, this.numbersGroup, this.collectCoin, null, this);
 
-        this.sumText = this.add.text(400, 160, `Собрано: 0 / ${this.targetSum}`, {
-            fontSize: '22px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold'
+        this.sumText = this.add.text(400, 560, `Собрано: 0 / ${this.targetSum}`, {
+            fontSize: '22px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold',
+            backgroundColor: '#00000066', padding: { x: 10, y: 5 }
         }).setOrigin(0.5);
 
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -434,9 +439,12 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     createWalls() {
         this.walls = this.physics.add.staticGroup();
         const wallData = [
-            [200, 50, 400, 20], [200, 550, 400, 20],
-            [50, 200, 20, 300], [750, 200, 20, 300],
-            [400, 250, 20, 200], [300, 350, 200, 20]
+            [200, 120, 400, 20],
+            [200, 550, 400, 20],
+            [50, 250, 20, 250],
+            [750, 250, 20, 250],
+            [400, 300, 20, 200],
+            [300, 400, 200, 20]
         ];
         wallData.forEach(([x, y, w, h]) => {
             const graphics = this.add.graphics();
@@ -452,15 +460,15 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     createCoins() {
         this.numbersGroup = this.physics.add.group();
         const possibleNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        const count = Phaser.Math.Between(4, 8);
+        const count = Phaser.Math.Between(5, 9);
         for (let i = 0; i < count; i++) {
-            const x = Phaser.Math.Between(100, 700);
-            const y = Phaser.Math.Between(200, 500);
+            const x = Phaser.Math.Between(120, 680);
+            const y = Phaser.Math.Between(180, 480);
             const coin = this.numbersGroup.create(x, y, 'coin').setScale(1.5);
             coin.value = Phaser.Math.RND.pick(possibleNumbers);
-            this.add.text(x, y - 15, coin.value.toString(), {
+            this.add.text(x, y, coin.value.toString(), {
                 fontSize: '14px', fill: '#000', fontFamily: 'Arial', fontWeight: 'bold'
-            }).setOrigin(0.5);
+            }).setOrigin(0.5, 0.5);
         }
     }
 
@@ -492,9 +500,10 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     }
 
     showMessageAndReturn(msg, color) {
-        this.add.rectangle(400, 300, 600, 200, 0x000000, 0.8).setDepth(10);
-        this.add.text(400, 300, msg, { fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center' })
-            .setOrigin(0.5).setDepth(11);
+        this.add.rectangle(400, 300, 600, 200, 0x000000, 0.85).setDepth(10);
+        this.add.text(400, 300, msg, {
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center'
+        }).setOrigin(0.5).setDepth(11);
         this.time.delayedCall(2000, () => {
             this.scene.start('GameScene');
         });
