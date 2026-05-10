@@ -11,6 +11,7 @@
         this.easyStartActive = false;
         this.levelFinished = false;
         this.baseSlimeSpeed = 50;
+        this.slimeParts = []; // массив для хранения частей (глаза, рты, антенны)
     }
 
     preload() {
@@ -175,6 +176,12 @@
             txt.setStyle({ fill: '#ffffff' });
             if (this.slimes.length > 0) {
                 const slime = this.slimes.shift();
+                // Удаляем связанные части
+                if (slime._parts) {
+                    slime._parts.forEach(part => {
+                        if (part && part.destroy) part.destroy();
+                    });
+                }
                 slime.destroy();
                 gameSettings.score += 10;
                 this.scoreText.setText(`Счёт: ${gameSettings.score}`);
@@ -222,16 +229,16 @@
         slime.body.setSize(slime.width * 0.7, slime.height * 0.7);
         slime.setScale(0.75);
 
-        const eye = this.add.image(0, -10, eyeKey).setScale(0.7);
-        const mouth = this.add.image(0, 15, `mouth${mouthVariant}`).setScale(0.7);
-        slime.addChild(eye);
-        slime.addChild(mouth);
-
+        // Вместо addChild создаём спрайты и будем двигать в update
+        const eye = this.add.image(slime.x, slime.y - 10, eyeKey).setScale(0.7);
+        const mouth = this.add.image(slime.x, slime.y + 15, `mouth${mouthVariant}`).setScale(0.7);
+        let antenna = null;
         if (Math.random() < 0.5) {
-            const antennaKey = `detail_${color}_antenna_small`;
-            const antenna = this.add.image(0, -40, antennaKey).setScale(0.6);
-            slime.addChild(antenna);
+            antenna = this.add.image(slime.x, slime.y - 40, `detail_${color}_antenna_small`).setScale(0.6);
         }
+
+        // Сохраняем ссылки на части в пользовательском свойстве
+        slime._parts = [eye, mouth, antenna].filter(p => p);
 
         slime.y = Phaser.Math.Clamp(this.hero.y + Phaser.Math.Between(-30, 30), 40, 560);
         slime.setVelocityX(-this.slimeSpeed);
@@ -254,11 +261,13 @@
         if (this.levelFinished) return;
         if (this.hasShield) {
             this.hasShield = false;
+            if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
             slime.destroy();
             this.slimes = this.slimes.filter(s => s !== slime);
             this.showHeroMessage('Щит отразил атаку! ✨');
             return;
         }
+        if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
         slime.destroy();
         this.slimes = this.slimes.filter(s => s !== slime);
         gameSettings.lives--;
@@ -317,6 +326,25 @@
 
     update() {
         if (this.levelFinished) return;
+        // Обновляем позиции частей вместе с телами слизней
+        this.slimes.forEach(slime => {
+            if (slime._parts && slime.active) {
+                // двигаем части за телом
+                if (slime._parts[0]) { // eye
+                    slime._parts[0].x = slime.x;
+                    slime._parts[0].y = slime.y - 10;
+                }
+                if (slime._parts[1]) { // mouth
+                    slime._parts[1].x = slime.x;
+                    slime._parts[1].y = slime.y + 15;
+                }
+                if (slime._parts[2]) { // antenna
+                    slime._parts[2].x = slime.x;
+                    slime._parts[2].y = slime.y - 40;
+                }
+            }
+        });
+
         if (this.slimes.length === 0 && this.slimesSpawned >= this.slimesToSpawn) this.levelComplete();
         if (this.slimes[0] && this.slimes[0].x < 300 && !this.warningShown) {
             this.showHeroMessage('Они близко! Быстрее! 🚨');
@@ -324,6 +352,7 @@
         }
         for (let i = this.slimes.length - 1; i >= 0; i--) {
             if (this.slimes[i].x < -50) {
+                if (this.slimes[i]._parts) this.slimes[i]._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
                 this.slimes[i].destroy();
                 this.slimes.splice(i, 1);
             }
