@@ -4,10 +4,10 @@
         this.correctAnswers = 0;
         this.requiredAnswers = 3;
         this.bossDefeated = false;
+        this.feedbackText = null;
     }
 
     preload() {
-        // Кнопки босса
         this.createColorTexture('boss-button', 0x9b59b6);
         this.createColorTexture('boss-correct', 0x27ae60);
         this.createColorTexture('boss-wrong', 0xc0392b);
@@ -23,23 +23,25 @@
 
     create() {
         console.log('Boss level started');
+        this.correctAnswers = 0;
+        this.bossDefeated = false;
+        this.feedbackText = null;
+
         this.add.image(400, 300, 'bg-desert').setDisplaySize(800, 600);
 
         this.add.text(400, 80, 'БОСС-УРОВЕНЬ!', {
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5);
 
-        // Собираем босса из доступных частей (красный, большой)
+        // Босс из красных частей
         const bossBody = this.add.image(0, 0, 'body_redF').setScale(2.5);
         const bossEye = this.add.image(0, -20, 'eye_angry_red').setScale(2.5);
         const bossMouth = this.add.image(0, 25, 'mouthC').setScale(2.0);
-        // Две антенны по бокам (используем detail_red_antenna_small, они точно есть)
         const antennaL = this.add.image(-35, -45, 'detail_red_antenna_small').setScale(2.0);
         const antennaR = this.add.image(35, -45, 'detail_red_antenna_small').setScale(2.0);
 
         this.bossContainer = this.add.container(400, 200, [bossBody, bossEye, bossMouth, antennaL, antennaR]);
 
-        // Анимация контейнера
         this.tweens.add({
             targets: this.bossContainer,
             scaleX: 2.1, scaleY: 2.1, duration: 1000, yoyo: true, repeat: -1
@@ -119,13 +121,23 @@
 
     checkBossAnswer(selected, btn, txt) {
         this.answerButtons.forEach(b => b.button.disableInteractive());
+
+        // Удаляем старые сообщения, чтобы не накладывались
+        if (this.feedbackText) {
+            this.feedbackText.destroy();
+            this.feedbackText = null;
+        }
+
         if (selected === this.currentBossProblem.answer) {
             btn.setTexture('boss-correct');
             this.correctAnswers++;
             this.counterText.setText(`Правильных ответов: ${this.correctAnswers}/${this.requiredAnswers}`);
+
             if (this.correctAnswers >= this.requiredAnswers) {
                 this.bossDefeated = true;
-                this.add.text(400, 520, 'БОСС ПОБЕЖДЁН! 🎉', { fontSize: '32px', fill: '#27ae60' }).setOrigin(0.5);
+                this.feedbackText = this.add.text(400, 520, 'БОСС ПОБЕЖДЁН! 🎉', {
+                    fontSize: '32px', fill: '#27ae60'
+                }).setOrigin(0.5);
                 this.tweens.add({
                     targets: this.bossContainer, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
                     onComplete: () => {
@@ -133,8 +145,13 @@
                     }
                 });
             } else {
-                this.add.text(400, 520, 'Правильно! 👍', { fontSize: '24px', fill: '#27ae60' }).setOrigin(0.5);
-                this.time.delayedCall(1000, () => this.generateBossProblem());
+                this.feedbackText = this.add.text(400, 520, 'Правильно! 👍', {
+                    fontSize: '24px', fill: '#27ae60'
+                }).setOrigin(0.5);
+                this.time.delayedCall(1000, () => {
+                    if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
+                    this.generateBossProblem();
+                });
             }
         } else {
             btn.setTexture('boss-wrong');
@@ -143,8 +160,13 @@
             this.answerButtons.forEach(b => {
                 if (parseInt(b.text.text) === this.currentBossProblem.answer) b.button.setTexture('boss-correct');
             });
-            this.add.text(400, 520, 'Неправильно! Начинаем заново... 🔄', { fontSize: '20px', fill: '#e74c3c' }).setOrigin(0.5);
-            this.time.delayedCall(2000, () => this.generateBossProblem());
+            this.feedbackText = this.add.text(400, 520, 'Неправильно! Начинаем заново... 🔄', {
+                fontSize: '20px', fill: '#e74c3c'
+            }).setOrigin(0.5);
+            this.time.delayedCall(2000, () => {
+                if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
+                this.generateBossProblem();
+            });
         }
     }
 }

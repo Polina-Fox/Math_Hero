@@ -4,7 +4,7 @@
         this.currentNumber = 1;
         this.timeLeft = 15;
         this.numbers = [];
-        this.gameEnded = false; // защита от повторного завершения
+        this.gameEnded = false;
     }
 
     preload() {
@@ -50,7 +50,6 @@
             fontSize: '18px', fill: '#e74c3c', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
         }).setOrigin(0.5);
 
-        // Даём 3 секунды на чтение перед началом
         this.time.delayedCall(3000, () => {
             if (!this.gameEnded) {
                 this.startMiniGame();
@@ -110,7 +109,6 @@
         if (this.gameEnded) return;
 
         if (value === this.currentNumber) {
-            // Правильное число
             bubble.setTexture('number-correct');
             text.setStyle({ fill: '#ffffff' });
             bubble.disableInteractive();
@@ -124,14 +122,6 @@
             if (this.currentNumber > 9) {
                 this.miniGameSuccess();
             }
-        } else {
-            // Неправильное число — просто мигаем красным, но не наказываем
-            bubble.setTexture('number-correct'); // временно подсветим
-            text.setStyle({ fill: '#ffffff' });
-            this.tweens.add({
-                targets: [bubble, text],
-                scaleX: 1.1, scaleY: 1.1, duration: 200, yoyo: true
-            });
         }
     }
 
@@ -202,6 +192,7 @@ class MagicPauseMiniGame extends Phaser.Scene {
         this.currentIndex = 0;
         this.canClick = true;
         this.gameEnded = false;
+        this.flexibleOrder = false;
     }
 
     preload() {
@@ -240,16 +231,38 @@ class MagicPauseMiniGame extends Phaser.Scene {
             fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
-        // Безопасно получаем последний вопрос
         const lastQ = gameSettings.lastQuestion;
         if (!lastQ || typeof lastQ !== 'string') {
             gameSettings.lastQuestion = '2 + 2 = ?';
             gameSettings.lastAnswer = 4;
         }
         const parts = gameSettings.lastQuestion.split(' ');
-        this.expectedOrder = [...parts.slice(0, 4), gameSettings.lastAnswer.toString()];
+        const a = parts[0];
+        const op = parts[1];
+        const b = parts[2];
+        const answer = gameSettings.lastAnswer.toString();
 
-        const allElements = [...this.expectedOrder];
+        if (op === '+' || op === '×') {
+            this.flexibleOrder = true;
+            this.expectedOrder = [
+                { value: a, type: 'number', accepts: [a, b] },
+                { value: op, type: 'operator', accepts: [op] },
+                { value: b, type: 'number', accepts: [a, b] },
+                { value: '=', type: 'operator', accepts: ['='] },
+                { value: answer, type: 'answer', accepts: [answer] }
+            ];
+        } else {
+            this.flexibleOrder = false;
+            this.expectedOrder = [
+                { value: a, type: 'number', accepts: [a] },
+                { value: op, type: 'operator', accepts: [op] },
+                { value: b, type: 'number', accepts: [b] },
+                { value: '=', type: 'operator', accepts: ['='] },
+                { value: answer, type: 'answer', accepts: [answer] }
+            ];
+        }
+
+        const allElements = [a, b, op, '=', answer];
         const distractors = ['7', '12', '-', '×', '4', '15'];
         Phaser.Utils.Array.Shuffle(distractors);
         allElements.push(distractors[0], distractors[1]);
@@ -302,7 +315,10 @@ class MagicPauseMiniGame extends Phaser.Scene {
     onCloudClick(cloud, text, value) {
         if (!this.canClick || this.gameEnded) return;
 
-        if (value === this.expectedOrder[this.currentIndex]) {
+        const expected = this.expectedOrder[this.currentIndex];
+        const isAccepted = expected.accepts.includes(value);
+
+        if (isAccepted) {
             cloud.setTexture('cloud-correct');
             text.setStyle({ fill: '#ffffff' });
             cloud.disableInteractive();
@@ -317,7 +333,7 @@ class MagicPauseMiniGame extends Phaser.Scene {
                     this.scene.start('GameScene');
                 });
             } else {
-                this.statusText.setText(`Дальше: ${this.expectedOrder[this.currentIndex]}`);
+                this.statusText.setText(`Дальше: ${this.expectedOrder[this.currentIndex].value}`);
             }
         } else {
             this.canClick = false;
@@ -325,7 +341,7 @@ class MagicPauseMiniGame extends Phaser.Scene {
             text.setStyle({ fill: '#ffffff' });
 
             this.clouds.forEach(c => {
-                if (c.value === this.expectedOrder[this.currentIndex]) {
+                if (c.value === expected.accepts[0]) {
                     c.cloud.setTexture('cloud-correct');
                 }
                 c.cloud.disableInteractive();
@@ -334,12 +350,14 @@ class MagicPauseMiniGame extends Phaser.Scene {
             this.statusText.setText('Ошибка! Запоминай порядок...');
             this.time.delayedCall(1500, () => {
                 if (!this.gameEnded) {
-                    const elements = [...this.expectedOrder];
+                    const lastQ = gameSettings.lastQuestion || '2 + 2 = ?';
+                    const parts = lastQ.split(' ');
+                    const allElements = [parts[0], parts[2], parts[1], '=', gameSettings.lastAnswer.toString()];
                     const distractors = ['7', '12', '-', '×', '4', '15'];
                     Phaser.Utils.Array.Shuffle(distractors);
-                    elements.push(distractors[0], distractors[1]);
-                    Phaser.Utils.Array.Shuffle(elements);
-                    this.createClouds(elements);
+                    allElements.push(distractors[0], distractors[1]);
+                    Phaser.Utils.Array.Shuffle(allElements);
+                    this.createClouds(allElements);
                     this.statusText.setText('Попробуй ещё раз!');
                 }
             });
@@ -408,7 +426,6 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             right: this.input.keyboard.addKey('D')
         };
 
-        // Таймаут 30 секунд — если не успел, считаем провалом
         this.time.delayedCall(30000, () => {
             if (!this.gameEnded) this.finish(false);
         });
