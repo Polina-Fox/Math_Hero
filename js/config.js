@@ -244,6 +244,7 @@ class Preloader extends Phaser.Scene {
             this.load.image(`detail_${c}_antenna_small`, `assets/images/mobs/detail_${c}_antenna_small.png`);
         });
 
+        // Больше ничего не грузим — остальное соберём из этих частей
     }
 
     createButtonTextures() {
