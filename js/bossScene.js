@@ -123,7 +123,8 @@
                 this.tweens.add({
                     targets: this.boss, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
                     onComplete: () => {
-                        this.time.delayedCall(1500, () => this.scene.start('OutroCutscene')); // или 'Victory'
+                        // Переход на экран победы (без промежуточного ролика)
+                        this.time.delayedCall(1500, () => this.scene.start('Victory'));
                     }
                 });
             } else {

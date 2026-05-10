@@ -91,7 +91,8 @@ class Preloader extends Phaser.Scene {
         console.log('Preloader complete');
         const loadingElement = document.querySelector('.loading');
         if (loadingElement) loadingElement.style.display = 'none';
-        this.scene.start('IntroCutscene');   // или 'MainMenu', если без ролика
+        // Переход сразу в главное меню (без роликов)
+        this.scene.start('MainMenu');
     }
 }
 
@@ -104,7 +105,8 @@ function initGame() {
         height: 600,
         parent: 'game-container',
         backgroundColor: '#2c3e50',
-        scene: [Preloader, IntroCutscene, MainMenu, Settings, GameScene, BossScene, OutroCutscene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
+        // Убраны IntroCutscene и OutroCutscene
+        scene: [Preloader, MainMenu, Settings, GameScene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
         physics: {
             default: 'arcade',
             arcade: { gravity: { y: 0 }, debug: false }
