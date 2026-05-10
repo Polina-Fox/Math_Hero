@@ -98,7 +98,7 @@
             this.easyStartActive = false;
         }
 
-        this.hero = this.physics.add.sprite(100, 660, 'hero-character');
+        this.hero = this.physics.add.sprite(100, 260, 'hero-character');
         this.hero.setCollideWorldBounds(true);
         this.hero.body.setSize(60, 80);
 
