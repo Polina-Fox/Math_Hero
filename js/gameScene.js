@@ -98,8 +98,7 @@
             this.easyStartActive = false;
         }
 
-        // Герой (опущен на 10 пикселей ниже: было 320, стало 330)
-        this.hero = this.physics.add.sprite(100, 330, 'hero-character');
+        this.hero = this.physics.add.sprite(100, 360, 'hero-character');
         this.hero.setCollideWorldBounds(true);
         this.hero.body.setSize(60, 80);
 
@@ -154,7 +153,7 @@
         gameSettings.lastQuestion = this.currentProblem.question;
         gameSettings.lastAnswer = this.currentProblem.answer;
 
-        // Плашка с примером поднята на 5 пикселей (было 480, стало 475)
+        // Плашка с примером поднята на 5 пикселей 
         this.problemText = this.add.text(400, 475, this.currentProblem.question, {
             fontSize: '36px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
             backgroundColor: '#000000cc', padding: { x: 25, y: 15 },
