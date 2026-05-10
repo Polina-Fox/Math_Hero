@@ -58,17 +58,25 @@ class Preloader extends Phaser.Scene {
 
         this.createButtonTextures();
 
-        // ===== Части мобов (blue, green, red) =====
+        // ===== Части мобов =====
         const colors = ['blue', 'green', 'red'];
         colors.forEach(c => {
-            ['A', 'B', 'C', 'D', 'E', 'F'].forEach(v => this.load.image(`body_${c}${v}`, `assets/images/mobs/body_${c}${v}.png`));
-            this.load.image(`eye_${c}`, `assets/images/mobs/eye_${c}.png`);
+            ['A', 'B', 'C', 'D', 'E', 'F'].forEach(v => {
+                this.load.image(`body_${c}${v}`, `assets/images/mobs/body_${c}${v}.png`);
+            });
+            // Загружаем только злые глаза для всех (обычные могут отсутствовать)
             this.load.image(`eye_angry_${c}`, `assets/images/mobs/eye_angry_${c}.png`);
+            // Для синего и красного загружаем обычные (если есть файлы)
+            if (c === 'blue' || c === 'red') {
+                this.load.image(`eye_${c}`, `assets/images/mobs/eye_${c}.png`);
+            }
             this.load.image(`detail_${c}_antenna_small`, `assets/images/mobs/detail_${c}_antenna_small.png`);
         });
-        ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].forEach(m => this.load.image(`mouth${m}`, `assets/images/mobs/mouth${m}.png`));
+        ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].forEach(m => {
+            this.load.image(`mouth${m}`, `assets/images/mobs/mouth${m}.png`);
+        });
 
-        // ===== Спрайты героя (Adventurer) =====
+        // ===== Спрайты героя =====
         const heroPath = 'assets/images/Poses HD/character_maleAdventurer';
         const heroFrames = [
             'idle', 'fall', 'fallDown', 'hurt', 'hit',
