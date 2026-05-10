@@ -14,7 +14,6 @@
     }
 
     preload() {
-        // Только кнопки – герой загружен в Preloader
         this.createColorTexture('answer-button', 0x3498db);
         this.createColorTexture('answer-correct', 0x27ae60);
         this.createColorTexture('answer-wrong', 0xe74c3c);
@@ -84,7 +83,6 @@
             this.easyStartActive = false;
         }
 
-        // === ГЕРОЙ ===
         this.hero = this.physics.add.sprite(100, 330, 'hero_idle');
         this.hero.setCollideWorldBounds(true);
         this.hero.body.setSize(this.hero.width * 0.6, this.hero.height * 0.8);
@@ -167,21 +165,29 @@
         if (selected === this.currentProblem.answer) {
             btn.setTexture('answer-correct');
             txt.setStyle({ fill: '#ffffff' });
-            // Радость
+
+            // Радость героя
             this.hero.setTexture('hero_cheer0');
             this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
 
+            // Уничтожаем первого живого слизня
             if (this.slimes.length > 0) {
-                const slime = this.slimes.shift();
-                if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
-                slime.destroy();
-                gameSettings.score += 10;
-                this.scoreText.setText(`Счёт: ${gameSettings.score}`);
+                const slimeIndex = this.slimes.findIndex(s => s.active);
+                if (slimeIndex !== -1) {
+                    const slime = this.slimes[slimeIndex];
+                    if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+                    slime.destroy();
+                    this.slimes.splice(slimeIndex, 1);
+                    gameSettings.score += 10;
+                    this.scoreText.setText(`Счёт: ${gameSettings.score}`);
+                }
             }
+
             this.time.delayedCall(800, () => { this.generateMathProblem(); this.showHeroMessage('Молодец! 👍'); });
         } else {
             btn.setTexture('answer-wrong');
             txt.setStyle({ fill: '#ffffff' });
+
             // Ошибка
             this.hero.setTexture('hero_hurt');
             this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
@@ -217,7 +223,8 @@
         const color = Phaser.Math.RND.pick(colors);
         const bodyVariant = Phaser.Math.RND.pick(['A', 'B', 'C', 'D', 'E', 'F']);
         const mouthVariant = Phaser.Math.RND.pick(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
-        const useAngryEye = Math.random() < 0.3;
+        const hasNormalEye = (color === 'blue' || color === 'red');
+        const useAngryEye = !hasNormalEye || Math.random() < 0.3;
         const eyeKey = useAngryEye ? `eye_angry_${color}` : `eye_${color}`;
 
         const bodyKey = `body_${color}${bodyVariant}`;
@@ -256,17 +263,17 @@
             this.hasShield = false;
             if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
             slime.destroy();
-            this.slimes = this.slimes.filter(s => s !== slime);
+            this.slimes = this.slimes.filter(s => s.active && s !== slime);
             this.showHeroMessage('Щит отразил атаку! ✨');
             return;
         }
         if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
         slime.destroy();
-        this.slimes = this.slimes.filter(s => s !== slime);
+        this.slimes = this.slimes.filter(s => s.active && s !== slime);
         gameSettings.lives--;
         this.livesText.setText(`Жизни: ${gameSettings.lives}`);
 
-        // Урон
+        // Анимация урона
         this.hero.setTexture('hero_hit');
         this.tweens.add({
             targets: hero, alpha: 0.5, duration: 200, yoyo: true, repeat: 2,
@@ -329,6 +336,8 @@
 
     update() {
         if (this.levelFinished) return;
+
+        // Обновляем позиции частей слизней
         this.slimes.forEach(slime => {
             if (slime._parts && slime.active) {
                 if (slime._parts[0]) { slime._parts[0].x = slime.x; slime._parts[0].y = slime.y - 10; }
@@ -338,14 +347,18 @@
         });
 
         if (this.slimes.length === 0 && this.slimesSpawned >= this.slimesToSpawn) this.levelComplete();
+
         if (this.slimes[0] && this.slimes[0].x < 300 && !this.warningShown) {
             this.showHeroMessage('Они близко! Быстрее! 🚨');
             this.warningShown = true;
         }
+
+        // Удаление вышедших за экран (безопасное, с конца массива)
         for (let i = this.slimes.length - 1; i >= 0; i--) {
-            if (this.slimes[i].x < -50) {
-                if (this.slimes[i]._parts) this.slimes[i]._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
-                this.slimes[i].destroy();
+            const slime = this.slimes[i];
+            if (!slime.active || slime.x < -50) {
+                if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+                slime.destroy();
                 this.slimes.splice(i, 1);
             }
         }
