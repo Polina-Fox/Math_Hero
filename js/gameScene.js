@@ -14,8 +14,9 @@
     }
 
     preload() {
+        // Создаём текстуру для героя (пока что прямоугольник)
         this.createColorTexture('hero-character', 0xe74c3c);
-        this.createColorTexture('slime-enemy', 0x2ecc71);
+        // Кнопки ответов остаются
         this.createColorTexture('answer-button', 0x3498db);
         this.createColorTexture('answer-correct', 0x27ae60);
         this.createColorTexture('answer-wrong', 0xe74c3c);
@@ -26,8 +27,6 @@
         graphics.fillStyle(color);
         if (key === 'hero-character') {
             graphics.fillRect(0, 0, 60, 80);
-        } else if (key === 'slime-enemy') {
-            graphics.fillCircle(32, 32, 32);
         } else {
             graphics.fillRoundedRect(0, 0, 120, 50, 10);
         }
@@ -39,7 +38,6 @@
     }
 
     create() {
-        // Проверка уровня
         const validLevels = [1, 2, 3, 4];
         if (!validLevels.includes(gameSettings.currentLevel)) {
             console.warn('Некорректный currentLevel =', gameSettings.currentLevel, '→ сброс на 1');
@@ -48,7 +46,7 @@
 
         console.log('=== Запущен уровень', gameSettings.currentLevel, '===');
 
-        // Выбор фона
+        // Фон
         let bgKey = 'bg-grass';
         if (gameSettings.currentLevel >= 3 && gameSettings.currentLevel <= 4) {
             bgKey = 'bg-forest';
@@ -98,19 +96,18 @@
             this.easyStartActive = false;
         }
 
-        this.hero = this.physics.add.sprite(100, 360, 'hero-character');
+        // Герой
+        this.hero = this.physics.add.sprite(100, 330, 'hero-character');
         this.hero.setCollideWorldBounds(true);
         this.hero.body.setSize(60, 80);
 
-        // Сложность (медленный рост скорости)
+        // Сложность
         this.slimeSpeed = this.baseSlimeSpeed + (gameSettings.currentLevel - 1) * 6;
         this.spawnDelay = Math.max(1100, 2000 - (gameSettings.currentLevel - 1) * 250);
 
-        // Генерация примера и слизней
         this.generateMathProblem();
         this.startSlimeSpawning();
 
-        // Столкновения
         this.physics.add.overlap(this.hero, this.slimes, this.heroHit, null, this);
     }
 
@@ -153,7 +150,6 @@
         gameSettings.lastQuestion = this.currentProblem.question;
         gameSettings.lastAnswer = this.currentProblem.answer;
 
-        // Плашка с примером 
         this.problemText = this.add.text(400, 475, this.currentProblem.question, {
             fontSize: '36px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
             backgroundColor: '#000000cc', padding: { x: 25, y: 15 },
@@ -221,15 +217,38 @@
     }
 
     spawnSlime() {
-        const heroY = this.hero ? this.hero.y : 330;
-        const y = Phaser.Math.Clamp(heroY + Phaser.Math.Between(-30, 30), 40, 560);
-        const slime = this.physics.add.sprite(850, y, 'slime-enemy').setScale(0.8);
-        slime.body.setCircle(32);
+        const colors = ['blue', 'green', 'red', 'dark', 'yellow', 'white'];
+        const color = Phaser.Math.RND.pick(colors);
+        const bodyVariant = Phaser.Math.RND.pick(['A', 'B', 'C', 'D', 'E', 'F']);
+        const mouthVariant = Phaser.Math.RND.pick(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']);
+        const useAngryEye = Math.random() < 0.3 && ['blue', 'green', 'red'].includes(color);
+        const eyeKey = useAngryEye ? `eye_angry_${color}` : `eye_${color}`;
+
+        // Основное тело с физикой
+        const bodyKey = `body_${color}${bodyVariant}`;
+        const slime = this.physics.add.sprite(850, 0, bodyKey);
+        slime.body.setSize(slime.width * 0.7, slime.height * 0.7);
+        slime.setScale(0.75);
+
+      
+        const eye = this.add.image(0, -10, eyeKey).setScale(0.7);
+        const mouth = this.add.image(0, 15, `mouth${mouthVariant}`).setScale(0.7);
+        slime.addChild(eye);
+        slime.addChild(mouth);
+
+        // По желанию антенны (с вероятностью 50%)
+        if (Math.random() < 0.5) {
+            const antennaKey = `detail_${color}_antenna_small`;
+            const antenna = this.add.image(0, -40, antennaKey).setScale(0.6);
+            slime.addChild(antenna);
+        }
+
+        // Позиция и движение
+        slime.y = Phaser.Math.Clamp(this.hero.y + Phaser.Math.Between(-30, 30), 40, 560);
         slime.setVelocityX(-this.slimeSpeed);
-        slime.setTint(Phaser.Math.RND.pick([0xff6b9d, 0x74b9ff, 0x55efc4, 0xfdcb6e, 0xa29bfe]));
-        this.slimes.push(slime);
         slime.setAlpha(0);
         this.tweens.add({ targets: slime, alpha: 1, duration: 500 });
+        this.slimes.push(slime);
     }
 
     getSlimeCountForLevel() {

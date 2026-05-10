@@ -58,7 +58,7 @@ class Preloader extends Phaser.Scene {
         this.load.image('menu-bg', 'assets/images/background0.png');
         this.load.audio('bgMusic', 'assets/audio/bg_music.mp3');
 
-        // Фоны уровней (Kenney)
+        // Фоны уровней
         this.load.image('bg-grass', 'assets/images/backgroundColorGrass.png');
         this.load.image('bg-forest', 'assets/images/backgroundColorForest.png');
         this.load.image('bg-fall', 'assets/images/backgroundColorFall.png');
@@ -66,6 +66,62 @@ class Preloader extends Phaser.Scene {
 
         // Кнопки
         this.createButtonTextures();
+
+        // ====== Загрузка частей мобов ======
+        const colors = ['blue', 'green', 'red', 'dark', 'yellow', 'white'];
+        const bodyVariants = ['A', 'B', 'C', 'D', 'E', 'F'];
+        const mouthLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']; 
+        const eyeTypes = ['eye_', 'eye_angry_']; // базовые и злые только для blue,green,red
+        const detailTypes = ['antenna_small', 'antenna_large', 'ear', 'ear_round', 'horn_large', 'horn_small'];
+        const legVariants = ['A', 'B', 'C', 'D', 'E'];
+        const armVariants = ['A', 'B', 'C', 'D', 'E'];
+
+        // Тела
+        colors.forEach(color => {
+            bodyVariants.forEach(v => {
+                this.load.image(`body_${color}${v}`, `assets/images/mobs/body_${color}${v}.png`);
+            });
+        });
+
+        // Глаза (обычные и злые)
+        colors.forEach(color => {
+            this.load.image(`eye_${color}`, `assets/images/mobs/eye_${color}.png`);
+            if (['blue', 'green', 'red'].includes(color)) {
+                this.load.image(`eye_angry_${color}`, `assets/images/mobs/eye_angry_${color}.png`);
+            }
+        });
+
+        // Рты
+        mouthLetters.forEach(m => {
+            this.load.image(`mouth${m}`, `assets/images/mobs/mouth${m}.png`);
+        });
+
+        // Детали (антенны, уши, рога) )
+        colors.forEach(color => {
+            detailTypes.forEach(d => {
+                this.load.image(`detail_${color}_${d}`, `assets/images/mobs/detail_${color}_${d}.png`);
+            });
+        });
+
+        // Ноги и руки
+        colors.forEach(color => {
+            legVariants.forEach(v => {
+                this.load.image(`leg_${color}${v}`, `assets/images/mobs/leg_${color}${v}.png`);
+            });
+            armVariants.forEach(v => {
+                this.load.image(`arm_${color}${v}`, `assets/images/mobs/arm_${color}${v}.png`);
+            });
+        });
+
+        // Носы 
+        ['brown', 'green', 'red', 'yellow'].forEach(c => {
+            this.load.image(`nose_${c}`, `assets/images/mobs/nose_${c}.png`);
+        });
+        // Сопли
+        this.load.image('snot_large', 'assets/images/mobs/snot_large.png');
+        this.load.image('snot_small', 'assets/images/mobs/snot_small.png');
+
+        // ====== конец загрузки мобов ======
     }
 
     createButtonTextures() {
@@ -91,7 +147,6 @@ class Preloader extends Phaser.Scene {
         console.log('Preloader complete');
         const loadingElement = document.querySelector('.loading');
         if (loadingElement) loadingElement.style.display = 'none';
-        // Переход сразу в главное меню (без роликов)
         this.scene.start('MainMenu');
     }
 }
@@ -105,7 +160,6 @@ function initGame() {
         height: 600,
         parent: 'game-container',
         backgroundColor: '#2c3e50',
-        // Убраны IntroCutscene и OutroCutscene
         scene: [Preloader, MainMenu, Settings, GameScene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
         physics: {
             default: 'arcade',

@@ -7,7 +7,7 @@
     }
 
     preload() {
-        this.createColorTexture('boss-enemy', 0xe74c3c);
+        // Кнопки босса
         this.createColorTexture('boss-button', 0x9b59b6);
         this.createColorTexture('boss-correct', 0x27ae60);
         this.createColorTexture('boss-wrong', 0xc0392b);
@@ -16,27 +16,35 @@
     createColorTexture(key, color) {
         const graphics = this.add.graphics();
         graphics.fillStyle(color);
-        if (key === 'boss-enemy') {
-            graphics.fillCircle(50, 50, 50);
-        } else {
-            graphics.fillRoundedRect(0, 0, 120, 50, 10);
-        }
-        graphics.generateTexture(key, key === 'boss-enemy' ? 120 : 120, 50);
+        graphics.fillRoundedRect(0, 0, 120, 50, 10);
+        graphics.generateTexture(key, 120, 50);
         graphics.destroy();
     }
 
     create() {
         console.log('Boss level started');
-        // Фон пустыни
         this.add.image(400, 300, 'bg-desert').setDisplaySize(800, 600);
 
         this.add.text(400, 80, 'БОСС-УРОВЕНЬ!', {
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5);
 
-        this.boss = this.add.image(400, 200, 'boss-enemy').setScale(2);
+        // Собираем босса из частей (например, красный, большой)
+        const bossBody = this.add.image(0, 0, 'body_redF').setScale(2.5);
+        const bossEye = this.add.image(0, -20, 'eye_angry_red').setScale(2.5);
+        const bossMouth = this.add.image(0, 25, 'mouthC').setScale(2.0);
+        const bossAntenna = this.add.image(0, -60, 'detail_red_horn_large').setScale(2.2);
+        // Добавим ещё пару антенн для устрашения
+        const bossAntenna2 = this.add.image(-35, -45, 'detail_red_antenna_small').setScale(1.8);
+        const bossAntenna3 = this.add.image(35, -45, 'detail_red_antenna_small').setScale(1.8);
+
+        // Контейнер, чтобы анимировать все части вместе
+        this.bossContainer = this.add.container(400, 200, [bossBody, bossEye, bossMouth, bossAntenna, bossAntenna2, bossAntenna3]);
+
+        // Анимация контейнера
         this.tweens.add({
-            targets: this.boss, scaleX: 2.1, scaleY: 2.1, duration: 1000, yoyo: true, repeat: -1
+            targets: this.bossContainer,
+            scaleX: 2.1, scaleY: 2.1, duration: 1000, yoyo: true, repeat: -1
         });
 
         this.add.text(400, 280, `Реши ${this.requiredAnswers} примера подряд, чтобы победить босса!`, {
@@ -121,9 +129,8 @@
                 this.bossDefeated = true;
                 this.add.text(400, 520, 'БОСС ПОБЕЖДЁН! 🎉', { fontSize: '32px', fill: '#27ae60' }).setOrigin(0.5);
                 this.tweens.add({
-                    targets: this.boss, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
+                    targets: this.bossContainer, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
                     onComplete: () => {
-                        // Переход на экран победы (без промежуточного ролика)
                         this.time.delayedCall(1500, () => this.scene.start('Victory'));
                     }
                 });
