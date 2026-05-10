@@ -29,17 +29,15 @@
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5);
 
-        // Собираем босса из частей (например, красный, большой)
+        // Собираем босса из доступных частей (красный, большой)
         const bossBody = this.add.image(0, 0, 'body_redF').setScale(2.5);
         const bossEye = this.add.image(0, -20, 'eye_angry_red').setScale(2.5);
         const bossMouth = this.add.image(0, 25, 'mouthC').setScale(2.0);
-        const bossAntenna = this.add.image(0, -60, 'detail_red_horn_large').setScale(2.2);
-        // Добавим ещё пару антенн для устрашения
-        const bossAntenna2 = this.add.image(-35, -45, 'detail_red_antenna_small').setScale(1.8);
-        const bossAntenna3 = this.add.image(35, -45, 'detail_red_antenna_small').setScale(1.8);
+        // Две антенны по бокам (используем detail_red_antenna_small, они точно есть)
+        const antennaL = this.add.image(-35, -45, 'detail_red_antenna_small').setScale(2.0);
+        const antennaR = this.add.image(35, -45, 'detail_red_antenna_small').setScale(2.0);
 
-        // Контейнер, чтобы анимировать все части вместе
-        this.bossContainer = this.add.container(400, 200, [bossBody, bossEye, bossMouth, bossAntenna, bossAntenna2, bossAntenna3]);
+        this.bossContainer = this.add.container(400, 200, [bossBody, bossEye, bossMouth, antennaL, antennaR]);
 
         // Анимация контейнера
         this.tweens.add({
