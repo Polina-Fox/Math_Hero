@@ -19,11 +19,6 @@
         this.createColorTexture('answer-button', 0x3498db);
         this.createColorTexture('answer-correct', 0x27ae60);
         this.createColorTexture('answer-wrong', 0xe74c3c);
-
-        // Загружаем кнопки паузы
-        this.load.image('pause-button', 'assets/images/buttons/button_round_depth_flat.png');
-        this.load.image('resume-button', 'assets/images/buttons/arrow_basic_e.png');
-        this.load.image('menu-button', 'assets/images/buttons/slide_hangle.png');
     }
 
     createColorTexture(key, color) {
@@ -84,14 +79,16 @@
             stroke: '#000', strokeThickness: 3
         });
 
-        // Кнопка паузы (правый верхний угол)
+        // Кнопка паузы (правый верхний угол, увеличена в 3 раза)
         this.pauseButton = this.add.image(760, 40, 'pause-button')
             .setInteractive({ useHandCursor: true })
-            .setScale(0.15)
+            .setScale(0.45)
             .setDepth(100);
 
         this.pauseButton.on('pointerdown', () => {
-            this.togglePause();
+            if (!this.isPaused) {
+                this.pauseGame();
+            }
         });
 
         if (gameSettings.shield) {
@@ -127,22 +124,17 @@
         this.physics.add.overlap(this.hero, this.slimes, this.heroHit, null, this);
     }
 
-    togglePause() {
-        if (this.isPaused) {
-            this.resumeGame();
-        } else {
-            this.pauseGame();
-        }
-    }
-
     pauseGame() {
+        if (this.isPaused) return;
         this.isPaused = true;
 
         // Останавливаем физику
         this.physics.pause();
 
         // Затемнённый фон
-        const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7).setDepth(200);
+        const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7)
+            .setDepth(200)
+            .setInteractive(); // блокируем клики под меню
         this.pauseMenuElements.push(overlay);
 
         // Заголовок паузы
@@ -155,35 +147,52 @@
         // Кнопка "Продолжить"
         const resumeBtn = this.add.image(400, 280, 'resume-button')
             .setInteractive({ useHandCursor: true })
-            .setScale(0.3)
+            .setScale(0.5)
             .setDepth(201);
         this.pauseMenuElements.push(resumeBtn);
 
-        const resumeText = this.add.text(400, 280, 'ПРОДОЛЖИТЬ', {
+        const resumeText = this.add.text(400, 320, 'ПРОДОЛЖИТЬ', {
             fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
             fontWeight: 'bold', stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(202);
         this.pauseMenuElements.push(resumeText);
 
+        resumeBtn.on('pointerover', () => {
+            resumeBtn.setScale(0.55);
+        });
+        resumeBtn.on('pointerout', () => {
+            resumeBtn.setScale(0.5);
+        });
         resumeBtn.on('pointerdown', () => {
             this.resumeGame();
         });
 
         // Кнопка "В главное меню"
-        const menuBtn = this.add.image(400, 380, 'menu-button')
+        const menuBtn = this.add.image(400, 400, 'menu-button')
             .setInteractive({ useHandCursor: true })
-            .setScale(0.3)
+            .setScale(0.5)
             .setDepth(201);
         this.pauseMenuElements.push(menuBtn);
 
-        const menuText = this.add.text(400, 380, 'ГЛАВНОЕ МЕНЮ', {
+        const menuText = this.add.text(400, 440, 'ГЛАВНОЕ МЕНЮ', {
             fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
             fontWeight: 'bold', stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(202);
         this.pauseMenuElements.push(menuText);
 
+        menuBtn.on('pointerover', () => {
+            menuBtn.setScale(0.55);
+        });
+        menuBtn.on('pointerout', () => {
+            menuBtn.setScale(0.5);
+        });
         menuBtn.on('pointerdown', () => {
             // Сбрасываем всё и возвращаемся в меню
+            this.isPaused = false;
+            this.pauseMenuElements.forEach(el => {
+                if (el && el.destroy) el.destroy();
+            });
+            this.pauseMenuElements = [];
             this.physics.resume();
             gameSettings.currentLevel = 1;
             gameSettings.score = 0;
@@ -193,6 +202,7 @@
     }
 
     resumeGame() {
+        if (!this.isPaused) return;
         this.isPaused = false;
 
         // Удаляем элементы меню паузы
