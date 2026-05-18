@@ -64,9 +64,7 @@ class Preloader extends Phaser.Scene {
             ['A', 'B', 'C', 'D', 'E', 'F'].forEach(v => {
                 this.load.image(`body_${c}${v}`, `assets/images/mobs/body_${c}${v}.png`);
             });
-            // Загружаем только злые глаза для всех (обычные могут отсутствовать)
             this.load.image(`eye_angry_${c}`, `assets/images/mobs/eye_angry_${c}.png`);
-            // Для синего и красного загружаем обычные (если есть файлы)
             if (c === 'blue' || c === 'red') {
                 this.load.image(`eye_${c}`, `assets/images/mobs/eye_${c}.png`);
             }
@@ -92,6 +90,11 @@ class Preloader extends Phaser.Scene {
         heroFrames.forEach(frame => {
             this.load.image(`hero_${frame}`, `${heroPath}_${frame}.png`);
         });
+
+        // ===== Кнопки паузы =====
+        this.load.image('pause-button', 'assets/images/buttons/button_round_depth_flat.png');
+        this.load.image('resume-button', 'assets/images/buttons/arrow_basic_e.png');
+        this.load.image('menu-button', 'assets/images/buttons/slide_hangle.png');
     }
 
     createButtonTextures() {

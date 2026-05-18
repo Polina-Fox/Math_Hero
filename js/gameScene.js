@@ -11,12 +11,19 @@
         this.easyStartActive = false;
         this.levelFinished = false;
         this.baseSlimeSpeed = 50;
+        this.isPaused = false;
+        this.pauseMenuElements = [];
     }
 
     preload() {
         this.createColorTexture('answer-button', 0x3498db);
         this.createColorTexture('answer-correct', 0x27ae60);
         this.createColorTexture('answer-wrong', 0xe74c3c);
+
+        // Загружаем кнопки паузы
+        this.load.image('pause-button', 'assets/images/buttons/button_round_depth_flat.png');
+        this.load.image('resume-button', 'assets/images/buttons/arrow_basic_e.png');
+        this.load.image('menu-button', 'assets/images/buttons/slide_hangle.png');
     }
 
     createColorTexture(key, color) {
@@ -28,6 +35,7 @@
     }
 
     create() {
+        // Полный сброс состояний
         if (this.spawnTimer) {
             this.spawnTimer.remove();
             this.spawnTimer = null;
@@ -41,6 +49,8 @@
         this.answerButtons = [];
         this.levelFinished = false;
         this.warningShown = false;
+        this.isPaused = false;
+        this.pauseMenuElements = [];
 
         const validLevels = [1, 2, 3, 4];
         if (!validLevels.includes(gameSettings.currentLevel)) {
@@ -74,6 +84,16 @@
             stroke: '#000', strokeThickness: 3
         });
 
+        // Кнопка паузы (правый верхний угол)
+        this.pauseButton = this.add.image(760, 40, 'pause-button')
+            .setInteractive({ useHandCursor: true })
+            .setScale(0.15)
+            .setDepth(100);
+
+        this.pauseButton.on('pointerdown', () => {
+            this.togglePause();
+        });
+
         if (gameSettings.shield) {
             this.hasShield = true;
             gameSettings.shield = false;
@@ -105,6 +125,84 @@
         this.startSlimeSpawning();
 
         this.physics.add.overlap(this.hero, this.slimes, this.heroHit, null, this);
+    }
+
+    togglePause() {
+        if (this.isPaused) {
+            this.resumeGame();
+        } else {
+            this.pauseGame();
+        }
+    }
+
+    pauseGame() {
+        this.isPaused = true;
+
+        // Останавливаем физику
+        this.physics.pause();
+
+        // Затемнённый фон
+        const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7).setDepth(200);
+        this.pauseMenuElements.push(overlay);
+
+        // Заголовок паузы
+        const pauseTitle = this.add.text(400, 150, 'ПАУЗА', {
+            fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial, sans-serif',
+            stroke: '#000', strokeThickness: 6
+        }).setOrigin(0.5).setDepth(201);
+        this.pauseMenuElements.push(pauseTitle);
+
+        // Кнопка "Продолжить"
+        const resumeBtn = this.add.image(400, 280, 'resume-button')
+            .setInteractive({ useHandCursor: true })
+            .setScale(0.3)
+            .setDepth(201);
+        this.pauseMenuElements.push(resumeBtn);
+
+        const resumeText = this.add.text(400, 280, 'ПРОДОЛЖИТЬ', {
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold', stroke: '#000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(202);
+        this.pauseMenuElements.push(resumeText);
+
+        resumeBtn.on('pointerdown', () => {
+            this.resumeGame();
+        });
+
+        // Кнопка "В главное меню"
+        const menuBtn = this.add.image(400, 380, 'menu-button')
+            .setInteractive({ useHandCursor: true })
+            .setScale(0.3)
+            .setDepth(201);
+        this.pauseMenuElements.push(menuBtn);
+
+        const menuText = this.add.text(400, 380, 'ГЛАВНОЕ МЕНЮ', {
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold', stroke: '#000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(202);
+        this.pauseMenuElements.push(menuText);
+
+        menuBtn.on('pointerdown', () => {
+            // Сбрасываем всё и возвращаемся в меню
+            this.physics.resume();
+            gameSettings.currentLevel = 1;
+            gameSettings.score = 0;
+            gameSettings.lives = 3;
+            this.scene.start('MainMenu');
+        });
+    }
+
+    resumeGame() {
+        this.isPaused = false;
+
+        // Удаляем элементы меню паузы
+        this.pauseMenuElements.forEach(el => {
+            if (el && el.destroy) el.destroy();
+        });
+        this.pauseMenuElements = [];
+
+        // Возобновляем физику
+        this.physics.resume();
     }
 
     generateMathProblem() {
@@ -172,6 +270,8 @@
     }
 
     checkAnswer(selected, btn, txt) {
+        if (this.isPaused || this.levelFinished) return;
+
         this.answerButtons.forEach(b => b.button.disableInteractive());
         if (selected === this.currentProblem.answer) {
             btn.setTexture('answer-correct');
@@ -217,7 +317,7 @@
         this.spawnTimer = this.time.addEvent({
             delay: this.spawnDelay,
             callback: () => {
-                if (!this.levelFinished && this.slimesSpawned < this.slimesToSpawn) {
+                if (!this.levelFinished && !this.isPaused && this.slimesSpawned < this.slimesToSpawn) {
                     this.spawnSlime();
                     this.slimesSpawned++;
                 }
@@ -266,7 +366,7 @@
     }
 
     heroHit(hero, slime) {
-        if (this.levelFinished || !slime.active) return;
+        if (this.levelFinished || this.isPaused || !slime.active) return;
         if (this.hasShield) {
             this.hasShield = false;
             if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
@@ -374,7 +474,7 @@
     }
 
     update() {
-        if (this.levelFinished) return;
+        if (this.levelFinished || this.isPaused) return;
 
         this.slimes.forEach(slime => {
             if (slime._parts && slime.active) {

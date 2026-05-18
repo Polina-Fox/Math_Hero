@@ -1,5 +1,4 @@
-﻿// miniGames.js - полный код
-
+﻿
 class RescueMiniGame extends Phaser.Scene {
     constructor() {
         super({ key: 'RescueMiniGame' });
