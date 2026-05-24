@@ -49,12 +49,12 @@ class Preloader extends Phaser.Scene {
         // Основные ресурсы
         this.load.image('menu-bg', 'assets/images/background0.png');
 
-        // ===== НОВАЯ МУЗЫКА =====
-        this.load.audio('menuMusic', 'assets/audio/palm_of_my_hand_-_intro.mp3');
-        this.load.audio('music-at-altar', 'assets/audio/palm_of_my_hand_-_at_the_altar.mp3');
-        this.load.audio('music-story-time', 'assets/audio/story_time.mp3');
-        this.load.audio('music-ancient-waters', 'assets/audio/over_ancient_waters_looping.mp3');
-        this.load.audio('music-otts', 'assets/audio/otts.mp3');
+        // ===== МУЗЫКА (правильные форматы) =====
+        this.load.audio('menuMusic', 'assets/audio/palm of my hand - intro.ogg');
+        this.load.audio('music-at-altar', 'assets/audio/palm of my hand - at the altar.ogg');
+        this.load.audio('music-story-time', 'assets/audio/story time.ogg');
+        this.load.audio('music-ancient-waters', 'assets/audio/over_ancient_waters_looping.ogg');
+        this.load.audio('music-otts', 'assets/audio/otts.flac');
 
         // Фоны
         this.load.image('bg-grass', 'assets/images/backgroundColorGrass.png');
@@ -125,6 +125,9 @@ function initGame() {
         width: 800, height: 600,
         parent: 'game-container',
         backgroundColor: '#2c3e50',
+        audio: {
+            disableWebAudio: false
+        },
         scene: [Preloader, MainMenu, Settings, GameScene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
         physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
         scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
