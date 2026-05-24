@@ -21,7 +21,7 @@
             this.add.image(400, 300, 'fallback-bg');
         }
 
-        // Запускаем фоновую музыку
+        // Запускаем НОВУЮ фоновую музыку для меню
         this.playBackgroundMusic();
 
         // Заголовок игры
@@ -60,19 +60,20 @@
 
     playBackgroundMusic() {
         try {
-            if (!this.bgMusic) {
-                this.bgMusic = this.sound.add('bgMusic', {
-                    loop: true,
-                    volume: 0.3
-                });
+            // Останавливаем старую музыку если есть
+            if (this.bgMusic && this.bgMusic.isPlaying) {
+                this.bgMusic.stop();
+                this.bgMusic.destroy();
             }
-
-            if (!this.bgMusic.isPlaying) {
-                this.bgMusic.play();
-                console.log('Background music started');
-            }
+            // Запускаем новую музыку меню
+            this.bgMusic = this.sound.add('menuMusic', {
+                loop: true,
+                volume: 0.3
+            });
+            this.bgMusic.play();
+            console.log('Menu music started');
         } catch (error) {
-            console.log('Could not play background music:', error);
+            console.log('Could not play menu music:', error);
         }
     }
 
@@ -165,6 +166,8 @@
 
             this.time.delayedCall(100, () => {
                 if (typeof target === 'string') {
+                    // Останавливаем музыку меню перед переходом
+                    this.stopBackgroundMusic();
                     this.scene.start(target);
                 } else {
                     target.call(this);
@@ -187,7 +190,6 @@
         panel.setStrokeStyle(4, 0xf1c40f);
         this.instructionElements.push(panel);
 
-        // Крестик закрытия в левом верхнем углу панели
         const closeButton = this.add.rectangle(150, 100, 40, 40, 0xe74c3c)
             .setInteractive({ useHandCursor: true })
             .setStrokeStyle(2, 0xffffff);
@@ -308,7 +310,6 @@
         }).setOrigin(0.5);
         this.settingsElements.push(info4);
 
-        // Крестик закрытия для настроек
         const closeButton = this.add.rectangle(150, 120, 40, 40, 0xe74c3c)
             .setInteractive({ useHandCursor: true })
             .setStrokeStyle(2, 0xffffff);
