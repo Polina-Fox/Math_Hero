@@ -79,7 +79,7 @@
             stroke: '#000', strokeThickness: 3
         });
 
-        // Кнопка паузы (правый верхний угол, увеличена в 3 раза)
+        // Кнопка паузы 
         this.pauseButton = this.add.image(760, 40, 'pause-button')
             .setInteractive({ useHandCursor: true })
             .setScale(0.45)
@@ -134,20 +134,19 @@
         // Затемнённый фон
         const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7)
             .setDepth(200)
-            .setInteractive(); // блокируем клики под меню
+            .setInteractive();
         this.pauseMenuElements.push(overlay);
 
         // Заголовок паузы
-        const pauseTitle = this.add.text(400, 150, 'ПАУЗА', {
+        const pauseTitle = this.add.text(400, 130, 'ПАУЗА', {
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial, sans-serif',
             stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5).setDepth(201);
         this.pauseMenuElements.push(pauseTitle);
 
-        // Кнопка "Продолжить"
-        const resumeBtn = this.add.image(400, 280, 'resume-button')
+        const resumeBtn = this.add.image(400, 260, 'resume-button')
             .setInteractive({ useHandCursor: true })
-            .setScale(0.5)
+            .setScale(1.5)
             .setDepth(201);
         this.pauseMenuElements.push(resumeBtn);
 
@@ -158,36 +157,34 @@
         this.pauseMenuElements.push(resumeText);
 
         resumeBtn.on('pointerover', () => {
-            resumeBtn.setScale(0.55);
+            resumeBtn.setScale(1.6);
         });
         resumeBtn.on('pointerout', () => {
-            resumeBtn.setScale(0.5);
+            resumeBtn.setScale(1.5);
         });
         resumeBtn.on('pointerdown', () => {
             this.resumeGame();
         });
 
-        // Кнопка "В главное меню"
-        const menuBtn = this.add.image(400, 400, 'menu-button')
+        const menuBtn = this.add.image(400, 410, 'menu-button')
             .setInteractive({ useHandCursor: true })
-            .setScale(0.5)
+            .setScale(1.5)
             .setDepth(201);
         this.pauseMenuElements.push(menuBtn);
 
-        const menuText = this.add.text(400, 440, 'ГЛАВНОЕ МЕНЮ', {
+        const menuText = this.add.text(400, 470, 'ГЛАВНОЕ МЕНЮ', {
             fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
             fontWeight: 'bold', stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(202);
         this.pauseMenuElements.push(menuText);
 
         menuBtn.on('pointerover', () => {
-            menuBtn.setScale(0.55);
+            menuBtn.setScale(1.6);
         });
         menuBtn.on('pointerout', () => {
-            menuBtn.setScale(0.5);
+            menuBtn.setScale(1.5);
         });
         menuBtn.on('pointerdown', () => {
-            // Сбрасываем всё и возвращаемся в меню
             this.isPaused = false;
             this.pauseMenuElements.forEach(el => {
                 if (el && el.destroy) el.destroy();
@@ -205,13 +202,11 @@
         if (!this.isPaused) return;
         this.isPaused = false;
 
-        // Удаляем элементы меню паузы
         this.pauseMenuElements.forEach(el => {
             if (el && el.destroy) el.destroy();
         });
         this.pauseMenuElements = [];
 
-        // Возобновляем физику
         this.physics.resume();
     }
 
