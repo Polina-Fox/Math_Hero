@@ -59,8 +59,8 @@
         this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
         this.playLevelMusic(musicKey);
 
-        // Панель статистики – поднята значительно выше, чтобы не залезать на игровое поле
-        this.add.image(20, 45, 'panel').setOrigin(0, 0.5).setDisplaySize(170, 110).setAlpha(0.9).setDepth(10);
+        // Панель 
+        this.add.image(20, 45, 'panel').setOrigin(0, 0.5).setDisplaySize(150, 110).setAlpha(0.9).setDepth(10);
 
         this.levelText = this.add.text(35, 25, `Уровень: ${gameSettings.currentLevel}`, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3

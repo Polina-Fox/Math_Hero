@@ -6,7 +6,7 @@
         this.bossDefeated = false;
         this.feedbackText = null;
         this.bossMusic = null;
-        this.timeLeft = 80;            // 80 секунд на босса
+        this.timeLeft = 40;            // 40 секунд на босса
         this.timerText = null;
         this.bossTimer = null;
     }
