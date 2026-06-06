@@ -59,21 +59,16 @@
         this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
         this.playLevelMusic(musicKey);
 
-        // Панель статистики – поднята и увеличена по высоте
-        const statsPanel = this.add.image(20, 60, 'panel')
-            .setOrigin(0, 0.5)
-            .setDisplaySize(170, 110)
-            .setAlpha(0)
-            .setDepth(10);
-        this.tweens.add({ targets: statsPanel, alpha: 1, duration: 300 });
+        // Панель статистики – поднята значительно выше, чтобы не залезать на игровое поле
+        this.add.image(20, 45, 'panel').setOrigin(0, 0.5).setDisplaySize(170, 110).setAlpha(0.9).setDepth(10);
 
-        this.levelText = this.add.text(35, 40, `Уровень: ${gameSettings.currentLevel}`, {
+        this.levelText = this.add.text(35, 25, `Уровень: ${gameSettings.currentLevel}`, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
         }).setDepth(11);
-        this.scoreText = this.add.text(35, 65, `Счёт: ${gameSettings.score}`, {
+        this.scoreText = this.add.text(35, 50, `Счёт: ${gameSettings.score}`, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
         }).setDepth(11);
-        this.livesText = this.add.text(35, 90, `Жизни: ${gameSettings.lives}`, {
+        this.livesText = this.add.text(35, 75, `Жизни: ${gameSettings.lives}`, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
         }).setDepth(11);
 
