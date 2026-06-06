@@ -163,31 +163,27 @@
         this.gameEnded = true;
         if (this.timer) this.timer.remove();
 
-        // Диалог выбора
         const panel = this.add.image(400, 300, 'panel').setDepth(10);
-        const questionText = this.add.text(400, 240, 'Время вышло!\nУстал? Хочешь продолжить?', {
+        this.add.text(400, 240, 'Время вышло!\nУстал? Хочешь продолжить?', {
             fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center',
             stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(11);
 
-        const yesBtn = this.add.text(300, 350, 'Да, попробовать ещё', {
+        const yesBtn = this.add.text(250, 350, 'Да, попробовать ещё', {
             fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 
-        const noBtn = this.add.text(500, 350, 'Нет, выйти в меню', {
+        const noBtn = this.add.text(550, 350, 'Нет, выйти в меню', {
             fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 
-        yesBtn.on('pointerdown', () => {
-            this.scene.restart();
-        });
+        yesBtn.on('pointerdown', () => this.scene.restart());
         noBtn.on('pointerdown', () => {
             gameSettings.lives = 3;
             this.scene.start('MainMenu');
         });
     }
 }
-
 
 class MagicPauseMiniGame extends Phaser.Scene {
     constructor() {
@@ -341,12 +337,10 @@ class MagicPauseMiniGame extends Phaser.Scene {
                 this.statusText.setText(`Дальше: ${this.expectedOrder[this.currentIndex].value}`);
             }
         } else {
-            // Ошибка – показываем диалог выбора
             this.canClick = false;
             cloud.setTexture('cloud-wrong');
             text.setStyle({ fill: '#ffffff' });
 
-            // Показываем правильный элемент
             this.clouds.forEach(c => {
                 if (c.value === expected.accepts[0]) {
                     c.cloud.setTexture('cloud-correct');
@@ -360,16 +354,16 @@ class MagicPauseMiniGame extends Phaser.Scene {
 
     showRetryDialog(message) {
         const panel = this.add.image(400, 300, 'panel').setDepth(10);
-        const questionText = this.add.text(400, 240, message, {
+        this.add.text(400, 240, message, {
             fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center',
             stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(11);
 
-        const yesBtn = this.add.text(300, 350, 'Да, попробовать', {
+        const yesBtn = this.add.text(250, 350, 'Да, попробовать', {
             fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 
-        const noBtn = this.add.text(500, 350, 'Нет, выйти в меню', {
+        const noBtn = this.add.text(550, 350, 'Нет, выйти в меню', {
             fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 
@@ -377,7 +371,6 @@ class MagicPauseMiniGame extends Phaser.Scene {
         noBtn.on('pointerdown', () => this.scene.start('MainMenu'));
     }
 }
-
 
 class SecretTrainingMiniGame extends Phaser.Scene {
     constructor() {
@@ -440,7 +433,6 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             right: this.input.keyboard.addKey('D')
         };
 
-        // Мышь/тач – персонаж следует за указателем
         this.input.on('pointermove', (pointer) => {
             if (!this.gameEnded) {
                 this.physics.moveTo(this.player, pointer.x, pointer.y, 200);
@@ -472,7 +464,6 @@ class SecretTrainingMiniGame extends Phaser.Scene {
 
     createCoins() {
         this.numbersGroup = this.physics.add.group();
-        // Генерируем монетки так, чтобы можно было набрать ровно targetSum
         let remaining = this.targetSum;
         const coins = [];
         while (remaining > 0) {
@@ -480,7 +471,6 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             coins.push(val);
             remaining -= val;
         }
-        // Добавляем пару отвлекающих
         coins.push(Phaser.Math.Between(1, 10), Phaser.Math.Between(1, 10));
         Phaser.Utils.Array.Shuffle(coins);
 
@@ -517,18 +507,17 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             gameSettings.bonusLife = true;
             this.showMessageAndReturn('+1 жизнь на следующем уровне! ❤️', 0x00b894);
         } else {
-            // Диалог выбора при провале
             const panel = this.add.image(400, 300, 'panel').setDepth(10);
             this.add.text(400, 240, 'Не получилось!\nХочешь попробовать снова?', {
                 fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center',
                 stroke: '#000', strokeThickness: 3
             }).setOrigin(0.5).setDepth(11);
 
-            const yesBtn = this.add.text(300, 350, 'Да, попробовать', {
+            const yesBtn = this.add.text(250, 350, 'Да, попробовать', {
                 fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
             }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 
-            const noBtn = this.add.text(500, 350, 'Нет, выйти в меню', {
+            const noBtn = this.add.text(550, 350, 'Нет, выйти в меню', {
                 fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
             }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 

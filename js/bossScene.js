@@ -6,6 +6,9 @@
         this.bossDefeated = false;
         this.feedbackText = null;
         this.bossMusic = null;
+        this.timeLeft = 80;            // 80 секунд на босса
+        this.timerText = null;
+        this.bossTimer = null;
     }
 
     preload() {
@@ -27,6 +30,7 @@
         this.correctAnswers = 0;
         this.bossDefeated = false;
         this.feedbackText = null;
+        this.timeLeft = 40;
 
         this.add.image(400, 300, 'bg-desert').setDisplaySize(800, 600);
 
@@ -42,26 +46,57 @@
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5);
 
-        // Босс из красных частей
+        // Босс
         const bossBody = this.add.image(0, 0, 'body_redF').setScale(2.5);
         const bossEye = this.add.image(0, -20, 'eye_angry_red').setScale(2.5);
         const bossMouth = this.add.image(0, 25, 'mouthC').setScale(2.0);
         const antennaL = this.add.image(-35, -45, 'detail_red_antenna_small').setScale(2.0);
         const antennaR = this.add.image(35, -45, 'detail_red_antenna_small').setScale(2.0);
-
         this.bossContainer = this.add.container(400, 200, [bossBody, bossEye, bossMouth, antennaL, antennaR]);
-
         this.tweens.add({
             targets: this.bossContainer,
             scaleX: 2.1, scaleY: 2.1, duration: 1000, yoyo: true, repeat: -1
         });
 
-        // Убираем надпись за боссом — только счётчик спереди
+        // Счётчик правильных ответов
         this.counterText = this.add.text(400, 320, `Правильных ответов: ${this.correctAnswers}/${this.requiredAnswers}`, {
             fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold'
         }).setOrigin(0.5);
 
+        // Таймер обратного отсчёта
+        this.timerText = this.add.text(400, 360, `Время: ${this.timeLeft} сек`, {
+            fontSize: '24px', fill: '#e74c3c', fontFamily: 'Arial', fontWeight: 'bold'
+        }).setOrigin(0.5);
+
+        this.bossTimer = this.time.addEvent({
+            delay: 1000,
+            callback: this.updateTimer,
+            callbackScope: this,
+            loop: true
+        });
+
         this.time.delayedCall(1000, () => this.generateBossProblem());
+    }
+
+    updateTimer() {
+        if (this.bossDefeated) return;
+        this.timeLeft--;
+        this.timerText.setText(`Время: ${this.timeLeft} сек`);
+
+        if (this.timeLeft <= 10) {
+            this.timerText.setStyle({ fill: '#ff0000' });
+        }
+
+        if (this.timeLeft <= 0) {
+            this.bossTimer.remove();
+            this.bossMusic.stop();
+            this.feedbackText = this.add.text(400, 520, 'ВРЕМЯ ВЫШЛО! Босс ускользнул...', {
+                fontSize: '28px', fill: '#e74c3c', fontFamily: 'Arial', fontWeight: 'bold'
+            }).setOrigin(0.5);
+            this.time.delayedCall(2000, () => {
+                this.scene.restart();
+            });
+        }
     }
 
     generateBossProblem() {
@@ -103,7 +138,7 @@
     }
 
     showBossProblem() {
-        this.problemText = this.add.text(400, 370, this.currentBossProblem.question, {
+        this.problemText = this.add.text(400, 410, this.currentBossProblem.question, {
             fontSize: '36px', fill: '#ffffff', fontFamily: 'Arial', backgroundColor: '#000000aa', padding: 20
         }).setOrigin(0.5);
 
@@ -115,7 +150,7 @@
         Phaser.Utils.Array.Shuffle(answers);
 
         answers.forEach((ans, i) => {
-            const x = 300 + i * 150, y = 450;
+            const x = 300 + i * 150, y = 470;
             const btn = this.add.image(x, y, 'boss-button').setInteractive({ useHandCursor: true });
             const txt = this.add.text(x, y, ans.toString(), {
                 fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', fontWeight: 'bold'
@@ -126,9 +161,9 @@
     }
 
     checkBossAnswer(selected, btn, txt) {
+        if (this.bossDefeated) return;
         this.answerButtons.forEach(b => b.button.disableInteractive());
 
-        // Удаляем старые сообщения, чтобы не накладывались
         if (this.feedbackText) {
             this.feedbackText.destroy();
             this.feedbackText = null;
@@ -141,8 +176,11 @@
 
             if (this.correctAnswers >= this.requiredAnswers) {
                 this.bossDefeated = true;
-                this.feedbackText = this.add.text(400, 520, 'БОСС ПОБЕЖДЁН! 🎉', { fontSize: '32px', fill: '#27ae60' }).setOrigin(0.5);
+                if (this.bossTimer) this.bossTimer.remove();
                 if (this.bossMusic) this.bossMusic.stop();
+                this.feedbackText = this.add.text(400, 520, 'БОСС ПОБЕЖДЁН! 🎉', {
+                    fontSize: '32px', fill: '#27ae60'
+                }).setOrigin(0.5);
                 this.tweens.add({
                     targets: this.bossContainer, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
                     onComplete: () => {
@@ -150,7 +188,9 @@
                     }
                 });
             } else {
-                this.feedbackText = this.add.text(400, 520, 'Правильно! 👍', { fontSize: '24px', fill: '#27ae60' }).setOrigin(0.5);
+                this.feedbackText = this.add.text(400, 520, 'Правильно! 👍', {
+                    fontSize: '24px', fill: '#27ae60'
+                }).setOrigin(0.5);
                 this.time.delayedCall(1000, () => {
                     if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
                     this.generateBossProblem();
@@ -163,7 +203,9 @@
             this.answerButtons.forEach(b => {
                 if (parseInt(b.text.text) === this.currentBossProblem.answer) b.button.setTexture('boss-correct');
             });
-            this.feedbackText = this.add.text(400, 520, 'Неправильно! Начинаем заново... 🔄', { fontSize: '20px', fill: '#e74c3c' }).setOrigin(0.5);
+            this.feedbackText = this.add.text(400, 520, 'Неправильно! Начинаем заново... 🔄', {
+                fontSize: '20px', fill: '#e74c3c'
+            }).setOrigin(0.5);
             this.time.delayedCall(2000, () => {
                 if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
                 this.generateBossProblem();
