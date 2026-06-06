@@ -59,7 +59,7 @@
         this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
         this.playLevelMusic(musicKey);
 
-        // Статистика (ТОЛЬКО ТЕКСТ)
+        // Статистика (только текст)
         this.levelText = this.add.text(35, 25, `Уровень: ${gameSettings.currentLevel}`, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
         }).setDepth(11);
@@ -77,11 +77,12 @@
             .setDepth(100);
         this.pauseButton.on('pointerdown', () => { if (!this.isPaused) this.pauseGame(); });
 
-        // Бонусы
+        // Бонусы (с отладочным логом, можно убрать)
         if (gameSettings.shield) {
             this.hasShield = true;
             gameSettings.shield = false;
             this.showHeroMessage('Волшебный щит! 🛡️');
+            console.log('SHIELD activated');
         } else {
             this.hasShield = false;
         }
@@ -90,6 +91,7 @@
             gameSettings.bonusLife = false;
             this.livesText.setText(`Жизни: ${gameSettings.lives}`);
             this.showHeroMessage('+1 жизнь! ❤️');
+            console.log('BONUS LIFE applied');
         }
         if (gameSettings.easyStart) {
             this.easyStartActive = true;
@@ -374,12 +376,12 @@
 
     showHeroMessage(msg) {
         if (this.heroMessage) this.heroMessage.destroy();
-        // Сообщение спереди героя (слева от него)
-        this.heroMessage = this.add.text(this.hero.x - 60, this.hero.y - 50, msg, {
+        // Сообщение справа от героя, чтобы не обрезалось
+        this.heroMessage = this.add.text(this.hero.x + 60, this.hero.y - 50, msg, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial',
             backgroundColor: '#000000cc', padding: { x: 15, y: 8 },
             stroke: '#000', strokeThickness: 3, wordWrap: { width: 250 }
-        }).setOrigin(0.5);
+        }).setOrigin(0, 0.5); // origin левый край по центру, чтобы не вылезать за экран
         this.time.delayedCall(2000, () => { if (this.heroMessage) { this.heroMessage.destroy(); this.heroMessage = null; } });
     }
 
