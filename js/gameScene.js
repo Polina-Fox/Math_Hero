@@ -60,7 +60,7 @@
         this.playLevelMusic(musicKey);
 
         // Панель 
-        this.add.image(20, 45, 'panel').setOrigin(0, 0.5).setDisplaySize(150, 110).setAlpha(0.9).setDepth(10);
+        this.add.image(20, 45, 'panel').setOrigin(0, 0.5).setDisplaySize(170, 90).setAlpha(0.9).setDepth(10);
 
         this.levelText = this.add.text(35, 25, `Уровень: ${gameSettings.currentLevel}`, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
