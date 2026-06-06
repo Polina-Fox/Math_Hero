@@ -59,14 +59,7 @@
         this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
         this.playLevelMusic(musicKey);
 
-        // Панель
-        const statsPanel = this.add.image(20, 45, 'panel')   
-            .setOrigin(0, 0.5)
-            .setDisplaySize(170, 90)
-            .setAlpha(0)
-            .setDepth(10);
-        this.tweens.add({ targets: statsPanel, alpha: 1, duration: 300 });
-
+        // Статистика (без панели)
         this.levelText = this.add.text(35, 25, `Уровень: ${gameSettings.currentLevel}`, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
         }).setDepth(11);
@@ -381,7 +374,8 @@
 
     showHeroMessage(msg) {
         if (this.heroMessage) this.heroMessage.destroy();
-        this.heroMessage = this.add.text(this.hero.x + 40, this.hero.y - 50, msg, {
+        // Сообщение спереди героя (слева от него)
+        this.heroMessage = this.add.text(this.hero.x - 60, this.hero.y - 50, msg, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial',
             backgroundColor: '#000000cc', padding: { x: 15, y: 8 },
             stroke: '#000', strokeThickness: 3, wordWrap: { width: 250 }

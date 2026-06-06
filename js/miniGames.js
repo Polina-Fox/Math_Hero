@@ -8,22 +8,18 @@
     }
 
     preload() {
-        this.createColorTexture('rescue-bg', 0x27ae60); // ярко-зелёный
+        this.createColorTexture('rescue-bg', 0x27ae60);
         this.createColorTexture('number-bubble', 0x3498db);
         this.createColorTexture('number-correct', 0xf1c40f);
-        this.createColorTexture('particle-star', 0xffd700); // золотая звёздочка
     }
 
     createColorTexture(key, color) {
-        const g = this.add.graphics();
-        g.fillStyle(color);
-        if (key === 'rescue-bg') g.fillRect(0, 0, 800, 600);
-        else if (key === 'particle-star') {
-            g.fillStyle(color);
-            g.fillStar(5, 5, 5, 3);
-        } else g.fillCircle(25, 25, 25);
-        g.generateTexture(key, key === 'rescue-bg' ? 800 : 50, key === 'rescue-bg' ? 600 : 50);
-        g.destroy();
+        const graphics = this.add.graphics();
+        graphics.fillStyle(color);
+        if (key === 'rescue-bg') graphics.fillRect(0, 0, 800, 600);
+        else graphics.fillCircle(25, 25, 25);
+        graphics.generateTexture(key, key === 'rescue-bg' ? 800 : 50, key === 'rescue-bg' ? 600 : 50);
+        graphics.destroy();
     }
 
     create() {
@@ -72,10 +68,7 @@
             backgroundColor: '#00000066', padding: { x: 10, y: 5 }
         }).setOrigin(0.5);
         this.timer = this.time.addEvent({
-            delay: 1000,
-            callback: this.updateTimer,
-            callbackScope: this,
-            loop: true
+            delay: 1000, callback: this.updateTimer, callbackScope: this, loop: true
         });
     }
 
@@ -107,27 +100,22 @@
         if (this.gameEnded) return;
         this.gameEnded = true;
         if (this.timer) this.timer.remove();
-
-        // Фейерверк
         for (let i = 0; i < 20; i++) {
-            const star = this.add.image(400, 300, 'particle-star').setScale(0.5).setTint(Phaser.Math.RND.pick([0xff6b6b, 0xfeca57, 0x48dbfb]));
+            const star = this.add.image(400, 300, 'number-correct').setScale(0.5).setTint(Phaser.Math.RND.pick([0xff6b6b, 0xfeca57, 0x48dbfb]));
             this.tweens.add({
                 targets: star, x: 400 + Phaser.Math.Between(-200, 200), y: Phaser.Math.Between(100, 500),
                 alpha: 0, scale: 0, duration: 600, delay: Math.random() * 300, onComplete: () => star.destroy()
             });
         }
-
         const panel = this.add.image(400, 300, 'panel').setDepth(10);
-        this.add.text(400, 280, 'Ты спас друга! 🎉', { fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold' }).setOrigin(0.5).setDepth(11);
-        this.add.text(400, 330, 'Герой возвращается в бой! ⚔️', { fontSize: '18px', fill: '#ffffff', fontFamily: 'Arial' }).setOrigin(0.5).setDepth(11);
-        this.time.delayedCall(2000, () => { gameSettings.lives = 3; this.scene.start('GameScene'); });
+        this.add.text(400, 300, 'Ты спас друга! 🎉', { fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold' }).setOrigin(0.5).setDepth(11);
+        this.time.delayedCall(1500, () => { gameSettings.lives = 3; this.scene.start('GameScene'); });
     }
 
     miniGameFail() {
         if (this.gameEnded) return;
         this.gameEnded = true;
         if (this.timer) this.timer.remove();
-
         const panel = this.add.image(400, 300, 'panel').setDepth(10);
         this.add.text(400, 240, 'Время вышло!\nУстал? Хочешь продолжить?', {
             fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center', stroke: '#000', strokeThickness: 3
@@ -154,16 +142,11 @@ class MagicPauseMiniGame extends Phaser.Scene {
         this.flexibleOrder = false;
     }
 
-    preload() {
-        // Текстуры создаются динамически
-    }
-
     create() {
         this.gameEnded = false;
         this.canClick = true;
         this.currentIndex = 0;
         this.clouds = [];
-
         this.cameras.main.setBackgroundColor('#2c3e50');
 
         this.add.text(400, 60, 'МАГИЧЕСКАЯ ПАУЗА', {
@@ -176,7 +159,6 @@ class MagicPauseMiniGame extends Phaser.Scene {
         const lastQ = gameSettings.lastQuestion || '2 + 2 = ?';
         const parts = lastQ.split(' ');
         const a = parts[0], op = parts[1], b = parts[2], answer = gameSettings.lastAnswer.toString();
-
         if (op === '+' || op === '×') {
             this.flexibleOrder = true;
             this.expectedOrder = [
@@ -202,7 +184,6 @@ class MagicPauseMiniGame extends Phaser.Scene {
         Phaser.Utils.Array.Shuffle(distractors);
         allElements.push(distractors[0], distractors[1]);
         Phaser.Utils.Array.Shuffle(allElements);
-
         this.createClouds(allElements);
 
         this.statusText = this.add.text(400, 560, 'Нажми на первый элемент цепочки', {
@@ -250,7 +231,6 @@ class MagicPauseMiniGame extends Phaser.Scene {
         if (!this.canClick || this.gameEnded) return;
         const expected = this.expectedOrder[this.currentIndex];
         if (expected.accepts.includes(value)) {
-            // правильный выбор
             graphics.clear();
             graphics.fillStyle(0x00b894, 1);
             graphics.fillRoundedRect(graphics.input.hitArea.x, graphics.input.hitArea.y, 100, 60, 15);
@@ -332,7 +312,6 @@ class SecretTrainingMiniGame extends Phaser.Scene {
         this.targetSum = gameSettings.lastAnswer || 8;
         this.add.image(400, 300, 'training-bg');
 
-        // Звёзды на фоне (декор)
         for (let i = 0; i < 20; i++) {
             this.add.image(Phaser.Math.Between(50, 750), Phaser.Math.Between(50, 550), 'coin').setScale(0.3).setTint(0xf1c40f).setAlpha(0.3);
         }
@@ -361,9 +340,7 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             up: this.input.keyboard.addKey('W'), down: this.input.keyboard.addKey('S'),
             left: this.input.keyboard.addKey('A'), right: this.input.keyboard.addKey('D')
         };
-        this.input.on('pointermove', (pointer) => {
-            if (!this.gameEnded) this.physics.moveTo(this.player, pointer.x, pointer.y, 200);
-        });
+        this.input.on('pointermove', (pointer) => { if (!this.gameEnded) this.physics.moveTo(this.player, pointer.x, pointer.y, 200); });
         this.time.delayedCall(30000, () => { if (!this.gameEnded) this.finish(false); });
     }
 
@@ -409,9 +386,7 @@ class SecretTrainingMiniGame extends Phaser.Scene {
 
             const coin = this.numbersGroup.create(x, y, 'coin').setScale(1.5);
             coin.value = val;
-            this.add.text(x, y, val.toString(), {
-                fontSize: '14px', fill: '#000', fontFamily: 'Arial', fontWeight: 'bold'
-            }).setOrigin(0.5, 0.5);
+            this.add.text(x, y, val.toString(), { fontSize: '14px', fill: '#000', fontFamily: 'Arial', fontWeight: 'bold' }).setOrigin(0.5, 0.5);
         });
     }
 
@@ -435,7 +410,6 @@ class SecretTrainingMiniGame extends Phaser.Scene {
         this.time.removeAllEvents();
 
         if (success) {
-            // Конфетти
             for (let i = 0; i < 15; i++) {
                 const p = this.add.image(400, 300, 'coin').setScale(0.5).setTint(0xf1c40f);
                 this.tweens.add({
@@ -444,7 +418,9 @@ class SecretTrainingMiniGame extends Phaser.Scene {
                 });
             }
             gameSettings.bonusLife = true;
-            this.showMessageAndReturn('Великолепно! +1 жизнь! ❤️', 0x00b894);
+            const panel = this.add.image(400, 300, 'panel').setDepth(10);
+            this.add.text(400, 300, 'Великолепно! +1 жизнь! ❤️', { fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold' }).setOrigin(0.5).setDepth(11);
+            this.time.delayedCall(1500, () => this.scene.start('GameScene'));
         } else {
             const panel = this.add.image(400, 300, 'panel').setDepth(10);
             this.add.text(400, 240, 'Почти получилось!\nХочешь попробовать снова?', {
@@ -459,12 +435,6 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             yesBtn.on('pointerdown', () => this.scene.restart());
             noBtn.on('pointerdown', () => this.scene.start('MainMenu'));
         }
-    }
-
-    showMessageAndReturn(msg, color) {
-        this.add.rectangle(400, 300, 600, 200, 0x000000, 0.85).setDepth(10);
-        this.add.text(400, 300, msg, { fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center' }).setOrigin(0.5).setDepth(11);
-        this.time.delayedCall(2000, () => this.scene.start('GameScene'));
     }
 
     update() {
