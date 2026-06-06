@@ -59,7 +59,7 @@
         this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
         this.playLevelMusic(musicKey);
 
-        // Статистика (без панели)
+        // Статистика (ТОЛЬКО ТЕКСТ)
         this.levelText = this.add.text(35, 25, `Уровень: ${gameSettings.currentLevel}`, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
         }).setDepth(11);

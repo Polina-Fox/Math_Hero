@@ -100,6 +100,7 @@
         if (this.gameEnded) return;
         this.gameEnded = true;
         if (this.timer) this.timer.remove();
+        // Радостный фейерверк
         for (let i = 0; i < 20; i++) {
             const star = this.add.image(400, 300, 'number-correct').setScale(0.5).setTint(Phaser.Math.RND.pick([0xff6b6b, 0xfeca57, 0x48dbfb]));
             this.tweens.add({
@@ -130,6 +131,8 @@
         noBtn.on('pointerdown', () => { gameSettings.lives = 3; this.scene.start('MainMenu'); });
     }
 }
+
+// ----------------------------------------------------------------
 
 class MagicPauseMiniGame extends Phaser.Scene {
     constructor() {
@@ -281,6 +284,8 @@ class MagicPauseMiniGame extends Phaser.Scene {
     }
 }
 
+// ----------------------------------------------------------------
+
 class SecretTrainingMiniGame extends Phaser.Scene {
     constructor() {
         super({ key: 'SecretTrainingMiniGame' });
@@ -312,6 +317,7 @@ class SecretTrainingMiniGame extends Phaser.Scene {
         this.targetSum = gameSettings.lastAnswer || 8;
         this.add.image(400, 300, 'training-bg');
 
+        // Декоративные звёздочки
         for (let i = 0; i < 20; i++) {
             this.add.image(Phaser.Math.Between(50, 750), Phaser.Math.Between(50, 550), 'coin').setScale(0.3).setTint(0xf1c40f).setAlpha(0.3);
         }
