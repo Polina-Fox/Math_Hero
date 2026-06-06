@@ -1,17 +1,15 @@
-﻿
-class GameScene extends Phaser.Scene {
+﻿class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
         this.slimes = [];
         this.currentProblem = null;
         this.answerButtons = [];
-        this.slimeSpeed = 50;
+        this.slimeSpeed = 40;
         this.heroMessage = null;
         this.warningShown = false;
         this.hasShield = false;
         this.easyStartActive = false;
         this.levelFinished = false;
-        this.baseSlimeSpeed = 50;
         this.isPaused = false;
         this.pauseMenuElements = [];
         this.levelMusic = null;
@@ -48,83 +46,81 @@ class GameScene extends Phaser.Scene {
 
         const validLevels = [1, 2, 3, 4, 5, 6];
         if (!validLevels.includes(gameSettings.currentLevel)) {
-            console.warn('Некорректный currentLevel =', gameSettings.currentLevel, '→ сброс на 1');
             gameSettings.currentLevel = 1;
         }
 
-        console.log('=== Запущен уровень', gameSettings.currentLevel, '===');
-
-        // Выбор фона и музыки
+        // Фон и музыка
         let bgKey = 'bg-grass';
         let musicKey = 'music-at-altar';
-
-        if (gameSettings.currentLevel === 1 || gameSettings.currentLevel === 2) {
-            bgKey = 'bg-grass';
-            musicKey = 'music-at-altar';
-        } else if (gameSettings.currentLevel === 3 || gameSettings.currentLevel === 4) {
-            bgKey = 'bg-forest';
-            musicKey = 'music-story-time';
-        } else if (gameSettings.currentLevel === 5 || gameSettings.currentLevel === 6) {
-            bgKey = 'bg-fall';
-            musicKey = 'music-ancient-waters';
-        }
+        if (gameSettings.currentLevel <= 2) { bgKey = 'bg-grass'; musicKey = 'music-at-altar'; }
+        else if (gameSettings.currentLevel <= 4) { bgKey = 'bg-forest'; musicKey = 'music-story-time'; }
+        else { bgKey = 'bg-fall'; musicKey = 'music-ancient-waters'; }
 
         this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
-
-        // Запуск музыки уровня
         this.playLevelMusic(musicKey);
 
-        this.levelText = this.add.text(20, 20, `Уровень: ${gameSettings.currentLevel}`, {
-            fontSize: '22px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#000000aa', padding: { left: 15, right: 15, top: 8, bottom: 8 },
-            stroke: '#000', strokeThickness: 3
-        });
-        this.scoreText = this.add.text(20, 60, `Счёт: ${gameSettings.score}`, {
-            fontSize: '22px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#000000aa', padding: { left: 15, right: 15, top: 8, bottom: 8 },
-            stroke: '#000', strokeThickness: 3
-        });
-        this.livesText = this.add.text(20, 100, `Жизни: ${gameSettings.lives}`, {
-            fontSize: '22px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#000000aa', padding: { left: 15, right: 15, top: 8, bottom: 8 },
-            stroke: '#000', strokeThickness: 3
-        });
+        // Статистика (улучшенный вид с панелью)
+        const statsPanel = this.add.image(20, 70, 'panel').setOrigin(0, 0.5).setDisplaySize(160, 90).setAlpha(0).setDepth(10);
+        this.tweens.add({ targets: statsPanel, alpha: 1, duration: 300 });
+        this.levelText = this.add.text(30, 50, `Уровень: ${gameSettings.currentLevel}`, {
+            fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
+        }).setDepth(11);
+        this.scoreText = this.add.text(30, 75, `Счёт: ${gameSettings.score}`, {
+            fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
+        }).setDepth(11);
+        this.livesText = this.add.text(30, 100, `Жизни: ${gameSettings.lives}`, {
+            fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
+        }).setDepth(11);
 
+        // Кнопка паузы
         this.pauseButton = this.add.image(760, 40, 'pause-button')
             .setInteractive({ useHandCursor: true })
             .setScale(0.45)
             .setDepth(100);
         this.pauseButton.on('pointerdown', () => { if (!this.isPaused) this.pauseGame(); });
 
-        if (gameSettings.shield) { this.hasShield = true; gameSettings.shield = false; this.showHeroMessage('Волшебный щит активирован! 🛡️'); }
-        else { this.hasShield = false; }
-        if (gameSettings.bonusLife) { gameSettings.lives += 1; gameSettings.bonusLife = false; this.livesText.setText(`Жизни: ${gameSettings.lives}`); this.showHeroMessage('+1 жизнь от секретной тренировки! ❤️'); }
-        if (gameSettings.easyStart) { this.easyStartActive = true; gameSettings.easyStart = false; }
-        else { this.easyStartActive = false; }
+        // Бонусы
+        if (gameSettings.shield) {
+            this.hasShield = true;
+            gameSettings.shield = false;
+            this.showHeroMessage('Волшебный щит! 🛡️');
+        } else {
+            this.hasShield = false;
+        }
+        if (gameSettings.bonusLife) {
+            gameSettings.lives += 1;
+            gameSettings.bonusLife = false;
+            this.livesText.setText(`Жизни: ${gameSettings.lives}`);
+            this.showHeroMessage('+1 жизнь! ❤️');
+        }
+        if (gameSettings.easyStart) {
+            this.easyStartActive = true;
+            gameSettings.easyStart = false;
+        } else {
+            this.easyStartActive = false;
+        }
 
+        // Герой
         this.hero = this.physics.add.sprite(100, 330, 'hero_idle');
         this.hero.setCollideWorldBounds(true);
         this.hero.body.setSize(this.hero.width * 0.6, this.hero.height * 0.8);
 
-        this.slimeSpeed = this.baseSlimeSpeed + (gameSettings.currentLevel - 1) * 6;
-        this.spawnDelay = Math.max(900, 2000 - (gameSettings.currentLevel - 1) * 200);
+        // Сбалансированная скорость слизней: 40 + 5 за уровень (40, 45, 50, 55, 60, 65)
+        this.slimeSpeed = 40 + (gameSettings.currentLevel - 1) * 5;
+        this.spawnDelay = Math.max(1000, 2000 - (gameSettings.currentLevel - 1) * 150);
 
         this.generateMathProblem();
         this.startSlimeSpawning();
+
         this.physics.add.overlap(this.hero, this.slimes, this.heroHit, null, this);
     }
 
     playLevelMusic(key) {
-        // Останавливаем предыдущую музыку
-        if (this.levelMusic && this.levelMusic.isPlaying) {
-            this.levelMusic.stop();
-        }
+        if (this.levelMusic && this.levelMusic.isPlaying) this.levelMusic.stop();
         try {
             this.levelMusic = this.sound.add(key, { loop: true, volume: 0.25 });
             this.levelMusic.play();
-        } catch (error) {
-            console.log('Cannot play level music:', key, error);
-        }
+        } catch (e) { console.log('Cannot play level music:', key, e); }
     }
 
     pauseGame() {
@@ -133,34 +129,32 @@ class GameScene extends Phaser.Scene {
         this.physics.pause();
         if (this.levelMusic && this.levelMusic.isPlaying) this.levelMusic.pause();
 
-        const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.7).setDepth(200).setInteractive();
-        this.pauseMenuElements.push(overlay);
-        const pauseTitle = this.add.text(400, 130, 'ПАУЗА', { fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial, sans-serif', stroke: '#000', strokeThickness: 6 }).setOrigin(0.5).setDepth(201);
-        this.pauseMenuElements.push(pauseTitle);
+        const panel = this.add.image(400, 300, 'panel').setDepth(200).setInteractive();
+        const pauseTitle = this.add.text(400, 150, 'ПАУЗА', {
+            fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
+        }).setOrigin(0.5).setDepth(201);
 
         const resumeBtn = this.add.image(400, 260, 'resume-button').setInteractive({ useHandCursor: true }).setScale(1.5).setDepth(201);
-        this.pauseMenuElements.push(resumeBtn);
-        const resumeText = this.add.text(400, 320, 'ПРОДОЛЖИТЬ', { fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5).setDepth(202);
-        this.pauseMenuElements.push(resumeText);
-        resumeBtn.on('pointerover', () => resumeBtn.setScale(1.6));
-        resumeBtn.on('pointerout', () => resumeBtn.setScale(1.5));
+        const resumeText = this.add.text(400, 320, 'ПРОДОЛЖИТЬ', {
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', fontWeight: 'bold', stroke: '#000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(202);
         resumeBtn.on('pointerdown', () => this.resumeGame());
 
         const menuBtn = this.add.image(400, 410, 'menu-button').setInteractive({ useHandCursor: true }).setScale(1.5).setDepth(201);
-        this.pauseMenuElements.push(menuBtn);
-        const menuText = this.add.text(400, 470, 'ГЛАВНОЕ МЕНЮ', { fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5).setDepth(202);
-        this.pauseMenuElements.push(menuText);
-        menuBtn.on('pointerover', () => menuBtn.setScale(1.6));
-        menuBtn.on('pointerout', () => menuBtn.setScale(1.5));
+        const menuText = this.add.text(400, 470, 'ГЛАВНОЕ МЕНЮ', {
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', fontWeight: 'bold', stroke: '#000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(202);
         menuBtn.on('pointerdown', () => {
             if (this.levelMusic && this.levelMusic.isPlaying) this.levelMusic.stop();
             this.isPaused = false;
-            this.pauseMenuElements.forEach(el => { if (el && el.destroy) el.destroy(); });
-            this.pauseMenuElements = [];
             this.physics.resume();
-            gameSettings.currentLevel = 1; gameSettings.score = 0; gameSettings.lives = 3;
+            gameSettings.currentLevel = 1;
+            gameSettings.score = 0;
+            gameSettings.lives = 3;
             this.scene.start('MainMenu');
         });
+
+        this.pauseMenuElements = [panel, pauseTitle, resumeBtn, resumeText, menuBtn, menuText];
     }
 
     resumeGame() {
@@ -230,7 +224,10 @@ class GameScene extends Phaser.Scene {
         answers.forEach((ans, i) => {
             const x = 300 + i * 150, y = 550;
             const btn = this.add.image(x, y, 'answer-button').setInteractive({ useHandCursor: true });
-            const txt = this.add.text(x, y, ans.toString(), { fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5);
+            const txt = this.add.text(x, y, ans.toString(), {
+                fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
+                fontWeight: 'bold', stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5);
             btn.on('pointerdown', () => this.checkAnswer(ans, btn, txt));
             this.answerButtons.push({ button: btn, text: txt });
         });
@@ -238,35 +235,78 @@ class GameScene extends Phaser.Scene {
 
     checkAnswer(selected, btn, txt) {
         if (this.isPaused || this.levelFinished) return;
+
         this.answerButtons.forEach(b => b.button.disableInteractive());
         if (selected === this.currentProblem.answer) {
-            btn.setTexture('answer-correct'); txt.setStyle({ fill: '#ffffff' });
-            this.hero.setTexture('hero_cheer0'); this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
+            btn.setTexture('answer-correct');
+            txt.setStyle({ fill: '#ffffff' });
+
+            this.hero.setTexture('hero_cheer0');
+            this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
+
+            // Визуальный эффект уничтожения слизня
             if (this.slimes.length > 0) {
                 const slimeIndex = this.slimes.findIndex(s => s.active);
                 if (slimeIndex !== -1) {
                     const slime = this.slimes[slimeIndex];
+                    this.createDestroyEffect(slime.x, slime.y);
                     if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
-                    slime.destroy(); this.slimes.splice(slimeIndex, 1);
-                    gameSettings.score += 10; this.scoreText.setText(`Счёт: ${gameSettings.score}`);
+                    slime.destroy();
+                    this.slimes.splice(slimeIndex, 1);
+                    gameSettings.score += 10;
+                    this.scoreText.setText(`Счёт: ${gameSettings.score}`);
                 }
             }
+
             this.time.delayedCall(800, () => { this.generateMathProblem(); this.showHeroMessage('Молодец! 👍'); });
         } else {
-            btn.setTexture('answer-wrong'); txt.setStyle({ fill: '#ffffff' });
-            this.hero.setTexture('hero_hurt'); this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
-            this.answerButtons.forEach(b => { if (parseInt(b.text.text) === this.currentProblem.answer) b.button.setTexture('answer-correct'); });
+            btn.setTexture('answer-wrong');
+            txt.setStyle({ fill: '#ffffff' });
+
+            this.hero.setTexture('hero_hurt');
+            this.time.delayedCall(600, () => this.hero.setTexture('hero_idle'));
+
+            this.answerButtons.forEach(b => {
+                if (parseInt(b.text.text) === this.currentProblem.answer) b.button.setTexture('answer-correct');
+            });
             this.showHeroMessage('Попробуй ещё! 💪');
             this.time.delayedCall(1500, () => this.generateMathProblem());
+        }
+    }
+
+    createDestroyEffect(x, y) {
+        for (let i = 0; i < 8; i++) {
+            const particle = this.add.image(x, y, 'particle')
+                .setScale(Phaser.Math.FloatBetween(0.5, 1.5))
+                .setTint(0xf1c40f);
+            this.tweens.add({
+                targets: particle,
+                x: x + Phaser.Math.Between(-50, 50),
+                y: y + Phaser.Math.Between(-50, 50),
+                alpha: 0,
+                scale: 0,
+                duration: 400,
+                onComplete: () => particle.destroy()
+            });
         }
     }
 
     startSlimeSpawning() {
         let slimeCount = this.getSlimeCountForLevel();
         if (this.easyStartActive) slimeCount = Math.max(1, slimeCount - 2);
-        this.slimesToSpawn = slimeCount; this.slimesSpawned = 0;
+        this.slimesToSpawn = slimeCount;
+        this.slimesSpawned = 0;
         if (this.spawnTimer) this.spawnTimer.remove();
-        this.spawnTimer = this.time.addEvent({ delay: this.spawnDelay, callback: () => { if (!this.levelFinished && !this.isPaused && this.slimesSpawned < this.slimesToSpawn) { this.spawnSlime(); this.slimesSpawned++; } }, loop: true });
+        this.spawnTimer = this.time.addEvent({
+            delay: this.spawnDelay,
+            callback: () => {
+                if (!this.levelFinished && !this.isPaused && this.slimesSpawned < this.slimesToSpawn) {
+                    this.spawnSlime();
+                    this.slimesSpawned++;
+                }
+            },
+            loop: true
+        });
     }
 
     spawnSlime() {
@@ -277,16 +317,23 @@ class GameScene extends Phaser.Scene {
         const hasNormalEye = (color === 'blue' || color === 'red');
         const useAngryEye = !hasNormalEye || Math.random() < 0.3;
         const eyeKey = useAngryEye ? `eye_angry_${color}` : `eye_${color}`;
+
         const bodyKey = `body_${color}${bodyVariant}`;
         const slime = this.physics.add.sprite(850, 0, bodyKey);
-        slime.body.setSize(slime.width * 0.7, slime.height * 0.7); slime.setScale(0.75);
+        slime.body.setSize(slime.width * 0.7, slime.height * 0.7);
+        slime.setScale(0.75);
+
         const eye = this.add.image(slime.x, slime.y - 10, eyeKey).setScale(0.7);
         const mouth = this.add.image(slime.x, slime.y + 15, `mouth${mouthVariant}`).setScale(0.7);
         let antenna = null;
-        if (Math.random() < 0.5) antenna = this.add.image(slime.x, slime.y - 40, `detail_${color}_antenna_small`).setScale(0.6);
+        if (Math.random() < 0.5) {
+            antenna = this.add.image(slime.x, slime.y - 40, `detail_${color}_antenna_small`).setScale(0.6);
+        }
         slime._parts = [eye, mouth, antenna].filter(p => p);
+
         slime.y = Phaser.Math.Clamp(this.hero.y + Phaser.Math.Between(-30, 30), 40, 560);
-        slime.setVelocityX(-this.slimeSpeed); slime.setAlpha(0);
+        slime.setVelocityX(-this.slimeSpeed);
+        slime.setAlpha(0);
         this.tweens.add({ targets: slime, alpha: 1, duration: 500 });
         this.slimes.push(slime);
     }
@@ -305,50 +352,131 @@ class GameScene extends Phaser.Scene {
 
     heroHit(hero, slime) {
         if (this.levelFinished || this.isPaused || !slime.active) return;
-        if (this.hasShield) { this.hasShield = false; if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); }); slime.destroy(); this.slimes = this.slimes.filter(s => s.active && s !== slime); this.showHeroMessage('Щит отразил атаку! ✨'); return; }
-        if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); }); slime.destroy();
+        if (this.hasShield) {
+            this.hasShield = false;
+            if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+            slime.destroy();
+            this.slimes = this.slimes.filter(s => s.active && s !== slime);
+            this.showHeroMessage('Щит отразил атаку! ✨');
+            return;
+        }
+        if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+        slime.destroy();
         this.slimes = this.slimes.filter(s => s.active && s !== slime);
-        gameSettings.lives--; this.livesText.setText(`Жизни: ${gameSettings.lives}`);
+        gameSettings.lives--;
+        this.livesText.setText(`Жизни: ${gameSettings.lives}`);
+
         this.hero.setTexture('hero_hit');
-        this.tweens.add({ targets: hero, alpha: 0.5, duration: 200, yoyo: true, repeat: 2, onComplete: () => this.hero.setTexture('hero_idle') });
-        if (gameSettings.lives <= 0) { this.hero.setTexture('hero_fallDown'); this.gameOver(); }
-        else this.showHeroMessage('Ай! Больно! 😫');
+        this.tweens.add({
+            targets: hero, alpha: 0.5, duration: 200, yoyo: true, repeat: 2,
+            onComplete: () => this.hero.setTexture('hero_idle')
+        });
+
+        if (gameSettings.lives <= 0) {
+            this.hero.setTexture('hero_fallDown');
+            this.gameOver();
+        } else {
+            this.showHeroMessage('Ай! Больно! 😫');
+        }
     }
 
     gameOver() {
-        if (this.levelFinished) return; this.levelFinished = true;
+        if (this.levelFinished) return;
+        this.levelFinished = true;
+
         if (this.levelMusic && this.levelMusic.isPlaying) this.levelMusic.stop();
-        this.slimes.forEach(s => { if (s._parts) s._parts.forEach(p => { if (p && p.destroy) p.destroy(); }); if (s && s.destroy) s.destroy(); });
-        this.slimes = []; this.slimesToSpawn = 0; this.slimesSpawned = 0;
-        this.physics.pause(); this.time.removeAllEvents();
+
+        this.slimes.forEach(s => {
+            if (s._parts) s._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+            if (s && s.destroy) s.destroy();
+        });
+        this.slimes = [];
+        this.slimesToSpawn = 0;
+        this.slimesSpawned = 0;
+
+        this.physics.pause();
+        this.time.removeAllEvents();
         if (this.spawnTimer) { this.spawnTimer.remove(); this.spawnTimer = null; }
-        this.hero.setTexture('hero_fallDown'); this.showHeroMessage('Меня победили... 💀');
-        this.time.delayedCall(2000, () => { const miniGames = ['RescueMiniGame', 'MagicPauseMiniGame', 'SecretTrainingMiniGame']; this.scene.start(Phaser.Math.RND.pick(miniGames)); });
+
+        this.hero.setTexture('hero_fallDown');
+        this.showHeroMessage('Меня победили... 💀');
+
+        this.time.delayedCall(1500, () => {
+            const miniGames = ['RescueMiniGame', 'MagicPauseMiniGame', 'SecretTrainingMiniGame'];
+            this.scene.start(Phaser.Math.RND.pick(miniGames));
+        });
     }
 
     levelComplete() {
-        if (this.levelFinished) return; this.levelFinished = true;
+        if (this.levelFinished) return;
+        this.levelFinished = true;
+
         if (gameSettings.currentLevel < 1 || gameSettings.currentLevel > 6) gameSettings.currentLevel = 1;
+
         if (this.levelMusic && this.levelMusic.isPlaying) this.levelMusic.stop();
-        this.slimes.forEach(s => { if (s._parts) s._parts.forEach(p => { if (p && p.destroy) p.destroy(); }); if (s && s.destroy) s.destroy(); });
-        this.slimes = []; this.slimesToSpawn = 0; this.slimesSpawned = 0;
-        this.hero.setTexture('hero_cheer1'); this.physics.pause(); this.time.removeAllEvents();
+
+        this.slimes.forEach(s => {
+            if (s._parts) s._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+            if (s && s.destroy) s.destroy();
+        });
+        this.slimes = [];
+        this.slimesToSpawn = 0;
+        this.slimesSpawned = 0;
+
+        this.hero.setTexture('hero_cheer1');
+        this.physics.pause();
+        this.time.removeAllEvents();
         if (this.spawnTimer) { this.spawnTimer.remove(); this.spawnTimer = null; }
-        gameSettings.currentLevel++; this.showHeroMessage('Уровень пройден! 🎉');
-        this.time.delayedCall(2000, () => { if (gameSettings.currentLevel > 6) this.scene.start('BossScene'); else this.scene.start('GameScene'); });
+
+        gameSettings.currentLevel++;
+        this.showHeroMessage('Уровень пройден! 🎉');
+
+        this.time.delayedCall(2000, () => {
+            if (gameSettings.currentLevel > 6) {
+                this.scene.start('BossScene');
+            } else {
+                this.scene.start('GameScene');
+            }
+        });
     }
 
     showHeroMessage(msg) {
         if (this.heroMessage) this.heroMessage.destroy();
-        this.heroMessage = this.add.text(this.hero.x + 40, this.hero.y - 50, msg, { fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial, sans-serif', backgroundColor: '#000000cc', padding: { x: 15, y: 8 }, stroke: '#000', strokeThickness: 3, wordWrap: { width: 250 } }).setOrigin(0.5);
-        this.time.delayedCall(2000, () => { if (this.heroMessage) { this.heroMessage.destroy(); this.heroMessage = null; } });
+        this.heroMessage = this.add.text(this.hero.x + 40, this.hero.y - 50, msg, {
+            fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial, sans-serif',
+            backgroundColor: '#000000cc', padding: { x: 15, y: 8 },
+            stroke: '#000', strokeThickness: 3, wordWrap: { width: 250 }
+        }).setOrigin(0.5);
+        this.time.delayedCall(2000, () => {
+            if (this.heroMessage) { this.heroMessage.destroy(); this.heroMessage = null; }
+        });
     }
 
     update() {
         if (this.levelFinished || this.isPaused) return;
-        this.slimes.forEach(slime => { if (slime._parts && slime.active) { if (slime._parts[0]) { slime._parts[0].x = slime.x; slime._parts[0].y = slime.y - 10; } if (slime._parts[1]) { slime._parts[1].x = slime.x; slime._parts[1].y = slime.y + 15; } if (slime._parts[2]) { slime._parts[2].x = slime.x; slime._parts[2].y = slime.y - 40; } } });
+
+        this.slimes.forEach(slime => {
+            if (slime._parts && slime.active) {
+                if (slime._parts[0]) { slime._parts[0].x = slime.x; slime._parts[0].y = slime.y - 10; }
+                if (slime._parts[1]) { slime._parts[1].x = slime.x; slime._parts[1].y = slime.y + 15; }
+                if (slime._parts[2]) { slime._parts[2].x = slime.x; slime._parts[2].y = slime.y - 40; }
+            }
+        });
+
         if (this.slimes.length === 0 && this.slimesSpawned >= this.slimesToSpawn) this.levelComplete();
-        if (this.slimes[0] && this.slimes[0].x < 300 && !this.warningShown) { this.showHeroMessage('Они близко! Быстрее! 🚨'); this.warningShown = true; }
-        for (let i = this.slimes.length - 1; i >= 0; i--) { const slime = this.slimes[i]; if (!slime.active || slime.x < -50) { if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); }); slime.destroy(); this.slimes.splice(i, 1); } }
+
+        if (this.slimes[0] && this.slimes[0].x < 300 && !this.warningShown) {
+            this.showHeroMessage('Они близко! Быстрее! 🚨');
+            this.warningShown = true;
+        }
+
+        for (let i = this.slimes.length - 1; i >= 0; i--) {
+            const slime = this.slimes[i];
+            if (!slime.active || slime.x < -50) {
+                if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
+                slime.destroy();
+                this.slimes.splice(i, 1);
+            }
+        }
     }
 }

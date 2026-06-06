@@ -21,7 +21,7 @@
             this.add.image(400, 300, 'fallback-bg');
         }
 
-        // Запускаем НОВУЮ фоновую музыку для меню
+        // Запускаем фоновую музыку (menuMusic)
         this.playBackgroundMusic();
 
         // Заголовок игры
@@ -60,12 +60,9 @@
 
     playBackgroundMusic() {
         try {
-            // Останавливаем старую музыку если есть
             if (this.bgMusic && this.bgMusic.isPlaying) {
                 this.bgMusic.stop();
-                this.bgMusic.destroy();
             }
-            // Запускаем новую музыку меню
             this.bgMusic = this.sound.add('menuMusic', {
                 loop: true,
                 volume: 0.3
@@ -190,6 +187,7 @@
         panel.setStrokeStyle(4, 0xf1c40f);
         this.instructionElements.push(panel);
 
+        // Крестик закрытия в левом верхнем углу панели
         const closeButton = this.add.rectangle(150, 100, 40, 40, 0xe74c3c)
             .setInteractive({ useHandCursor: true })
             .setStrokeStyle(2, 0xffffff);
@@ -229,7 +227,7 @@
             '• Умножение: 3 × 4 = 12',
             '',
             '⭐ СИСТЕМА УРОВНЕЙ:',
-            '• 4 уровня с увеличением сложности',
+            '• 6 уровней с увеличением сложности',
             '• Финальный босс-уровень',
             '• Мини-игры при проигрыше'
         ];
@@ -310,6 +308,7 @@
         }).setOrigin(0.5);
         this.settingsElements.push(info4);
 
+        // Крестик закрытия для настроек
         const closeButton = this.add.rectangle(150, 120, 40, 40, 0xe74c3c)
             .setInteractive({ useHandCursor: true })
             .setStrokeStyle(2, 0xffffff);

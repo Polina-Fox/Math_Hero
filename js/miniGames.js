@@ -1,5 +1,4 @@
-﻿
-class RescueMiniGame extends Phaser.Scene {
+﻿class RescueMiniGame extends Phaser.Scene {
     constructor() {
         super({ key: 'RescueMiniGame' });
         this.currentNumber = 1;
@@ -163,22 +162,28 @@ class RescueMiniGame extends Phaser.Scene {
         if (this.gameEnded) return;
         this.gameEnded = true;
         if (this.timer) this.timer.remove();
-        gameSettings.easyStart = true;
 
-        this.add.rectangle(400, 300, 500, 180, 0x000000, 0.7).setDepth(5);
-        this.add.text(400, 270, 'ВРЕМЯ ВЫШЛО! ⏰', {
-            fontSize: '28px', fill: '#e74c3c', fontFamily: 'Arial, sans-serif', fontWeight: 'bold'
-        }).setOrigin(0.5).setDepth(6);
-        this.add.text(400, 310, 'Но герой сам выбрался! 💪', {
-            fontSize: '18px', fill: '#ecf0f1', fontFamily: 'Arial, sans-serif'
-        }).setOrigin(0.5).setDepth(6);
-        this.add.text(400, 340, 'Следующие 2 слизня уже побеждены! 🎯', {
-            fontSize: '16px', fill: '#f1c40f', fontFamily: 'Arial, sans-serif', fontStyle: 'italic'
-        }).setOrigin(0.5).setDepth(6);
+        // Диалог выбора
+        const panel = this.add.image(400, 300, 'panel').setDepth(10);
+        const questionText = this.add.text(400, 240, 'Время вышло!\nУстал? Хочешь продолжить?', {
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center',
+            stroke: '#000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(11);
 
-        this.time.delayedCall(3000, () => {
+        const yesBtn = this.add.text(300, 350, 'Да, попробовать ещё', {
+            fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
+
+        const noBtn = this.add.text(500, 350, 'Нет, выйти в меню', {
+            fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
+
+        yesBtn.on('pointerdown', () => {
+            this.scene.restart();
+        });
+        noBtn.on('pointerdown', () => {
             gameSettings.lives = 3;
-            this.scene.start('GameScene');
+            this.scene.start('MainMenu');
         });
     }
 }
@@ -336,10 +341,12 @@ class MagicPauseMiniGame extends Phaser.Scene {
                 this.statusText.setText(`Дальше: ${this.expectedOrder[this.currentIndex].value}`);
             }
         } else {
+            // Ошибка – показываем диалог выбора
             this.canClick = false;
             cloud.setTexture('cloud-wrong');
             text.setStyle({ fill: '#ffffff' });
 
+            // Показываем правильный элемент
             this.clouds.forEach(c => {
                 if (c.value === expected.accepts[0]) {
                     c.cloud.setTexture('cloud-correct');
@@ -347,21 +354,27 @@ class MagicPauseMiniGame extends Phaser.Scene {
                 c.cloud.disableInteractive();
             });
 
-            this.statusText.setText('Ошибка! Запоминай порядок...');
-            this.time.delayedCall(1500, () => {
-                if (!this.gameEnded) {
-                    const lastQ = gameSettings.lastQuestion || '2 + 2 = ?';
-                    const parts = lastQ.split(' ');
-                    const allElements = [parts[0], parts[2], parts[1], '=', gameSettings.lastAnswer.toString()];
-                    const distractors = ['7', '12', '-', '×', '4', '15'];
-                    Phaser.Utils.Array.Shuffle(distractors);
-                    allElements.push(distractors[0], distractors[1]);
-                    Phaser.Utils.Array.Shuffle(allElements);
-                    this.createClouds(allElements);
-                    this.statusText.setText('Попробуй ещё раз!');
-                }
-            });
+            this.showRetryDialog('Ошибка! Попробуем снова?');
         }
+    }
+
+    showRetryDialog(message) {
+        const panel = this.add.image(400, 300, 'panel').setDepth(10);
+        const questionText = this.add.text(400, 240, message, {
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center',
+            stroke: '#000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(11);
+
+        const yesBtn = this.add.text(300, 350, 'Да, попробовать', {
+            fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
+
+        const noBtn = this.add.text(500, 350, 'Нет, выйти в меню', {
+            fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
+
+        yesBtn.on('pointerdown', () => this.scene.restart());
+        noBtn.on('pointerdown', () => this.scene.start('MainMenu'));
     }
 }
 
@@ -402,17 +415,14 @@ class SecretTrainingMiniGame extends Phaser.Scene {
         this.add.text(400, 35, 'СЕКРЕТНАЯ ТРЕНИРОВКА', {
             fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5);
-
         this.add.text(400, 70, `Собери числа, чтобы получить ровно ${this.targetSum}`, {
             fontSize: '18px', fill: '#ecf0f1', fontFamily: 'Arial'
         }).setOrigin(0.5);
-
-        this.add.text(400, 95, 'Управляй слизнем стрелками / WASD', {
+        this.add.text(400, 95, 'Управляй: стрелки / WASD или мышью/пальцем', {
             fontSize: '14px', fill: '#bdc3c7', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
         this.player = this.physics.add.sprite(400, 480, 'player').setCollideWorldBounds(true);
-
         this.createWalls();
         this.createCoins();
         this.physics.add.overlap(this.player, this.numbersGroup, this.collectCoin, null, this);
@@ -430,6 +440,13 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             right: this.input.keyboard.addKey('D')
         };
 
+        // Мышь/тач – персонаж следует за указателем
+        this.input.on('pointermove', (pointer) => {
+            if (!this.gameEnded) {
+                this.physics.moveTo(this.player, pointer.x, pointer.y, 200);
+            }
+        });
+
         this.time.delayedCall(30000, () => {
             if (!this.gameEnded) this.finish(false);
         });
@@ -438,12 +455,9 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     createWalls() {
         this.walls = this.physics.add.staticGroup();
         const wallData = [
-            [200, 120, 400, 20],
-            [200, 550, 400, 20],
-            [50, 250, 20, 250],
-            [750, 250, 20, 250],
-            [400, 300, 20, 200],
-            [300, 400, 200, 20]
+            [200, 120, 400, 20], [200, 550, 400, 20],
+            [50, 250, 20, 250], [750, 250, 20, 250],
+            [400, 300, 20, 200], [300, 400, 200, 20]
         ];
         wallData.forEach(([x, y, w, h]) => {
             const graphics = this.add.graphics();
@@ -458,17 +472,26 @@ class SecretTrainingMiniGame extends Phaser.Scene {
 
     createCoins() {
         this.numbersGroup = this.physics.add.group();
-        const possibleNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        const count = Phaser.Math.Between(5, 9);
-        for (let i = 0; i < count; i++) {
-            const x = Phaser.Math.Between(120, 680);
-            const y = Phaser.Math.Between(180, 480);
+        // Генерируем монетки так, чтобы можно было набрать ровно targetSum
+        let remaining = this.targetSum;
+        const coins = [];
+        while (remaining > 0) {
+            const val = Math.min(remaining, Phaser.Math.Between(1, Math.min(10, remaining)));
+            coins.push(val);
+            remaining -= val;
+        }
+        // Добавляем пару отвлекающих
+        coins.push(Phaser.Math.Between(1, 10), Phaser.Math.Between(1, 10));
+        Phaser.Utils.Array.Shuffle(coins);
+
+        coins.forEach(val => {
+            const x = Phaser.Math.Between(120, 680), y = Phaser.Math.Between(180, 480);
             const coin = this.numbersGroup.create(x, y, 'coin').setScale(1.5);
-            coin.value = Phaser.Math.RND.pick(possibleNumbers);
-            this.add.text(x, y, coin.value.toString(), {
+            coin.value = val;
+            this.add.text(x, y, val.toString(), {
                 fontSize: '14px', fill: '#000', fontFamily: 'Arial', fontWeight: 'bold'
             }).setOrigin(0.5, 0.5);
-        }
+        });
     }
 
     collectCoin(player, coin) {
@@ -494,7 +517,23 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             gameSettings.bonusLife = true;
             this.showMessageAndReturn('+1 жизнь на следующем уровне! ❤️', 0x00b894);
         } else {
-            this.showMessageAndReturn('Слизни передумали и отпустили тебя! 😄', 0xd63031);
+            // Диалог выбора при провале
+            const panel = this.add.image(400, 300, 'panel').setDepth(10);
+            this.add.text(400, 240, 'Не получилось!\nХочешь попробовать снова?', {
+                fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center',
+                stroke: '#000', strokeThickness: 3
+            }).setOrigin(0.5).setDepth(11);
+
+            const yesBtn = this.add.text(300, 350, 'Да, попробовать', {
+                fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
+
+            const noBtn = this.add.text(500, 350, 'Нет, выйти в меню', {
+                fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
+
+            yesBtn.on('pointerdown', () => this.scene.restart());
+            noBtn.on('pointerdown', () => this.scene.start('MainMenu'));
         }
     }
 

@@ -4,35 +4,22 @@
     }
 
     preload() {
-        this.createColorTexture('victory-bg', 0x27ae60);
-        this.createColorTexture('victory-button', 0x3498db);
-    }
-
-    createColorTexture(key, color) {
-        const graphics = this.add.graphics();
-        graphics.fillStyle(color);
-
-        if (key === 'victory-bg') {
-            graphics.fillRect(0, 0, 800, 600);
-        } else {
-            graphics.fillRoundedRect(0, 0, 300, 60, 15);
-        }
-
-        graphics.generateTexture(key,
-            key === 'victory-bg' ? 800 : 300,
-            key === 'victory-bg' ? 600 : 60
-        );
-        graphics.destroy();
+        // Текстуры теперь загружаются в Preloader (button-normal, panel, particle)
     }
 
     create() {
         console.log('Victory scene started');
 
-        // Фон
-        this.add.image(400, 300, 'victory-bg');
+        // Градиентный фон
+        const bg = this.add.graphics();
+        bg.fillGradientStyle(0x27ae60, 0x2ecc71, 0x27ae60, 0x2ecc71, 1);
+        bg.fillRect(0, 0, 800, 600);
 
-        // Поздравление
-        this.add.text(400, 120, 'ПОБЕДА!', {
+        // Заголовок с панелью
+        const titleBg = this.add.image(400, 100, 'panel').setDisplaySize(400, 100).setAlpha(0);
+        this.tweens.add({ targets: titleBg, alpha: 1, duration: 500 });
+
+        this.add.text(400, 100, 'ПОБЕДА!', {
             fontSize: '64px',
             fill: '#f1c40f',
             fontFamily: 'Arial, sans-serif',
@@ -46,7 +33,11 @@
             }
         }).setOrigin(0.5);
 
-        this.add.text(400, 200, 'Ты помог герою добраться домой! 🏠', {
+        // Статистика в панели
+        const statsPanel = this.add.image(400, 280, 'panel').setDisplaySize(400, 200).setAlpha(0);
+        this.tweens.add({ targets: statsPanel, alpha: 1, duration: 500, delay: 300 });
+
+        this.add.text(400, 240, 'Ты помог герою добраться домой! 🏠', {
             fontSize: '28px',
             fill: '#ffffff',
             fontFamily: 'Arial, sans-serif',
@@ -54,30 +45,28 @@
             padding: { x: 15, y: 8 }
         }).setOrigin(0.5);
 
-        // Статистика
-        this.add.text(400, 260, `Итоговый счёт: ${gameSettings.score}`, {
+        this.add.text(400, 290, `Итоговый счёт: ${gameSettings.score}`, {
             fontSize: '32px',
             fill: '#f1c40f',
             fontFamily: 'Arial, sans-serif',
             fontWeight: 'bold'
         }).setOrigin(0.5);
 
-        this.add.text(400, 300, `Пройдено уровней: ${gameSettings.currentLevel - 1}`, {
+        this.add.text(400, 330, `Пройдено уровней: ${gameSettings.currentLevel - 1}`, {
             fontSize: '24px',
             fill: '#ecf0f1',
             fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
 
-        // Поздравительное сообщение
+        // Случайное сообщение
         const messages = [
             'Ты настоящий математический герой! 🦸',
             'Родители очень рады видеть героя дома! 👨‍👩‍👧',
             'Слизни больше не посмеют нападать! 😄',
             'Твои математические навыки впечатляют! 📚'
         ];
-
         const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-        this.add.text(400, 340, randomMessage, {
+        this.add.text(400, 370, randomMessage, {
             fontSize: '20px',
             fill: '#bdc3c7',
             fontFamily: 'Arial, sans-serif',
@@ -85,47 +74,29 @@
             align: 'center'
         }).setOrigin(0.5);
 
-        // Салют из конфетти
+        // Конфетти
         this.createConfetti();
 
-        // Кнопка возврата в меню
-        const menuButton = this.add.image(400, 450, 'victory-button')
-            .setInteractive({ useHandCursor: true });
+        // Кнопка возврата в меню с анимацией
+        const menuBtn = this.add.image(400, 470, 'button-normal').setInteractive({ useHandCursor: true }).setScale(0);
+        this.tweens.add({ targets: menuBtn, scaleX: 1, scaleY: 1, duration: 500, ease: 'Back.easeOut', delay: 1000 });
 
-        const menuText = this.add.text(400, 450, 'В ГЛАВНОЕ МЕНЮ', {
+        const menuText = this.add.text(400, 470, 'В ГЛАВНОЕ МЕНЮ', {
             fontSize: '24px',
             fill: '#ffffff',
             fontFamily: 'Arial, sans-serif',
             fontWeight: 'bold'
         }).setOrigin(0.5);
 
-        menuButton.on('pointerover', () => {
-            menuButton.setScale(1.1);
-            menuText.setScale(1.1);
-        });
-
-        menuButton.on('pointerout', () => {
-            menuButton.setScale(1);
-            menuText.setScale(1);
-        });
-
-        menuButton.on('pointerdown', () => {
+        menuBtn.on('pointerover', () => { menuBtn.setTexture('button-hover'); menuBtn.setScale(1.05); });
+        menuBtn.on('pointerout', () => { menuBtn.setTexture('button-normal'); menuBtn.setScale(1); });
+        menuBtn.on('pointerdown', () => {
             // Сброс настроек игры
             gameSettings.currentLevel = 1;
             gameSettings.score = 0;
             gameSettings.lives = 3;
 
             this.scene.start('MainMenu');
-        });
-
-        // Анимация появления элементов
-        this.tweens.add({
-            targets: [menuButton, menuText],
-            scaleX: 1,
-            scaleY: 1,
-            duration: 500,
-            ease: 'Back.easeOut',
-            delay: 1000
         });
     }
 
