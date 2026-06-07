@@ -1,4 +1,3 @@
-// config.js – полный актуальный код с загрузкой озвучки
 const gameSettings = {
     addition: true,
     subtraction: false,
@@ -25,17 +24,15 @@ class Preloader extends Phaser.Scene {
         this.load.on('progress', v => { pt.setText(parseInt(v * 100) + '%'); pbar.clear(); pbar.fillStyle(0xffffff, 1); pbar.fillRect(w / 2 - 150, h / 2 - 20, 300 * v, 30); });
         this.load.on('complete', () => { pbar.destroy(); pb.destroy(); lt.destroy(); pt.destroy(); });
 
-        // Основные ресурсы
+        // Ресурсы меню и музыка
         this.load.image('menu-bg', 'assets/images/background0.png');
-
-        // Музыка
         this.load.audio('menuMusic', 'assets/audio/palm of my hand - intro.ogg');
         this.load.audio('music-at-altar', 'assets/audio/palm of my hand - at the altar.ogg');
         this.load.audio('music-story-time', 'assets/audio/story time.ogg');
         this.load.audio('music-ancient-waters', 'assets/audio/over_ancient_waters_looping.ogg');
         this.load.audio('music-otts', 'assets/audio/otts.flac');
 
-        // Озвучка вступительной сцены
+        // Озвучка интро
         this.load.audio('voiceFull', 'assets/audio/intro_voice_full.mp3');
 
         // Фоны
@@ -44,7 +41,7 @@ class Preloader extends Phaser.Scene {
         this.load.image('bg-fall', 'assets/images/backgroundColorFall.png');
         this.load.image('bg-desert', 'assets/images/backgroundColorDesert.png');
 
-        // Интро-картинки
+        // Картинки интро
         this.load.image('intro1', 'assets/images/intro1.png');
         this.load.image('intro2', 'assets/images/intro2.png');
         this.load.image('intro3', 'assets/images/intro3.png');
@@ -74,6 +71,13 @@ class Preloader extends Phaser.Scene {
         this.load.image('pause-button', 'assets/images/buttons/button_round_depth_flat.png');
         this.load.image('resume-button', 'assets/images/buttons/arrow_basic_e.png');
         this.load.image('menu-button', 'assets/images/buttons/slide_hangle.png');
+
+        // ===== ВИДЕОРОЛИКИ =====
+        this.load.video('vid-transition1', 'assets/video/transition1.mp4');
+        this.load.video('vid-transition2', 'assets/video/transition2.mp4');
+        this.load.video('vid-transition3', 'assets/video/transition3.mp4');
+        this.load.video('vid-boss-intro', 'assets/video/boss_intro.mp4');
+        this.load.video('vid-boss-ending', 'assets/video/boss_ending.mp4');
     }
 
     createButtonTextures() {
@@ -101,7 +105,7 @@ function initGame() {
     new Phaser.Game({
         type: Phaser.AUTO, width: 800, height: 600, parent: 'game-container', backgroundColor: '#2c3e50',
         audio: { disableWebAudio: false },
-        scene: [Preloader, IntroCutscene, MainMenu, Settings, GameScene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
+        scene: [Preloader, IntroCutscene, MainMenu, Settings, GameScene, VideoCutscene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
         physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
         scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
     });

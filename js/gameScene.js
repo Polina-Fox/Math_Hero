@@ -1,5 +1,4 @@
-﻿// gameScene.js – без панели, сообщения справа от героя
-class GameScene extends Phaser.Scene {
+﻿class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
         this.slimes = [];
@@ -60,7 +59,7 @@ class GameScene extends Phaser.Scene {
         this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
         this.playLevelMusic(musicKey);
 
-        // Только текст, без панели
+        // Статистика (только текст)
         this.levelText = this.add.text(35, 25, `Уровень: ${gameSettings.currentLevel}`, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
         }).setDepth(11);
@@ -365,22 +364,37 @@ class GameScene extends Phaser.Scene {
         this.slimes = []; this.slimesToSpawn = 0; this.slimesSpawned = 0;
         this.hero.setTexture('hero_cheer1'); this.physics.pause(); this.time.removeAllEvents();
         if (this.spawnTimer) { this.spawnTimer.remove(); this.spawnTimer = null; }
+
+        const prevLevel = gameSettings.currentLevel;
         gameSettings.currentLevel++;
         this.showHeroMessage('Уровень пройден! 🎉');
+
         this.time.delayedCall(2000, () => {
-            if (gameSettings.currentLevel > 6) this.scene.start('BossScene');
-            else this.scene.start('GameScene');
+            if (prevLevel === 2) {
+                // Переход луг → лес
+                this.scene.start('VideoCutscene', { videoKey: 'vid-transition1', nextScene: 'GameScene' });
+            } else if (prevLevel === 4) {
+                // Переход лес → увядший лес
+                this.scene.start('VideoCutscene', { videoKey: 'vid-transition2', nextScene: 'GameScene' });
+            } else if (prevLevel === 6) {
+                // Переход увядший лес → пустыня, затем босс
+                this.scene.start('VideoCutscene', { videoKey: 'vid-transition3', nextScene: 'BossScene' });
+            } else if (gameSettings.currentLevel > 6) {
+                this.scene.start('BossScene');
+            } else {
+                this.scene.start('GameScene');
+            }
         });
     }
 
     showHeroMessage(msg) {
         if (this.heroMessage) this.heroMessage.destroy();
-        // Теперь сообщение справа от героя и не обрезается
+        // Сообщение справа от героя
         this.heroMessage = this.add.text(this.hero.x + 60, this.hero.y - 50, msg, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial',
             backgroundColor: '#000000cc', padding: { x: 15, y: 8 },
             stroke: '#000', strokeThickness: 3, wordWrap: { width: 250 }
-        }).setOrigin(0, 0.5);  // левый край по вертикальному центру
+        }).setOrigin(0, 0.5);
         this.time.delayedCall(2000, () => { if (this.heroMessage) { this.heroMessage.destroy(); this.heroMessage = null; } });
     }
 

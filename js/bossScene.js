@@ -1,5 +1,4 @@
-﻿// bossScene.js – усложнённые примеры, таймер виден, диалог при проигрыше
-class BossScene extends Phaser.Scene {
+﻿class BossScene extends Phaser.Scene {
     constructor() {
         super({ key: 'BossScene' });
         this.correctAnswers = 0;
@@ -7,10 +6,10 @@ class BossScene extends Phaser.Scene {
         this.bossDefeated = false;
         this.feedbackText = null;
         this.bossMusic = null;
-        this.timeLeft = 40;            // 40 секунд на босса
+        this.timeLeft = 40;
         this.timerText = null;
         this.bossTimer = null;
-        this.timerColor = '#f1c40f';   // начальный цвет таймера (жёлтый)
+        this.timerColor = '#f1c40f';
     }
 
     preload() {
@@ -37,19 +36,40 @@ class BossScene extends Phaser.Scene {
 
         this.add.image(400, 300, 'bg-desert').setDisplaySize(800, 600);
 
-        // Музыка босса
+        // Музыка босса (позже)
         try {
             this.bossMusic = this.sound.add('music-otts', { loop: true, volume: 0.3 });
+        } catch (e) { console.log(e); }
+
+        // Видео встречи с боссом
+        const introVideo = this.add.video(400, 300, 'vid-boss-intro');
+        introVideo.setDisplaySize(800, 600);
+        introVideo.setOrigin(0.5);
+        introVideo.play();
+
+        introVideo.on('complete', () => {
+            introVideo.destroy();
+            this.startBossBattle();
+        });
+
+        this.input.on('pointerdown', () => {
+            if (introVideo && introVideo.isPlaying()) {
+                introVideo.stop();
+                introVideo.destroy();
+                this.startBossBattle();
+            }
+        });
+    }
+
+    startBossBattle() {
+        if (this.bossMusic && !this.bossMusic.isPlaying) {
             this.bossMusic.play();
-        } catch (e) {
-            console.log('Cannot play boss music:', e);
         }
 
         this.add.text(400, 80, 'БОСС-УРОВЕНЬ!', {
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5);
 
-        // Босс из красных частей
         const bossBody = this.add.image(0, 0, 'body_redF').setScale(2.5);
         const bossEye = this.add.image(0, -20, 'eye_angry_red').setScale(2.5);
         const bossMouth = this.add.image(0, 25, 'mouthC').setScale(2.0);
@@ -61,12 +81,10 @@ class BossScene extends Phaser.Scene {
             scaleX: 2.1, scaleY: 2.1, duration: 1000, yoyo: true, repeat: -1
         });
 
-        // Счётчик правильных ответов
         this.counterText = this.add.text(400, 320, `Правильных ответов: ${this.correctAnswers}/${this.requiredAnswers}`, {
             fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold'
         }).setOrigin(0.5);
 
-        // Таймер (жёлтый, виден на любом фоне)
         this.timerText = this.add.text(400, 360, `Время: ${this.timeLeft} сек`, {
             fontSize: '24px', fill: this.timerColor, fontFamily: 'Arial', fontWeight: 'bold',
             stroke: '#000', strokeThickness: 4
@@ -86,25 +104,21 @@ class BossScene extends Phaser.Scene {
         if (this.bossDefeated) return;
         this.timeLeft--;
         this.timerText.setText(`Время: ${this.timeLeft} сек`);
-
         if (this.timeLeft <= 10) {
-            // яркий оранжевый с обводкой, точно не сольётся
             this.timerText.setStyle({ fill: '#ff9f43', stroke: '#000', strokeThickness: 5 });
         } else {
             this.timerText.setStyle({ fill: '#f1c40f', stroke: '#000', strokeThickness: 4 });
         }
-
         if (this.timeLeft <= 0) {
             this.bossTimer.remove();
             this.bossMusic.stop();
-            // Показываем диалог проигрыша
             this.showLoseDialog();
         }
     }
 
     showLoseDialog() {
         const panel = this.add.image(400, 300, 'panel').setDepth(10);
-        const message = this.add.text(400, 250, 'Время вышло!\nТы проиграл. Хочешь попробовать снова?', {
+        this.add.text(400, 250, 'Время вышло!\nТы проиграл. Хочешь попробовать снова?', {
             fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center',
             stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(11);
@@ -117,13 +131,9 @@ class BossScene extends Phaser.Scene {
             fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 
-        yesBtn.on('pointerdown', () => {
-            this.scene.restart();
-        });
+        yesBtn.on('pointerdown', () => this.scene.restart());
         noBtn.on('pointerdown', () => {
-            gameSettings.currentLevel = 1;
-            gameSettings.score = 0;
-            gameSettings.lives = 3;
+            gameSettings.currentLevel = 1; gameSettings.score = 0; gameSettings.lives = 3;
             this.scene.start('MainMenu');
         });
     }
@@ -135,7 +145,6 @@ class BossScene extends Phaser.Scene {
         }
         this.answerButtons = [];
 
-        // Усложнённые примеры: сложение до 30, вычитание до 25, умножение до 12
         let a, b, answer, question;
         const ops = [];
         if (gameSettings.addition) ops.push('+');
@@ -153,7 +162,7 @@ class BossScene extends Phaser.Scene {
             b = Phaser.Math.Between(10, 25);
             answer = a + b;
             question = `${a} + ${b} = ?`;
-        } else { // вычитание
+        } else {
             a = Phaser.Math.Between(20, 35);
             b = Phaser.Math.Between(5, a - 5);
             answer = a - b;
@@ -163,7 +172,6 @@ class BossScene extends Phaser.Scene {
         this.currentBossProblem = { question, answer };
         gameSettings.lastQuestion = this.currentBossProblem.question;
         gameSettings.lastAnswer = this.currentBossProblem.answer;
-
         this.showBossProblem();
     }
 
@@ -193,11 +201,7 @@ class BossScene extends Phaser.Scene {
     checkBossAnswer(selected, btn, txt) {
         if (this.bossDefeated) return;
         this.answerButtons.forEach(b => b.button.disableInteractive());
-
-        if (this.feedbackText) {
-            this.feedbackText.destroy();
-            this.feedbackText = null;
-        }
+        if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
 
         if (selected === this.currentBossProblem.answer) {
             btn.setTexture('boss-correct');
@@ -208,11 +212,18 @@ class BossScene extends Phaser.Scene {
                 this.bossDefeated = true;
                 if (this.bossTimer) this.bossTimer.remove();
                 if (this.bossMusic) this.bossMusic.stop();
-                this.feedbackText = this.add.text(400, 550, 'БОСС ПОБЕЖДЁН! 🎉', { fontSize: '32px', fill: '#27ae60' }).setOrigin(0.5);
-                this.tweens.add({
-                    targets: this.bossContainer, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
-                    onComplete: () => {
-                        this.time.delayedCall(1500, () => this.scene.start('Victory'));
+
+                // Финальное видео
+                const endingVideo = this.add.video(400, 300, 'vid-boss-ending');
+                endingVideo.setDisplaySize(800, 600);
+                endingVideo.setOrigin(0.5);
+                endingVideo.play();
+
+                endingVideo.on('complete', () => this.scene.start('Victory'));
+                this.input.on('pointerdown', () => {
+                    if (endingVideo && endingVideo.isPlaying()) {
+                        endingVideo.stop();
+                        this.scene.start('Victory');
                     }
                 });
             } else {
