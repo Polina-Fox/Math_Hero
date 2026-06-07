@@ -1,4 +1,5 @@
-﻿class BossScene extends Phaser.Scene {
+﻿// bossScene.js – усложнённые примеры, таймер виден, диалог при проигрыше
+class BossScene extends Phaser.Scene {
     constructor() {
         super({ key: 'BossScene' });
         this.correctAnswers = 0;
@@ -6,10 +7,10 @@
         this.bossDefeated = false;
         this.feedbackText = null;
         this.bossMusic = null;
-        this.timeLeft = 40;
+        this.timeLeft = 40;            // 40 секунд на босса
         this.timerText = null;
         this.bossTimer = null;
-        this.gameEnded = false;   // новый флаг, чтобы не накладывать диалоги
+        this.timerColor = '#f1c40f';   // начальный цвет таймера (жёлтый)
     }
 
     preload() {
@@ -32,7 +33,7 @@
         this.bossDefeated = false;
         this.feedbackText = null;
         this.timeLeft = 40;
-        this.gameEnded = false;
+        this.timerColor = '#f1c40f';
 
         this.add.image(400, 300, 'bg-desert').setDisplaySize(800, 600);
 
@@ -48,7 +49,7 @@
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5);
 
-        // Босс (красный)
+        // Босс из красных частей
         const bossBody = this.add.image(0, 0, 'body_redF').setScale(2.5);
         const bossEye = this.add.image(0, -20, 'eye_angry_red').setScale(2.5);
         const bossMouth = this.add.image(0, 25, 'mouthC').setScale(2.0);
@@ -60,14 +61,15 @@
             scaleX: 2.1, scaleY: 2.1, duration: 1000, yoyo: true, repeat: -1
         });
 
-        // Счётчик ответов (жёлтый)
+        // Счётчик правильных ответов
         this.counterText = this.add.text(400, 320, `Правильных ответов: ${this.correctAnswers}/${this.requiredAnswers}`, {
             fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold'
         }).setOrigin(0.5);
 
-        // Таймер (жёлтый, становится оранжевым при ≤10 сек)
+        // Таймер (жёлтый, виден на любом фоне)
         this.timerText = this.add.text(400, 360, `Время: ${this.timeLeft} сек`, {
-            fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold'
+            fontSize: '24px', fill: this.timerColor, fontFamily: 'Arial', fontWeight: 'bold',
+            stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
 
         this.bossTimer = this.time.addEvent({
@@ -81,36 +83,37 @@
     }
 
     updateTimer() {
-        if (this.bossDefeated || this.gameEnded) return;
+        if (this.bossDefeated) return;
         this.timeLeft--;
         this.timerText.setText(`Время: ${this.timeLeft} сек`);
 
         if (this.timeLeft <= 10) {
-            this.timerText.setStyle({ fill: '#e67e22' }); // оранжевый, чтобы не сливался с красным
+            // яркий оранжевый с обводкой, точно не сольётся
+            this.timerText.setStyle({ fill: '#ff9f43', stroke: '#000', strokeThickness: 5 });
+        } else {
+            this.timerText.setStyle({ fill: '#f1c40f', stroke: '#000', strokeThickness: 4 });
         }
 
         if (this.timeLeft <= 0) {
             this.bossTimer.remove();
-            if (this.bossMusic) this.bossMusic.stop();
-            this.showTimeUpDialog();
+            this.bossMusic.stop();
+            // Показываем диалог проигрыша
+            this.showLoseDialog();
         }
     }
 
-    showTimeUpDialog() {
-        if (this.gameEnded) return;
-        this.gameEnded = true;
-        this.physics.pause();   // если бы была физика
-
+    showLoseDialog() {
         const panel = this.add.image(400, 300, 'panel').setDepth(10);
-        this.add.text(400, 240, 'Время вышло!\nПопробуешь снова?', {
-            fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial', align: 'center',
+        const message = this.add.text(400, 250, 'Время вышло!\nТы проиграл. Хочешь попробовать снова?', {
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center',
             stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(11);
 
-        const yesBtn = this.add.text(250, 350, 'Да, попробовать', {
+        const yesBtn = this.add.text(250, 370, 'Да, попробовать', {
             fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
-        const noBtn = this.add.text(550, 350, 'Нет, выйти в меню', {
+
+        const noBtn = this.add.text(550, 370, 'Нет, выйти в меню', {
             fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 
@@ -118,6 +121,9 @@
             this.scene.restart();
         });
         noBtn.on('pointerdown', () => {
+            gameSettings.currentLevel = 1;
+            gameSettings.score = 0;
+            gameSettings.lives = 3;
             this.scene.start('MainMenu');
         });
     }
@@ -129,6 +135,7 @@
         }
         this.answerButtons = [];
 
+        // Усложнённые примеры: сложение до 30, вычитание до 25, умножение до 12
         let a, b, answer, question;
         const ops = [];
         if (gameSettings.addition) ops.push('+');
@@ -137,20 +144,20 @@
         const operation = Phaser.Math.RND.pick(ops);
 
         if (operation === '×') {
-            a = Phaser.Math.Between(4, 9);
-            b = Phaser.Math.Between(2, 8);
+            a = Phaser.Math.Between(6, 12);
+            b = Phaser.Math.Between(3, 9);
             answer = a * b;
             question = `${a} × ${b} = ?`;
-        } else {
-            a = Phaser.Math.Between(10, 15);
-            b = Phaser.Math.Between(5, 10);
-            if (operation === '+') {
-                answer = a + b;
-                question = `${a} + ${b} = ?`;
-            } else {
-                answer = a - b;
-                question = `${a} - ${b} = ?`;
-            }
+        } else if (operation === '+') {
+            a = Phaser.Math.Between(15, 30);
+            b = Phaser.Math.Between(10, 25);
+            answer = a + b;
+            question = `${a} + ${b} = ?`;
+        } else { // вычитание
+            a = Phaser.Math.Between(20, 35);
+            b = Phaser.Math.Between(5, a - 5);
+            answer = a - b;
+            question = `${a} - ${b} = ?`;
         }
 
         this.currentBossProblem = { question, answer };
@@ -161,19 +168,19 @@
     }
 
     showBossProblem() {
-        this.problemText = this.add.text(400, 410, this.currentBossProblem.question, {
+        this.problemText = this.add.text(400, 420, this.currentBossProblem.question, {
             fontSize: '36px', fill: '#ffffff', fontFamily: 'Arial', backgroundColor: '#000000aa', padding: 20
         }).setOrigin(0.5);
 
         const answers = [this.currentBossProblem.answer];
         while (answers.length < 3) {
-            const wrong = this.currentBossProblem.answer + Phaser.Math.Between(-8, 8);
+            const wrong = this.currentBossProblem.answer + Phaser.Math.Between(-10, 10);
             if (wrong > 0 && !answers.includes(wrong)) answers.push(wrong);
         }
         Phaser.Utils.Array.Shuffle(answers);
 
         answers.forEach((ans, i) => {
-            const x = 300 + i * 150, y = 470;
+            const x = 300 + i * 150, y = 490;
             const btn = this.add.image(x, y, 'boss-button').setInteractive({ useHandCursor: true });
             const txt = this.add.text(x, y, ans.toString(), {
                 fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', fontWeight: 'bold'
@@ -184,7 +191,7 @@
     }
 
     checkBossAnswer(selected, btn, txt) {
-        if (this.bossDefeated || this.gameEnded) return;
+        if (this.bossDefeated) return;
         this.answerButtons.forEach(b => b.button.disableInteractive());
 
         if (this.feedbackText) {
@@ -201,9 +208,7 @@
                 this.bossDefeated = true;
                 if (this.bossTimer) this.bossTimer.remove();
                 if (this.bossMusic) this.bossMusic.stop();
-                this.feedbackText = this.add.text(400, 520, 'БОСС ПОБЕЖДЁН! 🎉', {
-                    fontSize: '32px', fill: '#27ae60'
-                }).setOrigin(0.5);
+                this.feedbackText = this.add.text(400, 550, 'БОСС ПОБЕЖДЁН! 🎉', { fontSize: '32px', fill: '#27ae60' }).setOrigin(0.5);
                 this.tweens.add({
                     targets: this.bossContainer, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
                     onComplete: () => {
@@ -211,9 +216,7 @@
                     }
                 });
             } else {
-                this.feedbackText = this.add.text(400, 520, 'Правильно! 👍', {
-                    fontSize: '24px', fill: '#f1c40f'
-                }).setOrigin(0.5);
+                this.feedbackText = this.add.text(400, 550, 'Правильно! 👍', { fontSize: '24px', fill: '#f1c40f' }).setOrigin(0.5);
                 this.time.delayedCall(1000, () => {
                     if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
                     this.generateBossProblem();
@@ -226,9 +229,7 @@
             this.answerButtons.forEach(b => {
                 if (parseInt(b.text.text) === this.currentBossProblem.answer) b.button.setTexture('boss-correct');
             });
-            this.feedbackText = this.add.text(400, 520, 'Неправильно! Начинаем заново... 🔄', {
-                fontSize: '20px', fill: '#f1c40f'
-            }).setOrigin(0.5);
+            this.feedbackText = this.add.text(400, 550, 'Неправильно! Начинаем заново... 🔄', { fontSize: '20px', fill: '#f1c40f' }).setOrigin(0.5);
             this.time.delayedCall(2000, () => {
                 if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
                 this.generateBossProblem();
