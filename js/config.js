@@ -24,7 +24,7 @@ class Preloader extends Phaser.Scene {
         this.load.on('progress', v => { pt.setText(parseInt(v * 100) + '%'); pbar.clear(); pbar.fillStyle(0xffffff, 1); pbar.fillRect(w / 2 - 150, h / 2 - 20, 300 * v, 30); });
         this.load.on('complete', () => { pbar.destroy(); pb.destroy(); lt.destroy(); pt.destroy(); });
 
-        // Ресурсы меню и музыка
+        // Основные ресурсы
         this.load.image('menu-bg', 'assets/images/background0.png');
         this.load.audio('menuMusic', 'assets/audio/palm of my hand - intro.ogg');
         this.load.audio('music-at-altar', 'assets/audio/palm of my hand - at the altar.ogg');
@@ -72,7 +72,7 @@ class Preloader extends Phaser.Scene {
         this.load.image('resume-button', 'assets/images/buttons/arrow_basic_e.png');
         this.load.image('menu-button', 'assets/images/buttons/slide_hangle.png');
 
-        // ===== ВИДЕОРОЛИКИ =====
+        // ===== ВИДЕО (включены) =====
         this.load.video('vid-transition1', 'assets/video/transition1.mp4');
         this.load.video('vid-transition2', 'assets/video/transition2.mp4');
         this.load.video('vid-transition3', 'assets/video/transition3.mp4');

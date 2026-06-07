@@ -369,27 +369,33 @@
         gameSettings.currentLevel++;
         this.showHeroMessage('Уровень пройден! 🎉');
 
+        const VIDEO_ENABLED = true;   // ← ВИДЕО ВКЛЮЧЕНЫ
+
         this.time.delayedCall(2000, () => {
-            if (prevLevel === 2) {
-                // Переход луг → лес
-                this.scene.start('VideoCutscene', { videoKey: 'vid-transition1', nextScene: 'GameScene' });
-            } else if (prevLevel === 4) {
-                // Переход лес → увядший лес
-                this.scene.start('VideoCutscene', { videoKey: 'vid-transition2', nextScene: 'GameScene' });
-            } else if (prevLevel === 6) {
-                // Переход увядший лес → пустыня, затем босс
-                this.scene.start('VideoCutscene', { videoKey: 'vid-transition3', nextScene: 'BossScene' });
-            } else if (gameSettings.currentLevel > 6) {
-                this.scene.start('BossScene');
+            if (VIDEO_ENABLED) {
+                if (prevLevel === 2) {
+                    this.scene.start('VideoCutscene', { videoKey: 'vid-transition1', nextScene: 'GameScene' });
+                } else if (prevLevel === 4) {
+                    this.scene.start('VideoCutscene', { videoKey: 'vid-transition2', nextScene: 'GameScene' });
+                } else if (prevLevel === 6) {
+                    this.scene.start('VideoCutscene', { videoKey: 'vid-transition3', nextScene: 'BossScene' });
+                } else if (gameSettings.currentLevel > 6) {
+                    this.scene.start('BossScene');
+                } else {
+                    this.scene.start('GameScene');
+                }
             } else {
-                this.scene.start('GameScene');
+                if (prevLevel === 6 || gameSettings.currentLevel > 6) {
+                    this.scene.start('BossScene');
+                } else {
+                    this.scene.start('GameScene');
+                }
             }
         });
     }
 
     showHeroMessage(msg) {
         if (this.heroMessage) this.heroMessage.destroy();
-        // Сообщение справа от героя
         this.heroMessage = this.add.text(this.hero.x + 60, this.hero.y - 50, msg, {
             fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial',
             backgroundColor: '#000000cc', padding: { x: 15, y: 8 },

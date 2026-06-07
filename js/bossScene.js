@@ -36,29 +36,36 @@
 
         this.add.image(400, 300, 'bg-desert').setDisplaySize(800, 600);
 
-        // Музыка босса (позже)
         try {
             this.bossMusic = this.sound.add('music-otts', { loop: true, volume: 0.3 });
         } catch (e) { console.log(e); }
 
-        // Видео встречи с боссом
-        const introVideo = this.add.video(400, 300, 'vid-boss-intro');
-        introVideo.setDisplaySize(800, 600);
-        introVideo.setOrigin(0.5);
-        introVideo.play();
+        const VIDEO_ENABLED = true;   // ← ВИДЕО ВКЛЮЧЕНЫ
 
-        introVideo.on('complete', () => {
-            introVideo.destroy();
-            this.startBossBattle();
-        });
+        if (VIDEO_ENABLED && this.textures.exists('vid-boss-intro')) {
+            const introVideo = this.add.video(400, 300, 'vid-boss-intro');
+            introVideo.setDisplaySize(800, 600);
+            introVideo.setOrigin(0.5);
+            introVideo.play();
 
-        this.input.on('pointerdown', () => {
-            if (introVideo && introVideo.isPlaying()) {
+            introVideo.on('error', () => {
                 introVideo.stop();
+                this.startBossBattle();
+            });
+            introVideo.on('complete', () => {
                 introVideo.destroy();
                 this.startBossBattle();
-            }
-        });
+            });
+            this.input.on('pointerdown', () => {
+                if (introVideo && introVideo.isPlaying()) {
+                    introVideo.stop();
+                    introVideo.destroy();
+                    this.startBossBattle();
+                }
+            });
+        } else {
+            this.startBossBattle();
+        }
     }
 
     startBossBattle() {
@@ -201,7 +208,11 @@
     checkBossAnswer(selected, btn, txt) {
         if (this.bossDefeated) return;
         this.answerButtons.forEach(b => b.button.disableInteractive());
-        if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
+
+        if (this.feedbackText) {
+            this.feedbackText.destroy();
+            this.feedbackText = null;
+        }
 
         if (selected === this.currentBossProblem.answer) {
             btn.setTexture('boss-correct');
@@ -213,19 +224,24 @@
                 if (this.bossTimer) this.bossTimer.remove();
                 if (this.bossMusic) this.bossMusic.stop();
 
-                // Финальное видео
-                const endingVideo = this.add.video(400, 300, 'vid-boss-ending');
-                endingVideo.setDisplaySize(800, 600);
-                endingVideo.setOrigin(0.5);
-                endingVideo.play();
+                const VIDEO_ENABLED = true;   // ← ВИДЕО ВКЛЮЧЕНЫ
+                if (VIDEO_ENABLED && this.textures.exists('vid-boss-ending')) {
+                    const endingVideo = this.add.video(400, 300, 'vid-boss-ending');
+                    endingVideo.setDisplaySize(800, 600);
+                    endingVideo.setOrigin(0.5);
+                    endingVideo.play();
 
-                endingVideo.on('complete', () => this.scene.start('Victory'));
-                this.input.on('pointerdown', () => {
-                    if (endingVideo && endingVideo.isPlaying()) {
-                        endingVideo.stop();
-                        this.scene.start('Victory');
-                    }
-                });
+                    endingVideo.on('error', () => this.scene.start('Victory'));
+                    endingVideo.on('complete', () => this.scene.start('Victory'));
+                    this.input.on('pointerdown', () => {
+                        if (endingVideo && endingVideo.isPlaying()) {
+                            endingVideo.stop();
+                            this.scene.start('Victory');
+                        }
+                    });
+                } else {
+                    this.scene.start('Victory');
+                }
             } else {
                 this.feedbackText = this.add.text(400, 550, 'Правильно! 👍', { fontSize: '24px', fill: '#f1c40f' }).setOrigin(0.5);
                 this.time.delayedCall(1000, () => {
