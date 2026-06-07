@@ -8,20 +8,16 @@
     }
 
     preload() {
-        this.createColorTexture('rescue-bg', 0x27ae60); // ярко-зелёный
-        this.createColorTexture('number-bubble', 0x3498db);
-        this.createColorTexture('number-correct', 0xf1c40f);
-        this.createColorTexture('particle-star', 0xffd700); // золотая звёздочка
+        this.createColorTexture('rescue-bg', 0x27ae60);       // ярко-зелёный фон
+        this.createColorTexture('number-bubble', 0xA8D5BA);  // мятный
+        this.createColorTexture('number-correct', 0x6B8E23); // оливковый
     }
 
     createColorTexture(key, color) {
         const g = this.add.graphics();
         g.fillStyle(color);
         if (key === 'rescue-bg') g.fillRect(0, 0, 800, 600);
-        else if (key === 'particle-star') {
-            g.fillStyle(color);
-            g.fillStar(5, 5, 5, 3);
-        } else g.fillCircle(25, 25, 25);
+        else g.fillCircle(25, 25, 25);   // кружки для шариков
         g.generateTexture(key, key === 'rescue-bg' ? 800 : 50, key === 'rescue-bg' ? 600 : 50);
         g.destroy();
     }
@@ -72,10 +68,7 @@
             backgroundColor: '#00000066', padding: { x: 10, y: 5 }
         }).setOrigin(0.5);
         this.timer = this.time.addEvent({
-            delay: 1000,
-            callback: this.updateTimer,
-            callbackScope: this,
-            loop: true
+            delay: 1000, callback: this.updateTimer, callbackScope: this, loop: true
         });
     }
 
@@ -108,9 +101,10 @@
         this.gameEnded = true;
         if (this.timer) this.timer.remove();
 
-        // Фейерверк
+        // Фейерверк из мятных и оливковых кружочков (без fillStar)
         for (let i = 0; i < 20; i++) {
-            const star = this.add.image(400, 300, 'particle-star').setScale(0.5).setTint(Phaser.Math.RND.pick([0xff6b6b, 0xfeca57, 0x48dbfb]));
+            const star = this.add.image(400, 300, 'number-bubble').setScale(0.5)
+                .setTint(Phaser.Math.RND.pick([0xFFD700, 0xADFF2F, 0xFF8C00]));
             this.tweens.add({
                 targets: star, x: 400 + Phaser.Math.Between(-200, 200), y: Phaser.Math.Between(100, 500),
                 alpha: 0, scale: 0, duration: 600, delay: Math.random() * 300, onComplete: () => star.destroy()
@@ -118,8 +112,12 @@
         }
 
         const panel = this.add.image(400, 300, 'panel').setDepth(10);
-        this.add.text(400, 280, 'Ты спас друга! 🎉', { fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold' }).setOrigin(0.5).setDepth(11);
-        this.add.text(400, 330, 'Герой возвращается в бой! ⚔️', { fontSize: '18px', fill: '#ffffff', fontFamily: 'Arial' }).setOrigin(0.5).setDepth(11);
+        this.add.text(400, 280, 'Ты спас друга! 🎉', {
+            fontSize: '28px', fill: '#006400', fontFamily: 'Arial', fontWeight: 'bold'
+        }).setOrigin(0.5).setDepth(11);
+        this.add.text(400, 330, 'Герой возвращается в бой! ⚔️', {
+            fontSize: '18px', fill: '#ffffff', fontFamily: 'Arial'
+        }).setOrigin(0.5).setDepth(11);
         this.time.delayedCall(2000, () => { gameSettings.lives = 3; this.scene.start('GameScene'); });
     }
 
@@ -143,6 +141,7 @@
     }
 }
 
+// ----------------------------------------------------------------
 class MagicPauseMiniGame extends Phaser.Scene {
     constructor() {
         super({ key: 'MagicPauseMiniGame' });
@@ -155,7 +154,7 @@ class MagicPauseMiniGame extends Phaser.Scene {
     }
 
     preload() {
-        // Текстуры создаются динамически
+        // текстуры создаются динамически
     }
 
     create() {
@@ -163,14 +162,13 @@ class MagicPauseMiniGame extends Phaser.Scene {
         this.canClick = true;
         this.currentIndex = 0;
         this.clouds = [];
-
-        this.cameras.main.setBackgroundColor('#2c3e50');
+        this.cameras.main.setBackgroundColor('#FDF5E6'); // кремовый фон
 
         this.add.text(400, 60, 'МАГИЧЕСКАЯ ПАУЗА', {
-            fontSize: '36px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 4
+            fontSize: '36px', fill: '#5C4033', fontFamily: 'Arial', stroke: '#FFF', strokeThickness: 4
         }).setOrigin(0.5);
         this.add.text(400, 110, 'Собери последний пример по порядку!', {
-            fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
+            fontSize: '20px', fill: '#5C4033', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
         const lastQ = gameSettings.lastQuestion || '2 + 2 = ?';
@@ -202,11 +200,10 @@ class MagicPauseMiniGame extends Phaser.Scene {
         Phaser.Utils.Array.Shuffle(distractors);
         allElements.push(distractors[0], distractors[1]);
         Phaser.Utils.Array.Shuffle(allElements);
-
         this.createClouds(allElements);
 
         this.statusText = this.add.text(400, 560, 'Нажми на первый элемент цепочки', {
-            fontSize: '20px', fill: '#ffffff', backgroundColor: '#00000066', padding: { x: 10, y: 8 }
+            fontSize: '20px', fill: '#5C4033', backgroundColor: '#FFFAF0', padding: { x: 10, y: 8 }
         }).setOrigin(0.5);
     }
 
@@ -227,14 +224,14 @@ class MagicPauseMiniGame extends Phaser.Scene {
             positions.push({ x, y });
 
             const graphics = this.add.graphics();
-            graphics.fillStyle(0x34495e, 1);
+            graphics.fillStyle(0xDEB887, 1);   // бежевый
             graphics.fillRoundedRect(x - 50, y - 30, 100, 60, 15);
-            graphics.lineStyle(2, 0xf1c40f, 1);
+            graphics.lineStyle(2, 0x8B4513, 1); // коричневая обводка
             graphics.strokeRoundedRect(x - 50, y - 30, 100, 60, 15);
             graphics.setInteractive(new Phaser.Geom.Rectangle(x - 50, y - 30, 100, 60), Phaser.Geom.Rectangle.Contains);
 
             const text = this.add.text(x, y, element, {
-                fontSize: '24px', fill: '#ecf0f1', fontFamily: 'Arial', fontWeight: 'bold'
+                fontSize: '24px', fill: '#3E2723', fontFamily: 'Arial', fontWeight: 'bold'
             }).setOrigin(0.5, 0.5);
 
             graphics.on('pointerdown', () => this.onCloudClick(graphics, text, element));
@@ -250,18 +247,17 @@ class MagicPauseMiniGame extends Phaser.Scene {
         if (!this.canClick || this.gameEnded) return;
         const expected = this.expectedOrder[this.currentIndex];
         if (expected.accepts.includes(value)) {
-            // правильный выбор
             graphics.clear();
-            graphics.fillStyle(0x00b894, 1);
+            graphics.fillStyle(0x6B8E23, 1);   // оливковый
             graphics.fillRoundedRect(graphics.input.hitArea.x, graphics.input.hitArea.y, 100, 60, 15);
-            graphics.lineStyle(2, 0xf1c40f, 1);
+            graphics.lineStyle(2, 0x8B4513, 1);
             graphics.strokeRoundedRect(graphics.input.hitArea.x, graphics.input.hitArea.y, 100, 60, 15);
-            text.setStyle({ fill: '#ffffff' });
+            text.setStyle({ fill: '#FFF' });
             graphics.disableInteractive();
             this.currentIndex++;
             if (this.currentIndex === this.expectedOrder.length) {
                 this.gameEnded = true;
-                gameSettings.shield = true;
+                gameSettings.shield = true;      // бафф
                 this.statusText.setText('Магический щит получен! 🛡️');
                 this.time.delayedCall(2000, () => this.scene.start('GameScene'));
             } else {
@@ -270,13 +266,13 @@ class MagicPauseMiniGame extends Phaser.Scene {
         } else {
             this.canClick = false;
             graphics.clear();
-            graphics.fillStyle(0xd63031, 1);
+            graphics.fillStyle(0xB22222, 1);    // красный
             graphics.fillRoundedRect(graphics.input.hitArea.x, graphics.input.hitArea.y, 100, 60, 15);
-            text.setStyle({ fill: '#ffffff' });
+            text.setStyle({ fill: '#FFF' });
             this.clouds.forEach(c => {
                 if (c.value === expected.accepts[0]) {
                     c.graphics.clear();
-                    c.graphics.fillStyle(0x00b894, 1);
+                    c.graphics.fillStyle(0x6B8E23, 1);
                     c.graphics.fillRoundedRect(c.graphics.input.hitArea.x, c.graphics.input.hitArea.y, 100, 60, 15);
                 }
                 c.graphics.disableInteractive();
@@ -288,19 +284,20 @@ class MagicPauseMiniGame extends Phaser.Scene {
     showRetryDialog(message) {
         const panel = this.add.image(400, 300, 'panel').setDepth(10);
         this.add.text(400, 240, message, {
-            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center', stroke: '#000', strokeThickness: 3
+            fontSize: '24px', fill: '#5C4033', fontFamily: 'Arial', align: 'center', stroke: '#FFF', strokeThickness: 3
         }).setOrigin(0.5).setDepth(11);
         const yesBtn = this.add.text(250, 350, 'Да, попробовать', {
-            fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+            fontSize: '22px', fill: '#2E8B57', backgroundColor: '#FFFAF0', padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
         const noBtn = this.add.text(550, 350, 'Нет, выйти в меню', {
-            fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+            fontSize: '22px', fill: '#B22222', backgroundColor: '#FFFAF0', padding: { x: 15, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
         yesBtn.on('pointerdown', () => this.scene.restart());
         noBtn.on('pointerdown', () => this.scene.start('MainMenu'));
     }
 }
 
+// ----------------------------------------------------------------
 class SecretTrainingMiniGame extends Phaser.Scene {
     constructor() {
         super({ key: 'SecretTrainingMiniGame' });
@@ -311,9 +308,9 @@ class SecretTrainingMiniGame extends Phaser.Scene {
     }
 
     preload() {
-        this.createColorTexture('training-bg', 0x1a1a2e);
-        this.createColorTexture('player', 0xfdcb6e);
-        this.createColorTexture('coin', 0xf1c40f);
+        this.createColorTexture('training-bg', 0xD2B48C); // светло-коричневый
+        this.createColorTexture('player', 0xFFA500);      // оранжевый
+        this.createColorTexture('coin', 0xFFD700);         // золотой
     }
 
     createColorTexture(key, color) {
@@ -332,19 +329,20 @@ class SecretTrainingMiniGame extends Phaser.Scene {
         this.targetSum = gameSettings.lastAnswer || 8;
         this.add.image(400, 300, 'training-bg');
 
-        // Звёзды на фоне (декор)
+        // Декоративные золотистые кружочки
         for (let i = 0; i < 20; i++) {
-            this.add.image(Phaser.Math.Between(50, 750), Phaser.Math.Between(50, 550), 'coin').setScale(0.3).setTint(0xf1c40f).setAlpha(0.3);
+            this.add.image(Phaser.Math.Between(50, 750), Phaser.Math.Between(50, 550), 'coin')
+                .setScale(0.3).setTint(0xFFF8DC).setAlpha(0.5);
         }
 
         this.add.text(400, 35, 'СЕКРЕТНАЯ ТРЕНИРОВКА', {
-            fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
+            fontSize: '28px', fill: '#5C4033', fontFamily: 'Arial', stroke: '#FFF', strokeThickness: 3
         }).setOrigin(0.5);
         this.add.text(400, 70, `Собери числа, чтобы получить ровно ${this.targetSum}`, {
-            fontSize: '18px', fill: '#ecf0f1', fontFamily: 'Arial'
+            fontSize: '18px', fill: '#5C4033', fontFamily: 'Arial'
         }).setOrigin(0.5);
         this.add.text(400, 95, 'Управляй: стрелки / WASD или мышью/пальцем', {
-            fontSize: '14px', fill: '#bdc3c7', fontFamily: 'Arial'
+            fontSize: '14px', fill: '#5C4033', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
         this.player = this.physics.add.sprite(400, 480, 'player').setCollideWorldBounds(true);
@@ -353,7 +351,8 @@ class SecretTrainingMiniGame extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.numbersGroup, this.collectCoin, null, this);
 
         this.sumText = this.add.text(400, 560, `Собрано: 0 / ${this.targetSum}`, {
-            fontSize: '22px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold', backgroundColor: '#00000066', padding: { x: 10, y: 5 }
+            fontSize: '22px', fill: '#5C4033', fontFamily: 'Arial', fontWeight: 'bold',
+            backgroundColor: '#FFFAF0', padding: { x: 10, y: 5 }
         }).setOrigin(0.5);
 
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -376,7 +375,7 @@ class SecretTrainingMiniGame extends Phaser.Scene {
         ];
         wallData.forEach(([x, y, w, h]) => {
             const g = this.add.graphics();
-            g.fillStyle(0xbdc3c7);
+            g.fillStyle(0xBC8F8F); // контрастный розовато-коричневый
             g.fillRect(0, 0, w, h);
             g.generateTexture('wall_' + x + y, w, h);
             g.destroy();
@@ -410,7 +409,7 @@ class SecretTrainingMiniGame extends Phaser.Scene {
             const coin = this.numbersGroup.create(x, y, 'coin').setScale(1.5);
             coin.value = val;
             this.add.text(x, y, val.toString(), {
-                fontSize: '14px', fill: '#000', fontFamily: 'Arial', fontWeight: 'bold'
+                fontSize: '14px', fill: '#2F4F4F', fontFamily: 'Arial', fontWeight: 'bold'
             }).setOrigin(0.5, 0.5);
         });
     }
@@ -435,36 +434,33 @@ class SecretTrainingMiniGame extends Phaser.Scene {
         this.time.removeAllEvents();
 
         if (success) {
-            // Конфетти
             for (let i = 0; i < 15; i++) {
-                const p = this.add.image(400, 300, 'coin').setScale(0.5).setTint(0xf1c40f);
+                const p = this.add.image(400, 300, 'coin').setScale(0.5).setTint(0xFFD700);
                 this.tweens.add({
                     targets: p, x: 400 + Phaser.Math.Between(-200, 200), y: Phaser.Math.Between(100, 500),
                     alpha: 0, scale: 0, duration: 600, delay: Math.random() * 300, onComplete: () => p.destroy()
                 });
             }
-            gameSettings.bonusLife = true;
-            this.showMessageAndReturn('Великолепно! +1 жизнь! ❤️', 0x00b894);
+            gameSettings.bonusLife = true;   // бафф
+            const panel = this.add.image(400, 300, 'panel').setDepth(10);
+            this.add.text(400, 300, 'Великолепно! +1 жизнь! ❤️', {
+                fontSize: '28px', fill: '#006400', fontFamily: 'Arial', fontWeight: 'bold'
+            }).setOrigin(0.5).setDepth(11);
+            this.time.delayedCall(1500, () => this.scene.start('GameScene'));
         } else {
             const panel = this.add.image(400, 300, 'panel').setDepth(10);
             this.add.text(400, 240, 'Почти получилось!\nХочешь попробовать снова?', {
-                fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center', stroke: '#000', strokeThickness: 3
+                fontSize: '24px', fill: '#5C4033', fontFamily: 'Arial', align: 'center', stroke: '#FFF', strokeThickness: 3
             }).setOrigin(0.5).setDepth(11);
             const yesBtn = this.add.text(250, 350, 'Да, попробовать', {
-                fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+                fontSize: '22px', fill: '#2E8B57', backgroundColor: '#FFFAF0', padding: { x: 15, y: 8 }
             }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
             const noBtn = this.add.text(550, 350, 'Нет, выйти в меню', {
-                fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+                fontSize: '22px', fill: '#B22222', backgroundColor: '#FFFAF0', padding: { x: 15, y: 8 }
             }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
             yesBtn.on('pointerdown', () => this.scene.restart());
             noBtn.on('pointerdown', () => this.scene.start('MainMenu'));
         }
-    }
-
-    showMessageAndReturn(msg, color) {
-        this.add.rectangle(400, 300, 600, 200, 0x000000, 0.85).setDepth(10);
-        this.add.text(400, 300, msg, { fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center' }).setOrigin(0.5).setDepth(11);
-        this.time.delayedCall(2000, () => this.scene.start('GameScene'));
     }
 
     update() {
