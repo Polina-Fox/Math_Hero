@@ -1,3 +1,4 @@
+// config.js – полный актуальный код с загрузкой озвучки
 const gameSettings = {
     addition: true,
     subtraction: false,
@@ -24,7 +25,7 @@ class Preloader extends Phaser.Scene {
         this.load.on('progress', v => { pt.setText(parseInt(v * 100) + '%'); pbar.clear(); pbar.fillStyle(0xffffff, 1); pbar.fillRect(w / 2 - 150, h / 2 - 20, 300 * v, 30); });
         this.load.on('complete', () => { pbar.destroy(); pb.destroy(); lt.destroy(); pt.destroy(); });
 
-        // Ресурсы главного меню
+        // Основные ресурсы
         this.load.image('menu-bg', 'assets/images/background0.png');
 
         // Музыка
@@ -34,20 +35,23 @@ class Preloader extends Phaser.Scene {
         this.load.audio('music-ancient-waters', 'assets/audio/over_ancient_waters_looping.ogg');
         this.load.audio('music-otts', 'assets/audio/otts.flac');
 
+        // Озвучка вступительной сцены
+        this.load.audio('voiceFull', 'assets/audio/intro_voice_full.mp3');
+
         // Фоны
         this.load.image('bg-grass', 'assets/images/backgroundColorGrass.png');
         this.load.image('bg-forest', 'assets/images/backgroundColorForest.png');
         this.load.image('bg-fall', 'assets/images/backgroundColorFall.png');
         this.load.image('bg-desert', 'assets/images/backgroundColorDesert.png');
 
-        // Картинки для интро-сцены (если их нет, используются прямоугольники)
+        // Интро-картинки
         this.load.image('intro1', 'assets/images/intro1.png');
         this.load.image('intro2', 'assets/images/intro2.png');
         this.load.image('intro3', 'assets/images/intro3.png');
 
         this.createButtonTextures();
 
-        // Части монстров (blue, green, red)
+        // Части монстров
         ['blue', 'green', 'red'].forEach(c => {
             ['A', 'B', 'C', 'D', 'E', 'F'].forEach(v => this.load.image(`body_${c}${v}`, `assets/images/mobs/body_${c}${v}.png`));
             this.load.image(`eye_angry_${c}`, `assets/images/mobs/eye_angry_${c}.png`);
@@ -75,19 +79,15 @@ class Preloader extends Phaser.Scene {
     createButtonTextures() {
         const g = this.add.graphics();
         g.fillStyle(0x2c3e50, 0.6); g.fillRoundedRect(5, 5, 300, 60, 20);
-        g.fillStyle(0x3498db); g.fillRoundedRect(0, 0, 300, 60, 20);
-        g.generateTexture('button-normal', 305, 65);
+        g.fillStyle(0x3498db); g.fillRoundedRect(0, 0, 300, 60, 20); g.generateTexture('button-normal', 305, 65);
         g.clear();
         g.fillStyle(0x2c3e50, 0.6); g.fillRoundedRect(5, 5, 300, 60, 20);
-        g.fillStyle(0x2980b9); g.fillRoundedRect(0, 0, 300, 60, 20);
-        g.generateTexture('button-hover', 305, 65);
+        g.fillStyle(0x2980b9); g.fillRoundedRect(0, 0, 300, 60, 20); g.generateTexture('button-hover', 305, 65);
         g.clear();
         g.fillStyle(0x000000, 0.3); g.fillRoundedRect(10, 10, 680, 480, 30);
-        g.fillStyle(0x2c3e50); g.fillRoundedRect(0, 0, 680, 480, 30);
-        g.generateTexture('panel', 690, 490);
+        g.fillStyle(0x2c3e50); g.fillRoundedRect(0, 0, 680, 480, 30); g.generateTexture('panel', 690, 490);
         g.clear();
-        g.fillStyle(0xffffff); g.fillCircle(4, 4, 4);
-        g.generateTexture('particle', 8, 8);
+        g.fillStyle(0xffffff); g.fillCircle(4, 4, 4); g.generateTexture('particle', 8, 8);
         g.destroy();
     }
 
