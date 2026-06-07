@@ -13,30 +13,52 @@ class VideoCutscene extends Phaser.Scene {
             return;
         }
 
+        let video = null;
         try {
-            const video = this.add.video(400, 300, videoKey);
-            video.setDisplaySize(800, 600);
-            video.setOrigin(0.5);
-
-            video.on('error', (err) => {
-                console.warn('Ошибка воспроизведения видео:', videoKey, err);
-                video.stop();
-                this.scene.start(nextScene || 'MainMenu');
-            });
-
-            video.on('complete', () => {
-                this.scene.start(nextScene || 'MainMenu');
-            });
-
-            this.input.on('pointerdown', () => {
-                video.stop();
-                this.scene.start(nextScene || 'MainMenu');
-            });
-
-            video.play();
+            video = this.add.video(400, 300, videoKey);
         } catch (e) {
-            console.warn('Не удалось создать видео:', videoKey, e);
+            console.warn('Ошибка создания видео:', videoKey, e);
             this.scene.start(nextScene || 'MainMenu');
+            return;
         }
+
+        if (!video) {
+            console.warn('Не удалось создать объект видео для', videoKey);
+            this.scene.start(nextScene || 'MainMenu');
+            return;
+        }
+
+        // Устанавливаем размер только после загрузки метаданных
+        video.on('loadedmetadata', () => {
+            if (video) {
+                video.setDisplaySize(800, 600);
+            }
+        });
+
+        // Альтернативно можно задать размер сразу после старта воспроизведения
+        video.on('play', () => {
+            if (video && !video.displayWidth) {
+                video.setDisplaySize(800, 600);
+            }
+        });
+
+        video.on('error', (err) => {
+            console.warn('Ошибка воспроизведения видео:', videoKey, err);
+            if (video) video.stop();
+            this.scene.start(nextScene || 'MainMenu');
+        });
+
+        video.on('complete', () => {
+            this.scene.start(nextScene || 'MainMenu');
+        });
+
+        this.input.on('pointerdown', () => {
+            if (video && video.isPlaying()) {
+                video.stop();
+            }
+            this.scene.start(nextScene || 'MainMenu');
+        });
+
+        video.play();
     }
 }
