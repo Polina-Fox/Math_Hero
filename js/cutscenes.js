@@ -4,37 +4,54 @@
     create() {
         const slides = [
             {
-                bg: 0x2c3e50,
+                imageKey: 'intro1',
                 text: 'Злой волшебник Слизнеус наслал на деревню полчища слизней.\nГерой спешит домой, но враги преграждают путь.'
             },
             {
-                bg: 0x34495e,
+                imageKey: 'intro2',
                 text: 'Чтобы победить слизней, нужно решать математические примеры.\nКаждый правильный ответ уничтожает одного монстра!'
             },
             {
-                bg: 0x2c3e50,
+                imageKey: 'intro3',
                 text: 'Помоги герою добраться до дома и спасти деревню!'
             }
         ];
         let current = 0;
 
-        const bg = this.add.rectangle(400, 300, 800, 600, slides[0].bg).setOrigin(0.5);
-        const text = this.add.text(400, 300, slides[0].text, {
+        // Фоновый прямоугольник (заглушка)
+        const bgRect = this.add.rectangle(400, 300, 800, 600, 0x2c3e50).setOrigin(0.5);
+
+        // Изображение слайда
+        const slideImage = this.add.image(400, 300, slides[current].imageKey)
+            .setOrigin(0.5)
+            .setDisplaySize(800, 600);
+
+        // Если текстура не загрузилась, скрываем изображение
+        if (!this.textures.exists(slides[current].imageKey)) {
+            slideImage.setVisible(false);
+        }
+
+        // Текст слайда
+        const text = this.add.text(400, 500, slides[current].text, {
             fontSize: '22px', fill: '#ecf0f1', fontFamily: 'Arial', align: 'center',
-            wordWrap: { width: 600 }, stroke: '#000', strokeThickness: 3
+            wordWrap: { width: 700 }, stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5);
 
         const nextSlide = () => {
             current++;
             if (current < slides.length) {
-                bg.setFillStyle(slides[current].bg);
+                slideImage.setTexture(slides[current].imageKey);
                 text.setText(slides[current].text);
+                if (!this.textures.exists(slides[current].imageKey)) {
+                    slideImage.setVisible(false);
+                } else {
+                    slideImage.setVisible(true);
+                }
             } else {
                 this.scene.start('MainMenu');
             }
         };
 
-        // Автоматическое переключение через 5 секунд или по клику
         this.time.addEvent({ delay: 5000, callback: nextSlide, loop: true });
         this.input.on('pointerdown', nextSlide);
     }
