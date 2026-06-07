@@ -6,7 +6,6 @@ class VideoCutscene extends Phaser.Scene {
     create() {
         const { videoKey, nextScene } = this.scene.settings.data;
 
-        // Проверяем наличие видео в кэше видео Phaser
         if (!this.cache.video.exists(videoKey)) {
             console.warn(`Видео ${videoKey} не найдено в кэше. Пропускаем.`);
             this.scene.start(nextScene || 'MainMenu');
@@ -28,19 +27,20 @@ class VideoCutscene extends Phaser.Scene {
             return;
         }
 
-        // Устанавливаем размер только после загрузки метаданных
-        video.on('loadedmetadata', () => {
-            if (video) {
-                video.setDisplaySize(800, 600);
-            }
-        });
+        const startPlayback = () => {
+            if (!video) return;
+            video.setDisplaySize(800, 600);
+            video.setOrigin(0.5);
+            video.play();
+        };
 
-        // Альтернативно можно задать размер сразу после старта воспроизведения
-        video.on('play', () => {
-            if (video && !video.displayWidth) {
-                video.setDisplaySize(800, 600);
-            }
-        });
+        // Ждём загрузку метаданных
+        video.on('loadedmetadata', startPlayback);
+
+        // Если метаданные уже загружены (readyState >= 1), запускаем сразу
+        if (video.video && video.video.readyState >= 1) {
+            startPlayback();
+        }
 
         video.on('error', (err) => {
             console.warn('Ошибка воспроизведения видео:', videoKey, err);
@@ -52,13 +52,12 @@ class VideoCutscene extends Phaser.Scene {
             this.scene.start(nextScene || 'MainMenu');
         });
 
+        // Возможность пропустить кликом
         this.input.on('pointerdown', () => {
             if (video && video.isPlaying()) {
                 video.stop();
             }
             this.scene.start(nextScene || 'MainMenu');
         });
-
-        video.play();
     }
 }

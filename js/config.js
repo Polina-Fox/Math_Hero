@@ -72,7 +72,7 @@ class Preloader extends Phaser.Scene {
         this.load.image('resume-button', 'assets/images/buttons/arrow_basic_e.png');
         this.load.image('menu-button', 'assets/images/buttons/slide_hangle.png');
 
-        // ===== ВИДЕО (с отладкой) =====
+        // ===== ВИДЕО (с указанием типа) =====
         const videoFiles = [
             { key: 'vid-transition1', path: 'assets/video/transition1.mp4' },
             { key: 'vid-transition2', path: 'assets/video/transition2.mp4' },
@@ -82,7 +82,7 @@ class Preloader extends Phaser.Scene {
         ];
 
         videoFiles.forEach(file => {
-            this.load.video(file.key, file.path);
+            this.load.video(file.key, file.path, 'loadeddata', false, 'video/mp4');
             console.log(`Загружаю видео: ${file.key} из ${file.path}`);
         });
 
