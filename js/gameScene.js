@@ -370,15 +370,11 @@
         this.showHeroMessage('Уровень пройден! 🎉');
 
         this.time.delayedCall(2000, () => {
-            // После 2, 4, 6 уровня показываем карту
-            if (prevLevel === 2 || prevLevel === 4 || prevLevel === 6) {
-                this.scene.start('MapScene', {
-                    from: prevLevel,                                    // пройденная точка (2, 4 или 6)
-                    nextScene: prevLevel === 6 ? 'BossScene' : 'GameScene'
-                });
-            } else {
-                this.scene.start('GameScene');
-            }
+            // ПОКАЗЫВАЕМ КАРТУ ПОСЛЕ КАЖДОГО УРОВНЯ
+            this.scene.start('MapScene', {
+                from: prevLevel,   // только что пройденный уровень (1,2,3,4,5 или 6)
+                nextScene: prevLevel === 6 ? 'BossScene' : 'GameScene'
+            });
         });
     }
 
