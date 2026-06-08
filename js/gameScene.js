@@ -369,27 +369,15 @@
         gameSettings.currentLevel++;
         this.showHeroMessage('Уровень пройден! 🎉');
 
-        const VIDEO_ENABLED = true;   // ← ВИДЕО ВКЛЮЧЕНЫ
-
         this.time.delayedCall(2000, () => {
-            if (VIDEO_ENABLED) {
-                if (prevLevel === 2) {
-                    this.scene.start('VideoCutscene', { videoKey: 'vid-transition1', nextScene: 'GameScene' });
-                } else if (prevLevel === 4) {
-                    this.scene.start('VideoCutscene', { videoKey: 'vid-transition2', nextScene: 'GameScene' });
-                } else if (prevLevel === 6) {
-                    this.scene.start('VideoCutscene', { videoKey: 'vid-transition3', nextScene: 'BossScene' });
-                } else if (gameSettings.currentLevel > 6) {
-                    this.scene.start('BossScene');
-                } else {
-                    this.scene.start('GameScene');
-                }
+            // После 2, 4, 6 уровня показываем карту
+            if (prevLevel === 2 || prevLevel === 4 || prevLevel === 6) {
+                this.scene.start('MapScene', {
+                    from: prevLevel,                                    // пройденная точка (2, 4 или 6)
+                    nextScene: prevLevel === 6 ? 'BossScene' : 'GameScene'
+                });
             } else {
-                if (prevLevel === 6 || gameSettings.currentLevel > 6) {
-                    this.scene.start('BossScene');
-                } else {
-                    this.scene.start('GameScene');
-                }
+                this.scene.start('GameScene');
             }
         });
     }

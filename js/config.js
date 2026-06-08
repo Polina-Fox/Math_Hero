@@ -71,30 +71,6 @@ class Preloader extends Phaser.Scene {
         this.load.image('pause-button', 'assets/images/buttons/button_round_depth_flat.png');
         this.load.image('resume-button', 'assets/images/buttons/arrow_basic_e.png');
         this.load.image('menu-button', 'assets/images/buttons/slide_hangle.png');
-
-        // ===== ВИДЕО (с указанием типа) =====
-        const videoFiles = [
-            { key: 'vid-transition1', path: 'assets/video/transition1.mp4' },
-            { key: 'vid-transition2', path: 'assets/video/transition2.mp4' },
-            { key: 'vid-transition3', path: 'assets/video/transition3.mp4' },
-            { key: 'vid-boss-intro', path: 'assets/video/boss_intro.mp4' },
-            { key: 'vid-boss-ending', path: 'assets/video/boss_ending.mp4' }
-        ];
-
-        videoFiles.forEach(file => {
-            this.load.video(file.key, file.path, 'loadeddata', false, 'video/mp4');
-            console.log(`Загружаю видео: ${file.key} из ${file.path}`);
-        });
-
-        this.load.on('filecomplete-video', (key) => {
-            console.log(`Видео ${key} успешно загружено.`);
-        });
-
-        this.load.on('loaderror', (file) => {
-            if (file && file.type === 'video') {
-                console.error(`Ошибка загрузки видео: ${file.key} (${file.url})`);
-            }
-        });
     }
 
     createButtonTextures() {
@@ -122,7 +98,7 @@ function initGame() {
     new Phaser.Game({
         type: Phaser.AUTO, width: 800, height: 600, parent: 'game-container', backgroundColor: '#2c3e50',
         audio: { disableWebAudio: false },
-        scene: [Preloader, IntroCutscene, MainMenu, Settings, GameScene, VideoCutscene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
+        scene: [Preloader, IntroCutscene, MainMenu, Settings, GameScene, MapScene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
         physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
         scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
     });

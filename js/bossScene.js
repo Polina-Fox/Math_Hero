@@ -36,36 +36,13 @@
 
         this.add.image(400, 300, 'bg-desert').setDisplaySize(800, 600);
 
+        // Музыка босса
         try {
             this.bossMusic = this.sound.add('music-otts', { loop: true, volume: 0.3 });
         } catch (e) { console.log(e); }
 
-        const VIDEO_ENABLED = true;   // ← ВИДЕО ВКЛЮЧЕНЫ
-
-        if (VIDEO_ENABLED && this.textures.exists('vid-boss-intro')) {
-            const introVideo = this.add.video(400, 300, 'vid-boss-intro');
-            introVideo.setDisplaySize(800, 600);
-            introVideo.setOrigin(0.5);
-            introVideo.play();
-
-            introVideo.on('error', () => {
-                introVideo.stop();
-                this.startBossBattle();
-            });
-            introVideo.on('complete', () => {
-                introVideo.destroy();
-                this.startBossBattle();
-            });
-            this.input.on('pointerdown', () => {
-                if (introVideo && introVideo.isPlaying()) {
-                    introVideo.stop();
-                    introVideo.destroy();
-                    this.startBossBattle();
-                }
-            });
-        } else {
-            this.startBossBattle();
-        }
+        // Сразу запускаем битву без видео
+        this.startBossBattle();
     }
 
     startBossBattle() {
@@ -77,6 +54,7 @@
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5);
 
+        // Босс из красных частей
         const bossBody = this.add.image(0, 0, 'body_redF').setScale(2.5);
         const bossEye = this.add.image(0, -20, 'eye_angry_red').setScale(2.5);
         const bossMouth = this.add.image(0, 25, 'mouthC').setScale(2.0);
@@ -88,10 +66,12 @@
             scaleX: 2.1, scaleY: 2.1, duration: 1000, yoyo: true, repeat: -1
         });
 
+        // Счётчик правильных ответов
         this.counterText = this.add.text(400, 320, `Правильных ответов: ${this.correctAnswers}/${this.requiredAnswers}`, {
             fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold'
         }).setOrigin(0.5);
 
+        // Таймер (жёлтый, с обводкой)
         this.timerText = this.add.text(400, 360, `Время: ${this.timeLeft} сек`, {
             fontSize: '24px', fill: this.timerColor, fontFamily: 'Arial', fontWeight: 'bold',
             stroke: '#000', strokeThickness: 4
@@ -223,25 +203,13 @@
                 this.bossDefeated = true;
                 if (this.bossTimer) this.bossTimer.remove();
                 if (this.bossMusic) this.bossMusic.stop();
-
-                const VIDEO_ENABLED = true;   // ← ВИДЕО ВКЛЮЧЕНЫ
-                if (VIDEO_ENABLED && this.textures.exists('vid-boss-ending')) {
-                    const endingVideo = this.add.video(400, 300, 'vid-boss-ending');
-                    endingVideo.setDisplaySize(800, 600);
-                    endingVideo.setOrigin(0.5);
-                    endingVideo.play();
-
-                    endingVideo.on('error', () => this.scene.start('Victory'));
-                    endingVideo.on('complete', () => this.scene.start('Victory'));
-                    this.input.on('pointerdown', () => {
-                        if (endingVideo && endingVideo.isPlaying()) {
-                            endingVideo.stop();
-                            this.scene.start('Victory');
-                        }
-                    });
-                } else {
-                    this.scene.start('Victory');
-                }
+                this.feedbackText = this.add.text(400, 550, 'БОСС ПОБЕЖДЁН! 🎉', { fontSize: '32px', fill: '#27ae60' }).setOrigin(0.5);
+                this.tweens.add({
+                    targets: this.bossContainer, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
+                    onComplete: () => {
+                        this.time.delayedCall(1500, () => this.scene.start('Victory'));
+                    }
+                });
             } else {
                 this.feedbackText = this.add.text(400, 550, 'Правильно! 👍', { fontSize: '24px', fill: '#f1c40f' }).setOrigin(0.5);
                 this.time.delayedCall(1000, () => {
