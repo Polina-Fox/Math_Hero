@@ -59,15 +59,15 @@
         this.add.image(400, 300, bgKey).setDisplaySize(800, 600);
         this.playLevelMusic(musicKey);
 
-        // Статистика (только текст)
+        // Статистика (ВСЕ ТЕКСТЫ С Verdana!)
         this.levelText = this.add.text(35, 25, `Уровень: ${gameSettings.currentLevel}`, {
-            fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
+            fontSize: '20px', fill: '#ffffff', fontFamily: 'Verdana, Arial, sans-serif', stroke: '#000', strokeThickness: 3
         }).setDepth(11);
         this.scoreText = this.add.text(35, 48, `Счёт: ${gameSettings.score}`, {
-            fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
+            fontSize: '20px', fill: '#ffffff', fontFamily: 'Verdana, Arial, sans-serif', stroke: '#000', strokeThickness: 3
         }).setDepth(11);
         this.livesText = this.add.text(35, 71, `Жизни: ${gameSettings.lives}`, {
-            fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 3
+            fontSize: '20px', fill: '#ffffff', fontFamily: 'Verdana, Arial, sans-serif', stroke: '#000', strokeThickness: 3
         }).setDepth(11);
 
         // Пауза
@@ -77,11 +77,11 @@
             .setDepth(100);
         this.pauseButton.on('pointerdown', () => { if (!this.isPaused) this.pauseGame(); });
 
-        // Бонусы
+        // Бонусы (текст тоже с Verdana)
         if (gameSettings.shield) {
             this.hasShield = true;
             gameSettings.shield = false;
-            this.showHeroMessage('Волшебный щит! 🛡️');
+            this.showHeroMessage('Волшебный щит!');
         } else {
             this.hasShield = false;
         }
@@ -89,7 +89,7 @@
             gameSettings.lives += 1;
             gameSettings.bonusLife = false;
             this.livesText.setText(`Жизни: ${gameSettings.lives}`);
-            this.showHeroMessage('+1 жизнь! ❤️');
+            this.showHeroMessage('+1 жизнь!');
         }
         if (gameSettings.easyStart) {
             this.easyStartActive = true;
@@ -128,18 +128,18 @@
 
         const panel = this.add.image(400, 300, 'panel').setDepth(200).setInteractive();
         const pauseTitle = this.add.text(400, 150, 'ПАУЗА', {
-            fontSize: '48px', fill: '#f1c40f', stroke: '#000', strokeThickness: 6
+            fontSize: '48px', fill: '#f1c40f', fontFamily: 'Verdana, Arial, sans-serif', stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5).setDepth(201);
 
         const resumeBtn = this.add.image(400, 260, 'resume-button').setInteractive().setScale(1.5).setDepth(201);
         const resumeText = this.add.text(400, 320, 'ПРОДОЛЖИТЬ', {
-            fontSize: '24px', fill: '#fff', stroke: '#000', strokeThickness: 3
+            fontSize: '24px', fill: '#fff', fontFamily: 'Verdana, Arial, sans-serif', stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(202);
         resumeBtn.on('pointerdown', () => this.resumeGame());
 
         const menuBtn = this.add.image(400, 410, 'menu-button').setInteractive().setScale(1.5).setDepth(201);
         const menuText = this.add.text(400, 470, 'ГЛАВНОЕ МЕНЮ', {
-            fontSize: '24px', fill: '#fff', stroke: '#000', strokeThickness: 3
+            fontSize: '24px', fill: '#fff', fontFamily: 'Verdana, Arial, sans-serif', stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(202);
         menuBtn.on('pointerdown', () => {
             if (this.levelMusic) this.levelMusic.stop();
@@ -201,7 +201,7 @@
         gameSettings.lastAnswer = this.currentProblem.answer;
 
         this.problemText = this.add.text(400, 475, this.currentProblem.question, {
-            fontSize: '36px', fill: '#ffffff', fontFamily: 'Arial',
+            fontSize: '36px', fill: '#ffffff', fontFamily: 'Verdana, Arial, sans-serif',
             backgroundColor: '#000000cc', padding: { x: 25, y: 15 },
             stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
@@ -217,7 +217,7 @@
             const x = 300 + i * 150, y = 550;
             const btn = this.add.image(x, y, 'answer-button').setInteractive({ useHandCursor: true });
             const txt = this.add.text(x, y, ans.toString(), {
-                fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial',
+                fontSize: '24px', fill: '#ffffff', fontFamily: 'Verdana, Arial, sans-serif',
                 fontWeight: 'bold', stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5);
             btn.on('pointerdown', () => this.checkAnswer(ans, btn, txt));
@@ -246,7 +246,7 @@
                     this.scoreText.setText(`Счёт: ${gameSettings.score}`);
                 }
             }
-            this.time.delayedCall(800, () => { this.generateMathProblem(); this.showHeroMessage('Молодец! 👍'); });
+            this.time.delayedCall(800, () => { this.generateMathProblem(); this.showHeroMessage('Молодец!'); });
         } else {
             btn.setTexture('answer-wrong');
             txt.setStyle({ fill: '#fff' });
@@ -255,7 +255,7 @@
             this.answerButtons.forEach(b => {
                 if (parseInt(b.text.text) === this.currentProblem.answer) b.button.setTexture('answer-correct');
             });
-            this.showHeroMessage('Попробуй ещё! 💪');
+            this.showHeroMessage('Попробуй ещё!');
             this.time.delayedCall(1500, () => this.generateMathProblem());
         }
     }
@@ -330,7 +330,7 @@
             this.hasShield = false;
             if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
             slime.destroy(); this.slimes = this.slimes.filter(s => s.active && s !== slime);
-            this.showHeroMessage('Щит отразил атаку! ✨');
+            this.showHeroMessage('Щит отразил атаку!');
             return;
         }
         if (slime._parts) slime._parts.forEach(p => { if (p && p.destroy) p.destroy(); });
@@ -339,7 +339,7 @@
         this.hero.setTexture('hero_hit');
         this.tweens.add({ targets: hero, alpha: 0.5, duration: 200, yoyo: true, repeat: 2, onComplete: () => this.hero.setTexture('hero_idle') });
         if (gameSettings.lives <= 0) { this.hero.setTexture('hero_fallDown'); this.gameOver(); }
-        else this.showHeroMessage('Ай! Больно! 😫');
+        else this.showHeroMessage('Ай! Больно!');
     }
 
     gameOver() {
@@ -350,7 +350,7 @@
         this.physics.pause(); this.time.removeAllEvents();
         if (this.spawnTimer) { this.spawnTimer.remove(); this.spawnTimer = null; }
         this.hero.setTexture('hero_fallDown');
-        this.showHeroMessage('Меня победили... 💀');
+        this.showHeroMessage('Меня победили...');
         this.time.delayedCall(1500, () => {
             const miniGames = ['RescueMiniGame', 'MagicPauseMiniGame', 'SecretTrainingMiniGame'];
             this.scene.start(Phaser.Math.RND.pick(miniGames));
@@ -367,12 +367,12 @@
 
         const prevLevel = gameSettings.currentLevel;
         gameSettings.currentLevel++;
-        this.showHeroMessage('Уровень пройден! 🎉');
+        this.showHeroMessage('Уровень пройден!');
 
         this.time.delayedCall(2000, () => {
-            // ПОКАЗЫВАЕМ КАРТУ ПОСЛЕ КАЖДОГО УРОВНЯ
+            // ВСЕГДА показываем карту после каждого уровня
             this.scene.start('MapScene', {
-                from: prevLevel,   // только что пройденный уровень (1,2,3,4,5 или 6)
+                from: prevLevel,
                 nextScene: prevLevel === 6 ? 'BossScene' : 'GameScene'
             });
         });
@@ -381,7 +381,7 @@
     showHeroMessage(msg) {
         if (this.heroMessage) this.heroMessage.destroy();
         this.heroMessage = this.add.text(this.hero.x + 60, this.hero.y - 50, msg, {
-            fontSize: '20px', fill: '#ffffff', fontFamily: 'Arial',
+            fontSize: '20px', fill: '#ffffff', fontFamily: 'Verdana, Arial, sans-serif',
             backgroundColor: '#000000cc', padding: { x: 15, y: 8 },
             stroke: '#000', strokeThickness: 3, wordWrap: { width: 250 }
         }).setOrigin(0, 0.5);
@@ -399,7 +399,7 @@
         });
         if (this.slimes.length === 0 && this.slimesSpawned >= this.slimesToSpawn) this.levelComplete();
         if (this.slimes[0] && this.slimes[0].x < 300 && !this.warningShown) {
-            this.showHeroMessage('Они близко! Быстрее! 🚨'); this.warningShown = true;
+            this.showHeroMessage('Они близко! Быстрее!'); this.warningShown = true;
         }
         for (let i = this.slimes.length - 1; i >= 0; i--) {
             const slime = this.slimes[i];

@@ -11,11 +11,11 @@ class MapScene extends Phaser.Scene {
         this.add.image(400, 300, 'bg-grass').setDisplaySize(800, 600).setAlpha(0.4);
         this.add.rectangle(400, 300, 700, 400, 0x000000, 0.5);
 
-        // Заголовок (с русским шрифтом)
+        // Заголовок (ВСЕГДА Verdana!)
         this.add.text(400, 50, 'ПУТЬ ГЕРОЯ', {
             fontSize: '32px',
             fill: '#f1c40f',
-            fontFamily: 'Arial, sans-serif',
+            fontFamily: 'Verdana, Arial, sans-serif',
             stroke: '#000',
             strokeThickness: 4
         }).setOrigin(0.5);
@@ -38,20 +38,20 @@ class MapScene extends Phaser.Scene {
             const color = (i <= from) ? 0x27ae60 : (i === from + 1) ? 0xf1c40f : 0x7f8c8d;
             this.add.circle(px, y, 15, color).setStrokeStyle(3, 0x000000);
 
-            // Подпись точки (русский шрифт)
+            // Подпись точки
             this.add.text(px, y + 30, pointNames[i - 1], {
                 fontSize: '14px',
                 fill: '#ffffff',
-                fontFamily: 'Arial, sans-serif',
+                fontFamily: 'Verdana, Arial, sans-serif',
                 stroke: '#000',
                 strokeThickness: 2
             }).setOrigin(0.5);
 
-            // Номер точки (цифра, тоже с явным шрифтом)
+            // Номер точки
             this.add.text(px, y, i.toString(), {
                 fontSize: '16px',
                 fill: '#000000',
-                fontFamily: 'Arial, sans-serif',
+                fontFamily: 'Verdana, Arial, sans-serif',
                 fontWeight: 'bold'
             }).setOrigin(0.5);
         }
