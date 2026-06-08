@@ -27,24 +27,43 @@ class VideoCutscene extends Phaser.Scene {
             return;
         }
 
+        // Флаг, чтобы не запустить воспроизведение дважды
+        let playbackStarted = false;
+
         const startPlayback = () => {
-            if (!video) return;
+            if (playbackStarted || !video) return;
+            playbackStarted = true;
             video.setDisplaySize(800, 600);
             video.setOrigin(0.5);
             video.play();
         };
 
-        // Ждём загрузку метаданных
-        video.on('loadedmetadata', startPlayback);
+        // Ждём, когда видео будет готово к воспроизведению
+        video.on('canplay', startPlayback);
+        video.on('loadedmetadata', () => {
+            // Если видео уже имеет размеры, пробуем запустить
+            if (video.video && video.video.readyState >= 1) {
+                startPlayback();
+            }
+        });
 
-        // Если метаданные уже загружены (readyState >= 1), запускаем сразу
-        if (video.video && video.video.readyState >= 1) {
+        // Если видео уже готово к моменту создания обработчиков
+        if (video.video && video.video.readyState >= 3) {
             startPlayback();
         }
 
+        // Таймаут: если через 3 секунды видео не начало играть, пропускаем
+        this.time.delayedCall(3000, () => {
+            if (!playbackStarted && video) {
+                console.warn('Видео не начало играть за 3 секунды, пропускаем:', videoKey);
+                video.stop();
+                this.scene.start(nextScene || 'MainMenu');
+            }
+        });
+
         video.on('error', (err) => {
             console.warn('Ошибка воспроизведения видео:', videoKey, err);
-            if (video) video.stop();
+            video.stop();
             this.scene.start(nextScene || 'MainMenu');
         });
 
