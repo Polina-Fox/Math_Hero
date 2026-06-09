@@ -41,7 +41,7 @@
             this.bossMusic = this.sound.add('music-otts', { loop: true, volume: 0.3 });
         } catch (e) { console.log(e); }
 
-        // Сразу запускаем битву без видео
+        // Сразу запускаем битву (без видео)
         this.startBossBattle();
     }
 
@@ -51,7 +51,7 @@
         }
 
         this.add.text(400, 80, 'БОСС-УРОВЕНЬ!', {
-            fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial', stroke: '#000', strokeThickness: 6
+            fontSize: '48px', fill: '#f1c40f', fontFamily: 'Arial, Helvetica, sans-serif', stroke: '#000', strokeThickness: 6
         }).setOrigin(0.5);
 
         // Босс из красных частей
@@ -68,12 +68,12 @@
 
         // Счётчик правильных ответов
         this.counterText = this.add.text(400, 320, `Правильных ответов: ${this.correctAnswers}/${this.requiredAnswers}`, {
-            fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial', fontWeight: 'bold'
+            fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial, Helvetica, sans-serif', fontWeight: 'bold'
         }).setOrigin(0.5);
 
         // Таймер (жёлтый, с обводкой)
         this.timerText = this.add.text(400, 360, `Время: ${this.timeLeft} сек`, {
-            fontSize: '24px', fill: this.timerColor, fontFamily: 'Arial', fontWeight: 'bold',
+            fontSize: '24px', fill: this.timerColor, fontFamily: 'Arial, Helvetica, sans-serif', fontWeight: 'bold',
             stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
 
@@ -106,16 +106,16 @@
     showLoseDialog() {
         const panel = this.add.image(400, 300, 'panel').setDepth(10);
         this.add.text(400, 250, 'Время вышло!\nТы проиграл. Хочешь попробовать снова?', {
-            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', align: 'center',
+            fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif', align: 'center',
             stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(11);
 
         const yesBtn = this.add.text(250, 370, 'Да, попробовать', {
-            fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+            fontSize: '22px', fill: '#2ecc71', backgroundColor: '#00000088', padding: { x: 15, y: 8 }, fontFamily: 'Arial, Helvetica, sans-serif'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 
         const noBtn = this.add.text(550, 370, 'Нет, выйти в меню', {
-            fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }
+            fontSize: '22px', fill: '#e74c3c', backgroundColor: '#00000088', padding: { x: 15, y: 8 }, fontFamily: 'Arial, Helvetica, sans-serif'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(11);
 
         yesBtn.on('pointerdown', () => this.scene.restart());
@@ -164,7 +164,7 @@
 
     showBossProblem() {
         this.problemText = this.add.text(400, 420, this.currentBossProblem.question, {
-            fontSize: '36px', fill: '#ffffff', fontFamily: 'Arial', backgroundColor: '#000000aa', padding: 20
+            fontSize: '36px', fill: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif', backgroundColor: '#000000aa', padding: 20
         }).setOrigin(0.5);
 
         const answers = [this.currentBossProblem.answer];
@@ -178,7 +178,7 @@
             const x = 300 + i * 150, y = 490;
             const btn = this.add.image(x, y, 'boss-button').setInteractive({ useHandCursor: true });
             const txt = this.add.text(x, y, ans.toString(), {
-                fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial', fontWeight: 'bold'
+                fontSize: '24px', fill: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif', fontWeight: 'bold'
             }).setOrigin(0.5);
             btn.on('pointerdown', () => this.checkBossAnswer(ans, btn, txt));
             this.answerButtons.push({ button: btn, text: txt });
@@ -203,15 +203,18 @@
                 this.bossDefeated = true;
                 if (this.bossTimer) this.bossTimer.remove();
                 if (this.bossMusic) this.bossMusic.stop();
-                this.feedbackText = this.add.text(400, 550, 'БОСС ПОБЕЖДЁН! 🎉', { fontSize: '32px', fill: '#27ae60' }).setOrigin(0.5);
+                this.feedbackText = this.add.text(400, 550, 'БОСС ПОБЕЖДЁН! 🎉', { fontSize: '32px', fill: '#27ae60', fontFamily: 'Arial, Helvetica, sans-serif' }).setOrigin(0.5);
                 this.tweens.add({
                     targets: this.bossContainer, scaleX: 0, scaleY: 0, alpha: 0, duration: 1000,
                     onComplete: () => {
-                        this.time.delayedCall(1500, () => this.scene.start('Victory'));
+                        this.time.delayedCall(1500, () => {
+                            // Запускаем финальную кат-сцену
+                            this.scene.start('FinalCutscene');
+                        });
                     }
                 });
             } else {
-                this.feedbackText = this.add.text(400, 550, 'Правильно! 👍', { fontSize: '24px', fill: '#f1c40f' }).setOrigin(0.5);
+                this.feedbackText = this.add.text(400, 550, 'Правильно! 👍', { fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial, Helvetica, sans-serif' }).setOrigin(0.5);
                 this.time.delayedCall(1000, () => {
                     if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
                     this.generateBossProblem();
@@ -224,7 +227,7 @@
             this.answerButtons.forEach(b => {
                 if (parseInt(b.text.text) === this.currentBossProblem.answer) b.button.setTexture('boss-correct');
             });
-            this.feedbackText = this.add.text(400, 550, 'Неправильно! Начинаем заново... 🔄', { fontSize: '20px', fill: '#f1c40f' }).setOrigin(0.5);
+            this.feedbackText = this.add.text(400, 550, 'Неправильно! Начинаем заново... 🔄', { fontSize: '20px', fill: '#f1c40f', fontFamily: 'Arial, Helvetica, sans-serif' }).setOrigin(0.5);
             this.time.delayedCall(2000, () => {
                 if (this.feedbackText) { this.feedbackText.destroy(); this.feedbackText = null; }
                 this.generateBossProblem();

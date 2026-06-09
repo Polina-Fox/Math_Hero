@@ -46,6 +46,13 @@ class Preloader extends Phaser.Scene {
         this.load.image('intro2', 'assets/images/intro2.png');
         this.load.image('intro3', 'assets/images/intro3.png');
 
+        // Финальные картинки
+        this.load.image('final1', 'assets/images/final_victory1.png');
+        this.load.image('final2', 'assets/images/final_victory2.png');
+
+        // Финальная озвучка
+        this.load.audio('finalVoice', 'assets/audio/final_narration.mp3');
+
         this.createButtonTextures();
 
         // Части монстров
@@ -99,9 +106,9 @@ function initGame() {
         type: Phaser.AUTO, width: 800, height: 600, parent: 'game-container', backgroundColor: '#2c3e50',
         audio: { disableWebAudio: false },
         render: {
-            defaultFontFamily: 'Arial, Helvetica, sans-serif'   // Глобальный шрифт для кириллицы
+            defaultFontFamily: 'Arial, Helvetica, sans-serif'
         },
-        scene: [Preloader, IntroCutscene, MainMenu, Settings, GameScene, MapScene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
+        scene: [Preloader, IntroCutscene, MainMenu, Settings, GameScene, MapScene, BossScene, FinalCutscene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
         physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
         scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
     });
