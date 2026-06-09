@@ -98,6 +98,9 @@ function initGame() {
     new Phaser.Game({
         type: Phaser.AUTO, width: 800, height: 600, parent: 'game-container', backgroundColor: '#2c3e50',
         audio: { disableWebAudio: false },
+        render: {
+            defaultFontFamily: 'Arial, Helvetica, sans-serif'   // Глобальный шрифт для кириллицы
+        },
         scene: [Preloader, IntroCutscene, MainMenu, Settings, GameScene, MapScene, BossScene, Victory, RescueMiniGame, MagicPauseMiniGame, SecretTrainingMiniGame],
         physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
         scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
