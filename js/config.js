@@ -32,6 +32,9 @@ class Preloader extends Phaser.Scene {
         this.load.audio('music-ancient-waters', 'assets/audio/over_ancient_waters_looping.ogg');
         this.load.audio('music-otts', 'assets/audio/otts.flac');
 
+        // Музыка для карты
+        this.load.audio('mapMusic', 'assets/audio/map_music.mp3'); // или .ogg, если файл в другом формате
+
         // Озвучка интро
         this.load.audio('voiceFull', 'assets/audio/intro_voice_full.mp3');
 
@@ -50,7 +53,7 @@ class Preloader extends Phaser.Scene {
         this.load.image('final1', 'assets/images/final_victory1.png');
         this.load.image('final2', 'assets/images/final_victory2.png');
 
-        // Финальная озвучка
+        // Финальные озвучки (два файла)
         this.load.audio('finalVoice1', 'assets/audio/final_narration1.mp3');
         this.load.audio('finalVoice2', 'assets/audio/final_narration2.mp3');
 

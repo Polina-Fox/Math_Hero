@@ -17,6 +17,18 @@ class MapScene extends Phaser.Scene {
             stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
 
+        // Фоновая музыка для карты (загружается в Preloader)
+        try {
+            const mapMusic = this.sound.add('mapMusic', { loop: true, volume: 0.3 });
+            mapMusic.play();
+            // Остановим музыку при уходе со сцены
+            this.events.on('shutdown', () => {
+                if (mapMusic && mapMusic.isPlaying) mapMusic.stop();
+            });
+        } catch (e) {
+            console.log('Музыка карты не найдена');
+        }
+
         // Линия маршрута
         const startX = 100, endX = 700, y = 400;
         const graphics = this.add.graphics();
@@ -59,7 +71,7 @@ class MapScene extends Phaser.Scene {
             this.tweens.add({
                 targets: hero,
                 x: targetX,
-                duration: 1500,
+                duration: 2500,  // было 1500 → стало 2500 (медленнее)
                 ease: 'Power2',
                 onUpdate: () => {
                     const frame = Math.floor((hero.x / 10) % 4);

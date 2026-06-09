@@ -2,7 +2,7 @@
     constructor() {
         super({ key: 'MainMenu' });
         this.instructionElements = [];
-        this.settingsElements = [];
+        this.authorsElements = [];
         this.bgMusic = null;
     }
 
@@ -21,11 +21,11 @@
             this.add.image(400, 300, 'fallback-bg');
         }
 
-        // Запускаем фоновую музыку (menuMusic)
+        // Запускаем фоновую музыку
         this.playBackgroundMusic();
 
         // Заголовок игры
-        const title = this.add.text(400, 120, 'МАТЕМАТИЧЕСКИЙ ГЕРОЙ', {
+        this.add.text(400, 120, 'МАТЕМАТИЧЕСКИЙ ГЕРОЙ', {
             fontSize: '42px',
             fill: '#f1c40f',
             fontFamily: 'Arial, sans-serif',
@@ -44,7 +44,7 @@
         // Основные кнопки меню
         this.createMenuButton(400, 250, 'ИГРАТЬ', 'Settings');
         this.createMenuButton(400, 330, 'КАК ИГРАТЬ', () => this.showInstructions());
-        this.createMenuButton(400, 410, 'НАСТРОЙКИ', () => this.showSettings());
+        this.createMenuButton(400, 410, 'АВТОРЫ', () => this.showAuthors());
 
         // Кнопка управления музыкой
         this.createMusicToggle();
@@ -60,15 +60,17 @@
 
     playBackgroundMusic() {
         try {
-            if (this.bgMusic && this.bgMusic.isPlaying) {
-                this.bgMusic.stop();
+            if (!this.bgMusic) {
+                this.bgMusic = this.sound.add('menuMusic', {
+                    loop: true,
+                    volume: 0.3
+                });
             }
-            this.bgMusic = this.sound.add('menuMusic', {
-                loop: true,
-                volume: 0.3
-            });
-            this.bgMusic.play();
-            console.log('Menu music started');
+
+            if (!this.bgMusic.isPlaying) {
+                this.bgMusic.play();
+                console.log('Menu music started');
+            }
         } catch (error) {
             console.log('Could not play menu music:', error);
         }
@@ -183,7 +185,8 @@
         const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85);
         this.instructionElements.push(overlay);
 
-        const panel = this.add.rectangle(400, 300, 700, 500, 0x2c3e50);
+        // Увеличенная панель (выше)
+        const panel = this.add.rectangle(400, 300, 700, 520, 0x2c3e50); // было 500, стало 520
         panel.setStrokeStyle(4, 0xf1c40f);
         this.instructionElements.push(panel);
 
@@ -254,19 +257,19 @@
         });
     }
 
-    showSettings() {
-        console.log('Showing settings');
+    showAuthors() {
+        console.log('Showing authors');
 
-        this.clearSettingsElements();
+        this.clearAuthorsElements();
 
         const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85);
-        this.settingsElements.push(overlay);
+        this.authorsElements.push(overlay);
 
         const panel = this.add.rectangle(400, 300, 600, 400, 0x2c3e50);
         panel.setStrokeStyle(4, 0xf1c40f);
-        this.settingsElements.push(panel);
+        this.authorsElements.push(panel);
 
-        const title = this.add.text(400, 160, 'НАСТРОЙКИ', {
+        const title = this.add.text(400, 160, 'АВТОРЫ', {
             fontSize: '36px',
             fill: '#f1c40f',
             fontWeight: 'bold',
@@ -274,45 +277,44 @@
             stroke: '#000',
             strokeThickness: 4
         }).setOrigin(0.5);
-        this.settingsElements.push(title);
+        this.authorsElements.push(title);
 
-        const info1 = this.add.text(400, 210, 'Выбери математические операции', {
+        const creator = this.add.text(400, 220, 'Создатель игры:', {
             fontSize: '20px',
-            fill: '#ecf0f1',
-            align: 'center',
-            fontFamily: 'Arial, sans-serif'
-        }).setOrigin(0.5);
-        this.settingsElements.push(info1);
-
-        const info2 = this.add.text(400, 240, 'в меню настроек перед игрой!', {
-            fontSize: '20px',
-            fill: '#ecf0f1',
-            align: 'center',
-            fontFamily: 'Arial, sans-serif'
-        }).setOrigin(0.5);
-        this.settingsElements.push(info2);
-
-        const info3 = this.add.text(400, 280, 'Сейчас доступны:', {
-            fontSize: '18px',
             fill: '#bdc3c7',
-            fontStyle: 'italic',
             fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
-        this.settingsElements.push(info3);
+        this.authorsElements.push(creator);
 
-        const info4 = this.add.text(400, 310, 'Сложение, Вычитание, Умножение', {
-            fontSize: '18px',
+        const creatorName = this.add.text(400, 260, 'Лисянская Полина Руслановна', {
+            fontSize: '24px',
             fill: '#f1c40f',
             fontWeight: 'bold',
             fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
-        this.settingsElements.push(info4);
+        this.authorsElements.push(creatorName);
 
-        // Крестик закрытия для настроек
+        const supervisor = this.add.text(400, 310, 'Научный руководитель:', {
+            fontSize: '20px',
+            fill: '#bdc3c7',
+            fontFamily: 'Arial, sans-serif'
+        }).setOrigin(0.5);
+        this.authorsElements.push(supervisor);
+
+        const supervisorName = this.add.text(400, 360, 'Доцент, доктор физико-математических наук\nИММиКН им. И. И. Воровича\nКарякин Михаил Игорьевич', {
+            fontSize: '20px',
+            fill: '#f1c40f',
+            fontWeight: 'bold',
+            fontFamily: 'Arial, sans-serif',
+            align: 'center'
+        }).setOrigin(0.5);
+        this.authorsElements.push(supervisorName);
+
+        // Крестик закрытия
         const closeButton = this.add.rectangle(150, 120, 40, 40, 0xe74c3c)
             .setInteractive({ useHandCursor: true })
             .setStrokeStyle(2, 0xffffff);
-        this.settingsElements.push(closeButton);
+        this.authorsElements.push(closeButton);
 
         const closeIcon = this.add.text(150, 120, '×', {
             fontSize: '32px',
@@ -320,14 +322,14 @@
             fontFamily: 'Arial, sans-serif',
             fontWeight: 'bold'
         }).setOrigin(0.5);
-        this.settingsElements.push(closeIcon);
+        this.authorsElements.push(closeIcon);
 
         closeButton.on('pointerdown', () => {
-            this.clearSettingsElements();
+            this.clearAuthorsElements();
         });
 
         overlay.on('pointerdown', () => {
-            this.clearSettingsElements();
+            this.clearAuthorsElements();
         });
     }
 
@@ -340,13 +342,13 @@
         this.instructionElements = [];
     }
 
-    clearSettingsElements() {
-        this.settingsElements.forEach(element => {
+    clearAuthorsElements() {
+        this.authorsElements.forEach(element => {
             if (element && element.destroy) {
                 element.destroy();
             }
         });
-        this.settingsElements = [];
+        this.authorsElements = [];
     }
 
     shutdown() {
