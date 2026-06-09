@@ -7,20 +7,17 @@ class MapScene extends Phaser.Scene {
         const { from, nextScene } = this.scene.settings.data;
         const totalPoints = 6;
 
-        // Фон
+        // Р¤РѕРЅ
         this.add.image(400, 300, 'bg-grass').setDisplaySize(800, 600).setAlpha(0.4);
         this.add.rectangle(400, 300, 700, 400, 0x000000, 0.5);
 
-        // Заголовок (ВСЕГДА Verdana!)
-        this.add.text(400, 50, 'ПУТЬ ГЕРОЯ', {
-            fontSize: '32px',
-            fill: '#f1c40f',
-            fontFamily: 'Verdana, Arial, sans-serif',
-            stroke: '#000',
-            strokeThickness: 4
+        // Р—Р°РіРѕР»РѕРІРѕРє
+        this.add.text(400, 50, 'РџРЈРўР¬ Р“Р•Р РћРЇ', {
+            fontSize: '32px', fill: '#f1c40f', fontFamily: 'Arial, Helvetica, sans-serif',
+            stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5);
 
-        // Линия маршрута
+        // Р›РёРЅРёСЏ РјР°СЂС€СЂСѓС‚Р°
         const startX = 100, endX = 700, y = 400;
         const graphics = this.add.graphics();
         graphics.lineStyle(4, 0xffffff, 0.8);
@@ -29,8 +26,8 @@ class MapScene extends Phaser.Scene {
         graphics.lineTo(endX, y);
         graphics.strokePath();
 
-        // Точки (чекапоинты)
-        const pointNames = ['Луг', 'Лес', 'Увядший лес', 'Пустыня', 'Перед битвой', 'Босс'];
+        // РўРѕС‡РєРё (С‡РµРєР°РїРѕРёРЅС‚С‹)
+        const pointNames = ['Р›СѓРі', 'Р›РµСЃ', 'РЈРІСЏРґС€РёР№ Р»РµСЃ', 'РџСѓСЃС‚С‹РЅСЏ', 'РџРµСЂРµРґ Р±РёС‚РІРѕР№', 'Р‘РѕСЃСЃ'];
         const step = (endX - startX) / (totalPoints - 1);
 
         for (let i = 1; i <= totalPoints; i++) {
@@ -38,29 +35,24 @@ class MapScene extends Phaser.Scene {
             const color = (i <= from) ? 0x27ae60 : (i === from + 1) ? 0xf1c40f : 0x7f8c8d;
             this.add.circle(px, y, 15, color).setStrokeStyle(3, 0x000000);
 
-            // Подпись точки
+            // РџРѕРґРїРёСЃСЊ С‚РѕС‡РєРё
             this.add.text(px, y + 30, pointNames[i - 1], {
-                fontSize: '14px',
-                fill: '#ffffff',
-                fontFamily: 'Verdana, Arial, sans-serif',
-                stroke: '#000',
-                strokeThickness: 2
+                fontSize: '14px', fill: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif',
+                stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5);
 
-            // Номер точки
+            // РќРѕРјРµСЂ С‚РѕС‡РєРё
             this.add.text(px, y, i.toString(), {
-                fontSize: '16px',
-                fill: '#000000',
-                fontFamily: 'Verdana, Arial, sans-serif',
+                fontSize: '16px', fill: '#000000', fontFamily: 'Arial, Helvetica, sans-serif',
                 fontWeight: 'bold'
             }).setOrigin(0.5);
         }
 
-        // Герой на пройденной точке
+        // Р“РµСЂРѕР№ РЅР° РїСЂРѕР№РґРµРЅРЅРѕР№ С‚РѕС‡РєРµ
         const heroX = startX + (from - 1) * step;
         const hero = this.add.sprite(heroX, y, 'hero_idle').setScale(1.2);
 
-        // Анимация к следующей точке (если не босс)
+        // РђРЅРёРјР°С†РёСЏ Рє СЃР»РµРґСѓСЋС‰РµР№ С‚РѕС‡РєРµ (РµСЃР»Рё РЅРµ Р±РѕСЃСЃ)
         const nextPoint = from + 1;
         if (nextPoint <= totalPoints) {
             const targetX = startX + (nextPoint - 1) * step;
@@ -86,7 +78,7 @@ class MapScene extends Phaser.Scene {
             });
         }
 
-        // Возможность пропустить кликом
+        // Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ РїСЂРѕРїСѓСЃС‚РёС‚СЊ РєР»РёРєРѕРј
         this.input.on('pointerdown', () => {
             this.scene.start(nextScene);
         });
