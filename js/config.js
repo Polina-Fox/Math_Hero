@@ -51,7 +51,8 @@ class Preloader extends Phaser.Scene {
         this.load.image('final2', 'assets/images/final_victory2.png');
 
         // Финальная озвучка
-        this.load.audio('finalVoice', 'assets/audio/final_narration.mp3');
+        this.load.audio('finalVoice1', 'assets/audio/final_narration1.mp3');
+        this.load.audio('finalVoice2', 'assets/audio/final_narration2.mp3');
 
         this.createButtonTextures();
 
