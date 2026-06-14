@@ -39,7 +39,7 @@ class MapScene extends Phaser.Scene {
         graphics.strokePath();
 
         // Точки (чекапоинты)
-        const pointNames = ['Луг', 'Лес', 'Увядший лес', 'Пустыня', 'Перед битвой', 'Босс'];
+        const pointNames = ['Луг', 'Продолжение луга', 'Лес', 'Глубже в лес', 'Увядший лес', 'Перед битвой'];
         const step = (endX - startX) / (totalPoints - 1);
 
         for (let i = 1; i <= totalPoints; i++) {
